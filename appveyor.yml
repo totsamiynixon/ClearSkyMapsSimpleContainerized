@@ -35,7 +35,7 @@ for:
         website: $(PRODUCTION_SITE_NAME)
         username: $(WEB_DEPLOY_USERNAME)
         password: $(WEB_DEPLOY_PASSWORD)
-        ntlm: false
+        ntlm: true
         skip_dirs: \\logs
         remove_files: true
         artifact: CSMProduction
@@ -64,7 +64,7 @@ for:
         website: $(STAGING_SITE_NAME)
         username: $(WEB_DEPLOY_USERNAME)
         password: $(WEB_DEPLOY_PASSWORD)
-        ntlm: false
+        ntlm: true
         skip_dirs: \\logs
         remove_files: true
         artifact: CSMStaging
