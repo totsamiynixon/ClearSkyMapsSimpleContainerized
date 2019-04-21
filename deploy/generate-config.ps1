@@ -7,7 +7,7 @@ try
         "ConnectionString" = $env:CONNECTION_STRING;
         "Emulation:ConnectionString" = $env:EMULATION_CONNECTION_STRING;
         "Emulation:Enabled" = $env:EMULATION_ENABLED;
-        "Application:Environment" = $env:APPLICATION_ENVIRONMENT;
+        "Application:Environment" = $env:ASPNETCORE_ENVIRONMENT;
         "Application:Version" = $env:APPLICATION_VERSION;
         "Yandex:MapsJavaScriptAPIKey" = $env:YANDEX__MAPS_JAVASCRIPT_API_KEY
    }

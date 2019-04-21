@@ -8,18 +8,14 @@ branches:
 for:
   - branches:
       only:
-        - production
-    build:
-      - project: src/ClearSkyMaps.sln
+        - master
     build_script:
-      - cmd: dotnet publish -c Release -o ../release
-      - ps:  .\deploy\generate-config.ps1 -path  .\src\release\config.json
+      - cmd: dotnet build src/ClearSkyMapsSimple.sln
   - branches:
       only:
         - production
     environment:
       ASPNETCORE_ENVIRONMENT: Production
-      APPLICATION_ENVIRONMENT: Production
       APPLICATION_VERSION: $(APPVEYOR_BUILD_VERSION)
       FIREBASE_CLOUD_MESSAGING__SERVER_KEY: $(PROD___FIREBASE_CLOUD_MESSAGING__SERVER_KEY)
       FIREBASE_CLOUD_MESSAGING__MESSAGING_SENDER_ID: $(PROD___FIREBASE_CLOUD_MESSAGING__MESSAGING_SENDER_ID)
@@ -27,10 +23,11 @@ for:
       CONNECTION_STRING: $(PROD___CONNECTION_STRING)
       EMULATION_ENABLED: false
     build_script:
-      - cmd: dotnet publish -c Release -o ../release
-      - ps:  .\deploy\generate-config.ps1 -path  .\src\release\config.json
+      - cmd: dotnet publish src/ClearSkyMapsSimple.sln -c Release -o ../../release -r win10-x64
+      - ps:  .\deploy\generate-config.ps1 -path  ..\release\config.json
+      - ps:  .\deploy\webconfig-transform.ps1 -path  ..\release\web.config
     artifacts:
-      - path: ./src/release
+      - path: ./release
         name: CSMProduction
     deploy:
       - provider: WebDeploy
@@ -47,7 +44,6 @@ for:
         - staging
     environment:
       ASPNETCORE_ENVIRONMENT: Staging
-      APPLICATION_ENVIRONMENT: Staging
       APPLICATION_VERSION: $(APPVEYOR_BUILD_VERSION)
       FIREBASE_CLOUD_MESSAGING__SERVER_KEY: $(STAGING___FIREBASE_CLOUD_MESSAGING__SERVER_KEY)
       FIREBASE_CLOUD_MESSAGING__MESSAGING_SENDER_ID: $(STAGING___FIREBASE_CLOUD_MESSAGING__MESSAGING_SENDER_ID)
@@ -55,8 +51,12 @@ for:
       CONNECTION_STRING: $(STAGING___CONNECTION_STRING)
       EMULATION_ENABLED: true
       EMULATION_CONNECTION_STRING: $(STAGING__EMULATION_CONNECTION_STRING)
+    build_script:
+      - cmd: dotnet publish src/ClearSkyMapsSimple.sln -c Release -o ../../release -r win10-x64
+      - ps:  .\deploy\generate-config.ps1 -path  ..\release\config.json
+      - ps:  .\deploy\webconfig-transform.ps1 -path  ..\release\web.config
     artifacts:
-      - path: ./src/release
+      - path: ./release
         name: CSMStaging
     deploy:
       - provider: WebDeploy
@@ -72,7 +72,7 @@ init:
   # Good practise, because Windows line endings are different from Unix/Linux ones
   - cmd: git config --global core.autocrlf true
 install:
-  - cmd: dotnet restore ./src/ClearSkyMaps.sln
+  - cmd: dotnet restore ./src/ClearSkyMapsSimple.sln
 clone_depth: 1
 test:
   assemblies:
