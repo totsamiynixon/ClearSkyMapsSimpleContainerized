@@ -24,8 +24,8 @@ for:
       EMULATION_ENABLED: false
     build_script:
       - cmd: dotnet publish src/ClearSkyMapsSimple.sln -c Release -o ../../release -r win10-x64
-      - ps:  .\deploy\generate-config.ps1 -path  ..\release\config.json
-      - ps:  .\deploy\webconfig-transform.ps1 -path  ..\release\web.config
+      - ps:  .\deploy\generate-config.ps1 -path  .\release\config.json
+      - ps:  .\deploy\webconfig-transform.ps1 -path  .\release\web.config
     artifacts:
       - path: ./release
         name: CSMProduction
@@ -53,8 +53,8 @@ for:
       EMULATION_CONNECTION_STRING: $(STAGING__EMULATION_CONNECTION_STRING)
     build_script:
       - cmd: dotnet publish src/ClearSkyMapsSimple.sln -c Release -o ../../release -r win10-x64
-      - ps:  .\deploy\generate-config.ps1 -path  ..\release\config.json
-      - ps:  .\deploy\webconfig-transform.ps1 -path  ..\release\web.config
+      - ps:  .\deploy\generate-config.ps1 -path  .\release\config.json
+      - ps:  .\deploy\webconfig-transform.ps1 -path  .\release\web.config
     artifacts:
       - path: ./release
         name: CSMStaging
