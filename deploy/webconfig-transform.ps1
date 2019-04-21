@@ -8,7 +8,7 @@ try
     $envVarEl.SetAttribute("value", $env:ASPNETCORE_ENVIRONMENT);
     $envVarsEl.AppendChild($envVarEl);
     $webConfig.configuration.location["system.webServer"].aspNetCore.appendChild($envVarsEl);
-    $webConfig.Save($path)
+    $webConfig.Save((Resolve-Path $path));
 }
 catch
 {
