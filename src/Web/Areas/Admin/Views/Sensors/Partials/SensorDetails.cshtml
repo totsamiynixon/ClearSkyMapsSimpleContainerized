@@ -1,0 +1,43 @@
+﻿@using Web.Areas.Admin.Models.Sensors
+@model SensorDetailsViewModel
+<div class="card">
+    <div class="card-body">
+        <div class="list-group">
+            <a href="javascript:void(0);" class="list-group-item list-group-item-action flex-column align-items-star">
+                <div class="d-flex w-100 justify-content-between">
+                    <h5 class="mb-1">@Html.NameFor(s => s.IPAddress)</h5>
+                </div>
+                <p class="mb-1">@Model.IPAddress</p>
+            </a>
+            <a href="javascript:void(0);" class="list-group-item list-group-item-action flex-column align-items-start">
+                <div class="d-flex w-100 justify-content-between">
+                    <h5 class="mb-1">Активность</h5>
+                </div>
+                <p class="mb-1">@(Model.IsActive ? "Активен" : "Деактивирован")</p>
+            </a>
+            <a href="javascript:void(0);" class="list-group-item list-group-item-action flex-column align-items-start">
+                <div class="d-flex w-100 justify-content-between">
+                    <h5 class="mb-1">Тип</h5>
+                </div>
+                <p class="mb-1">@(Model is StaticSensorDetailsViewModel ? "Статический" : "Портативный")</p>
+            </a>
+            @if (Model is StaticSensorDetailsViewModel)
+            {
+                var staticSensorModel = Model as StaticSensorDetailsViewModel;
+                <a href="javascript:void(0);" class="list-group-item list-group-item-action flex-column align-items-start">
+                    <div class="d-flex w-100 justify-content-between">
+                        <h5 class="mb-1">Видимость</h5>
+                    </div>
+                    <p class="mb-1">@(staticSensorModel.IsVisible ? "Видим" : "Скрыт")</p>
+                </a>
+
+                <a href="javascript:void(0);" class="list-group-item list-group-item-action flex-column align-items-start">
+                    <div class="d-flex w-100 justify-content-between">
+                        <h5 class="mb-1">Координаты</h5>
+                    </div>
+                    <p class="mb-1">Lat:@staticSensorModel.Latitude <br /> Long: @staticSensorModel.Longitude</p>
+                </a>
+            }
+        </div>
+    </div>
+</div>

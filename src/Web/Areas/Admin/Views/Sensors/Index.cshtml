@@ -1,0 +1,194 @@
+﻿@using Web.Areas.Admin.Models.Sensors
+@using Web.Extensions;
+@using Web.Helpers;
+@inject Web.Helpers.Interfaces.ISettingsProvider SettingsProvider
+@model SensorsIndexViewModel
+@{
+    ViewBag.Title = "Датчики";
+    Layout = "~/Areas/Admin/Views/Shared/_Layout.cshtml";
+    ViewBag.Page = "page-sensors";
+}
+<div class="row">
+    <div class="col-md-12">
+        <ul class="nav nav-pills mb-3" id="pills-tab" role="tablist">
+            <li class="nav-item">
+                <a class="nav-link active" id="pills-map-tab" data-toggle="pill" href="#pills-map" role="tab" aria-controls="pills-map" aria-selected="true">Карта статических</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" id="pills-static-table-tab" data-toggle="pill" href="#pills-static-table" role="tab" aria-controls="pills-static-table" aria-selected="false">Таблица статических</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" id="pills-portable-table-tab" data-toggle="pill" href="#pills-portable-table" role="tab" aria-controls="pills-portable-table" aria-selected="false">Таблица портативных</a>
+            </li>
+        </ul>
+        <div class="tab-content" id="pills-tabContent">
+            <div class="tab-pane fade show active" id="pills-map" role="tabpanel" aria-labelledby="pills-map-tab">
+                <div class="map-holder">
+                    <div id="map"></div>
+                </div>
+                <div class="dropdown-menu dropdown-menu-right" id="mapDropdownTemplate">
+                    <a class="dropdown-item" data-edit-button data-href="sensors/edit">Редактировать</a>
+                    <a class="dropdown-item" data-change-activation-button data-href="sensors/changeActivation">Активировать<br />/Деактивировать</a>
+                    <a class="dropdown-item" data-change-visbility-button data-href="sensors/changeVisibility">Показать/<br />Скрыть</a>
+                    <a class="dropdown-item" data-delete-button data-href="sensors/delete">Удалить</a>
+                </div>
+            </div>
+            <div class="tab-pane fade" id="pills-static-table" role="tabpanel" aria-labelledby="pills-static-table-tab">
+                <div class="card">
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table">
+                                <thead class=" text-primary">
+                                    <tr>
+                                        <th>
+                                            Id
+                                        </th>
+                                        <th>
+                                            IP адресс
+                                        </th>
+                                        <th>
+                                            Видимость
+                                        </th>
+                                        <th>
+                                            Статус
+                                        </th>
+                                        <th>
+                                            Подключение
+                                        </th>
+                                        <th>
+                                            Действия
+                                        </th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var sensor in Model.StaticSensors)
+                                    {
+                                        <tr>
+                                            <td>
+                                                @sensor.Id
+                                            </td>
+                                            <td>
+                                                @sensor.IPAddress
+                                            </td>
+                                            <td>
+                                                @(sensor.IsVisible ? "Видимый" : "Скрыт")
+                                            </td>
+                                            <td>
+                                                @(sensor.IsActive ? "Активен" : "Деактивирован")
+                                            </td>
+                                            <td>
+                                                @(sensor.IsConnected ? "Подключен" : "Отключен")
+                                            </td>
+                                            <td>
+                                                <a class="dropdown-toggle" href="javascript:void(0);" id="static_edit_button_@sensor.Id" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                                    <p>
+                                                        <span class="d-lg-none d-md-block">Дейсвтия</span>
+                                                    </p>
+                                                </a>
+                                                <div class="dropdown-menu dropdown-menu-right sensor-actions" aria-labelledby="stati_edit_button_@sensor.Id">
+                                                    <a class="dropdown-item" href="sensors/changeActivation?sensorId=@(sensor.Id)">Активировать/Деактивировать</a>
+                                                    <a class="dropdown-item" href="sensors/ChangeVisibilityStaticSensor?sensorId=@(sensor.Id)">Показать/скрыть</a>
+                                                    @using (Html.BeginForm($"{(!sensor.IsConnected ? "Connect" : "Disconnect")}", "Sensors", new { area = "Admin", ReturnUrl = ViewBag.ReturnUrl }, FormMethod.Post, null, new { @class = "form-horizontal", role = "form" }))
+                                                    {
+                                                        @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+                                                        @Html.Hidden(nameof(sensor.Id), sensor.Id)
+                                                        <button class="dropdown-item">@(!sensor.IsConnected ? "Подключить" : "Отключить")</button>
+                                                    }
+                                                    <a class="dropdown-item" href="sensors/delete?sensorId=@(sensor.Id)">Удалить</a>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <div class="card-footer">
+                        <a href="sensors/createStaticSensor" class="btn btn-default">Зарегестрировать</a>
+                    </div>
+                </div>
+            </div>
+            <div class="tab-pane fade" id="pills-portable-table" role="tabpanel" aria-labelledby="pills-portable-table-tab">
+                <div class="card">
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table">
+                                <thead class=" text-primary">
+                                    <tr>
+                                        <th>
+                                            Id
+                                        </th>
+                                        <th>
+                                            IP адресс
+                                        </th>
+                                        <th>
+                                            Статус
+                                        </th>
+                                        <th>
+                                            Подключение
+                                        </th>
+                                        <th>
+                                            Действия
+                                        </th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var sensor in Model.PortableSensors)
+                                    {
+                                        <tr>
+                                            <td>
+                                                @sensor.Id
+                                            </td>
+                                            <td>
+                                                @sensor.IPAddress
+                                            </td>
+                                            <td>
+                                                @(sensor.IsActive ? "Активен" : "Деактивирован")
+                                            </td>
+                                            <td>
+                                                @(sensor.IsConnected ? "Подключен" : "Отключен")
+                                            </td>
+                                            <td>
+                                                <a class="dropdown-toggle" href="javascript:void(0);" id="portable_edit_button_@sensor.Id" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                                    <p>
+                                                        <span class="d-lg-none d-md-block">Дейсвтия</span>
+                                                    </p>
+                                                </a>
+                                                <div class="dropdown-menu dropdown-menu-right sensor-actions" aria-labelledby="portable_edit_button_@sensor.Id">
+                                                    <a class="dropdown-item" href="sensors/changeActivation?sensorId=@(sensor.Id)">Активировать/Деактивировать</a>
+                                                    @using (Html.BeginForm($"{(!sensor.IsConnected ? "Connect" : "Disconnect")}", "Sensors", new { area = "Admin", ReturnUrl = ViewBag.ReturnUrl }, FormMethod.Post, null, new { @class = "form-horizontal", role = "form" }))
+                                                    {
+                                                        @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+                                                        @Html.Hidden(nameof(sensor.Id), sensor.Id)
+                                                        <button class="dropdown-item">@(!sensor.IsConnected ? "Подключить" : "Отключить")</button>
+                                                    }
+                                                    <a class="dropdown-item" href="sensors/portableSensorDetails?sensorId=@(sensor.Id)">Детали</a>
+                                                    <a class="dropdown-item" href="sensors/delete?sensorId=@(sensor.Id)">Удалить</a>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <div class="card-footer">
+                        <a href="sensors/CreatePortableSensor" class="btn btn-default">Зарегестрировать</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+@section Scripts {
+    <!--  Yandex Maps Plugin    -->
+    <script src="https://api-maps.yandex.ru/2.1/?lang=ru_RU&amp;apikey=@(SettingsProvider.YandexMapsJavaScriptAPIKey)" type="text/javascript"></script>
+    <script src="~/admin/js/front/pages/sensors.js"></script>
+    <script>
+        jQuery(function ($) {
+            window.CSM_Admin.getModule("Sensors")({
+                sensors: @Html.ToJson(Model.StaticSensors)
+            })
+        });
+    </script>
+}

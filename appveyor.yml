@@ -1,0 +1,79 @@
+version: "1.2.{build}"
+image: Visual Studio 2017
+branches:
+  only:
+    - master
+    - staging
+    - production
+for:
+  - branches:
+      only:
+        - production
+    build:
+      - project: src/ClearSkyMaps.sln
+    build_script:
+      - cmd: dotnet publish -c Release -o ../release
+      - ps:  .\deploy\generate-config.ps1 -path  .\src\release\config.json
+  - branches:
+      only:
+        - production
+    environment:
+      ASPNETCORE_ENVIRONMENT: Production
+      APPLICATION_ENVIRONMENT: Production
+      APPLICATION_VERSION: $(APPVEYOR_BUILD_VERSION)
+      FIREBASE_CLOUD_MESSAGING__SERVER_KEY: $(PROD___FIREBASE_CLOUD_MESSAGING__SERVER_KEY)
+      FIREBASE_CLOUD_MESSAGING__MESSAGING_SENDER_ID: $(PROD___FIREBASE_CLOUD_MESSAGING__MESSAGING_SENDER_ID)
+      YANDEX__MAPS_JAVASCRIPT_API_KEY: $(PROD___YANDEX__MAPS_JAVASCRIPT_API_KEY)
+      CONNECTION_STRING: $(PROD___CONNECTION_STRING)
+      EMULATION_ENABLED: false
+    build_script:
+      - cmd: dotnet publish -c Release -o ../release
+      - ps:  .\deploy\generate-config.ps1 -path  .\src\release\config.json
+    artifacts:
+      - path: ./src/release
+        name: CSMProduction
+    deploy:
+      - provider: WebDeploy
+        server: https://$(MAIN_DOMAIN):8172/MsDeploy.axd
+        website: $(PRODUCTION_SITE_NAME)
+        username: $(WEB_DEPLOY_USERNAME)
+        password: $(WEB_DEPLOY_PASSWORD)
+        ntlm: false
+        skip_dirs: \\logs
+        remove_files: true
+        artifact: CSMProduction
+  - branches:
+      only:
+        - staging
+    environment:
+      ASPNETCORE_ENVIRONMENT: Staging
+      APPLICATION_ENVIRONMENT: Staging
+      APPLICATION_VERSION: $(APPVEYOR_BUILD_VERSION)
+      FIREBASE_CLOUD_MESSAGING__SERVER_KEY: $(STAGING___FIREBASE_CLOUD_MESSAGING__SERVER_KEY)
+      FIREBASE_CLOUD_MESSAGING__MESSAGING_SENDER_ID: $(STAGING___FIREBASE_CLOUD_MESSAGING__MESSAGING_SENDER_ID)
+      YANDEX__MAPS_JAVASCRIPT_API_KEY: $(STAGING___YANDEX__MAPS_JAVASCRIPT_API_KEY)
+      CONNECTION_STRING: $(STAGING___CONNECTION_STRING)
+      EMULATION_ENABLED: true
+      EMULATION_CONNECTION_STRING: $(STAGING__EMULATION_CONNECTION_STRING)
+    artifacts:
+      - path: ./src/release
+        name: CSMStaging
+    deploy:
+      - provider: WebDeploy
+        server: https://$(MAIN_DOMAIN):8172/MsDeploy.axd
+        website: $(STAGING_SITE_NAME)
+        username: $(WEB_DEPLOY_USERNAME)
+        password: $(WEB_DEPLOY_PASSWORD)
+        ntlm: false
+        skip_dirs: \\logs
+        remove_files: true
+        artifact: CSMStaging
+init:
+  # Good practise, because Windows line endings are different from Unix/Linux ones
+  - cmd: git config --global core.autocrlf true
+install:
+  - cmd: dotnet restore ./src/ClearSkyMaps.sln
+clone_depth: 1
+test:
+  assemblies:
+    - '**\*.Tests.dll'

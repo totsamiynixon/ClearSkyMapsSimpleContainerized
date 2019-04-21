@@ -1,0 +1,77 @@
+﻿<div class="modal fade" id="sensor-details" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLabel">Текущие показания</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <nav>
+                    <div class="nav nav-tabs" id="nav-tab" role="tablist">
+                        <a class="nav-item nav-link active" id="nav-table-tab" data-toggle="tab" href="#nav-table" role="tab" aria-controls="nav-table" aria-selected="true">Таблица</a>
+                        <a class="nav-item nav-link" id="nav-chart-tab" data-toggle="tab" href="#nav-chart" role="tab" aria-controls="nav-chart" aria-selected="false">График</a>
+                    </div>
+                </nav>
+                <div class="tab-content" id="nav-tabContent">
+                    <div class="tab-pane fade show active" id="nav-table" role="tabpanel" aria-labelledby="nav-table-tab">
+                        <table class="table" id="current-sensor-readings">
+                            <thead>
+                                <tr>
+                                    <th scope="col">CO2</th>
+                                    <th scope="col">LPG</th>
+                                    <th scope="col">CO</th>
+                                    <th scope="col">CH4</th>
+                                    <th scope="col">Пыль</th>
+                                    <th scope="col">Т-ра</th>
+                                    <th scope="col">Hum</th>
+                                    <th scope="col">Давление</th>
+                                    <th scope="col">Снято</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr v-for="(item,index) in currentSensor.readings" :class="{'d-none' : index > 0 && table.collapsed == true}">
+                                    <td>{{item.cO2}}</td>
+                                    <td>{{item.lpg}}</td>
+                                    <td>{{item.co}}</td>
+                                    <td>{{item.cH4}}</td>
+                                    <td>{{item.dust}}</td>
+                                    <td>{{item.temp}}</td>
+                                    <td>{{item.hum}}</td>
+                                    <td>{{item.preassure}}</td>
+                                    <td>{{item.created | toTime}}</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                        <button type="button" class="btn btn-primary" @@click="expandTable" v-show="table.collapsed">Развернуть</button>
+                        <button type="button" class="btn btn-primary" @@click="collapseTable" v-show="!table.collapsed">Свернуть</button>
+                    </div>
+                    <div class="tab-pane fade" id="nav-chart" role="tabpanel" aria-labelledby="nav-chart-tab">
+                        <canvas id="chart"></canvas>
+                        <div class="dropdown">
+                            <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                {{chart.currentParameter}}
+                            </button>
+                            <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+                                <button class="dropdown-item" @@click="setChartCurrentParameter('cO2')">CO2</button>
+                                <button class="dropdown-item" @@click="setChartCurrentParameter('lpg')">LPG</button>
+                                <button class="dropdown-item" @@click="setChartCurrentParameter('co')">CO</button>
+                                <button class="dropdown-item" @@click="setChartCurrentParameter('cH4')">CH4</button>
+                                <button class="dropdown-item" @@click="setChartCurrentParameter('dust')">Пыль</button>
+                                <button class="dropdown-item" @@click="setChartCurrentParameter('temp')">Температура</button>
+                                <button class="dropdown-item" @@click="setChartCurrentParameter('hum')">Hum</button>
+                                <button class="dropdown-item" @@click="setChartCurrentParameter('preassure')">Давление</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" v-show="!isSubscribed" @@click="subscribeOnSensor()">Подписаться</button>
+                <button type="button" class="btn btn-primary" v-show="isSubscribed" @@click="unsubscribeFromSensor()">Отписаться</button>
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Закрыть</button>
+            </div>
+        </div>
+    </div>
+</div>

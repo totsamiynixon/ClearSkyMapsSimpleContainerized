@@ -1,0 +1,35 @@
+﻿@using Web.Areas.Admin.Models.Sensors
+@model ActivateSensorViewModel
+@{
+    ViewBag.Title = "Активация/Деактивация дачтика";
+    Layout = "~/Areas/Admin/Views/Shared/_Layout.cshtml";
+    ViewBag.Page = "page-sensor-activation";
+}
+<div class="row">
+    <div class="offset-md-1 col-md-4 col-sm-12">
+        <partial name="Partials/SensorDetails" model="Model.Details" />
+    </div>
+    <div class="offset-md-1 col-md-4 col-sm-12">
+        <div class="card">
+            <div class="card-body">
+                <section id="loginForm">
+                    @using (Html.BeginForm("ChangeActivation", "Sensors", new { area = "Admin", ReturnUrl = ViewBag.ReturnUrl }, FormMethod.Post, null, new { @class = "form-horizontal", role = "form" }))
+                    {
+                        @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+                        @Html.HiddenFor(f => f.Id)
+                        <div class="form-group">
+                            @Html.LabelFor(m => m.IsActive)
+                            @Html.CheckBoxFor(m => m.IsActive, new { @class = "form-control" })
+                            @Html.ValidationMessageFor(m => m.IsActive, "", new { @class = "text-danger" })
+                        </div>
+                        <div class="form-group">
+                            <div class="col-md-offset-2 col-md-10">
+                                <input type="submit" value="Сохранить" class="btn btn-success" />
+                            </div>
+                        </div>
+                    }
+                </section>
+            </div>
+        </div>
+    </div>
+</div>

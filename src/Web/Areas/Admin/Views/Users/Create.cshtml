@@ -1,0 +1,42 @@
+﻿@using Web.Areas.Admin.Models.Users
+@model CreateUserViewModel
+@{
+    ViewBag.Title = "Создание пользователя";
+    Layout = "~/Areas/Admin/Views/Shared/_Layout.cshtml";
+    ViewBag.Page = "page-user-create";
+}
+<div class="row">
+    <div class="offset-md-4 col-md-4 offset-sm-2 col-sm-6">
+        <div class="card">
+            <div class="card-body">
+                <section id="loginForm">
+                    @using (Html.BeginForm("Create", "Users", new { area = "Admin", ReturnUrl = ViewBag.ReturnUrl }, FormMethod.Post, null, new { @class = "form-horizontal", role = "form" }))
+                    {
+                        @Html.AntiForgeryToken()
+                        @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+                        <div class="form-group">
+                            @Html.LabelFor(m => m.Email)
+                            @Html.TextBoxFor(m => m.Email, new { @class = "form-control"})
+                            @Html.ValidationMessageFor(m => m.Email, "", new { @class = "text-danger" })
+                        </div>
+                        <div class="form-group">
+                            @Html.LabelFor(m => m.Password)
+                            @Html.PasswordFor(m => m.Password, new { @class = "form-control" })
+                            @Html.ValidationMessageFor(m => m.Password, "", new { @class = "text-danger" })
+                        </div>
+                        <div class="form-group">
+                            @Html.LabelFor(m => m.ConfirmPassword)
+                            @Html.PasswordFor(m => m.ConfirmPassword, new { @class = "form-control" })
+                            @Html.ValidationMessageFor(m => m.ConfirmPassword, "", new { @class = "text-danger" })
+                        </div>
+                        <div class="form-group">
+                            <div class="col-md-offset-2 col-md-10">
+                                <input type="submit" value="Создать пользователя" class="btn btn-success" />
+                            </div>
+                        </div>
+                    }
+                </section>
+            </div>
+        </div>
+    </div>
+</div>

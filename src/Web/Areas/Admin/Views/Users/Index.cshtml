@@ -1,0 +1,74 @@
+﻿@model List<Web.Areas.Admin.Models.Users.UserListItemViewModel>
+
+@{
+    ViewBag.Title = "Пользователи";
+    Layout = "~/Areas/Admin/Views/Shared/_Layout.cshtml";
+    ViewBag.Page = "page-users";
+}
+<div class="row">
+    <div class="col-md-12">
+        <div class="card">
+            <div class="card-body">
+                @if (Model != null && Model.Any())
+                {
+
+                    <div class="table-responsive">
+                        <table class="table">
+                            <thead class=" text-primary">
+                                <tr>
+                                    <th>
+                                        Имя
+                                    </th>
+                                    <th>
+                                        Почта
+                                    </th>
+                                    <th>
+                                        Статус
+                                    </th>
+                                    <th>
+                                        Действия
+                                    </th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var item in Model)
+                                {
+                                    <tr>
+                                        <td>
+                                            @item.UserName
+                                        </td>
+                                        <td>
+                                            @item.Email
+                                        </td>
+                                        <td>
+                                            @(item.IsActive ? "Активирован" : "Деактивирован")
+                                        </td>
+                                        <td>
+                                            <a class="dropdown-toggle" href="javascript:void(0);" id="edit_button_@(Model.IndexOf(item))" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                                <p>
+                                                    <span class="d-lg-none d-md-block">Дейсвтия</span>
+                                                </p>
+                                            </a>
+                                            <div class="dropdown-menu dropdown-menu-right" aria-labelledby="edit_button_@(Model.IndexOf(item))">
+                                                <a class="dropdown-item" href="users/changeActivation?userId=@(item.Id)">@(!item.IsActive ? "Активировать" : "Деактивировать")</a>
+                                                <a class="dropdown-item" href="users/changePassword?userId=@(item.Id)">Сменить пароль</a>
+                                                <a class="dropdown-item" href="users/delete?userId=@(item.Id)">Удалить</a>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                }
+                else
+                {
+                    <h2 class="text-center">Нет пользователей</h2>
+                }
+            </div>
+            <div class="card-footer">
+                <a href="users/create" class="btn btn-default">Создать</a>
+            </div>
+        </div>
+    </div>
+</div>

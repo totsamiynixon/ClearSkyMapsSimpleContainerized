@@ -1,0 +1,14 @@
+﻿<script type="text/x-template" id="offlinePageTemplate">
+    <div class="offline-page">
+        <div class="content">
+            <div v-show="offline" class="text-center">
+                <h1>Currently you are offline!</h1>
+            </div>
+            <div v-show="!offline" class="text-center">
+                <h1>Looks like you are online again!</h1>
+                <h2>Click on button to reconnect.</h2>
+                <button class="btn btn-success" @@click="reconnect">Reconnect</button>
+            </div>
+        </div>
+    </div>
+</script>

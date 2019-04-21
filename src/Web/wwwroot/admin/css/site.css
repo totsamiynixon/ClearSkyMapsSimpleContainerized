@@ -1,0 +1,71 @@
+﻿/*page login*/
+.page-login .card-user {
+    margin-top: 25vh;
+}
+
+.page-login .main-panel {
+    width: 100%;
+    background-color: transparent;
+}
+
+    .page-login .main-panel > .content {
+        position: relative;
+        min-height: 100vh;
+        overflow: hidden;
+        margin-top: 0;
+    }
+
+        .page-login .main-panel > .content:after {
+            content: "";
+            background: url(../img/login-screen.jpg);
+            top: 0;
+            left: 0;
+            bottom: 0;
+            right: 0;
+            position: absolute;
+            z-index: -2;
+        }
+
+        .page-login .main-panel > .content:before {
+            content: "";
+            background: #000;
+            opacity: 0.5;
+            top: 0;
+            left: 0;
+            bottom: 0;
+            right: 0;
+            position: absolute;
+            z-index: -1;
+        }
+
+#map {
+    position: absolute;
+    height: 100%;
+    width: 100%;
+    overflow: hidden;
+}
+
+
+.map-holder {
+    position: relative;
+    height: 0;
+    padding-bottom: 50%;
+}
+
+.page-sensors #mapDropdownTemplate {
+    display: none;
+    width: 300px;
+}
+
+@media(max-width:767px) {
+
+    .page-sensors .map-holder {
+        position: relative;
+        height: 0;
+        padding-bottom: 125%;
+    }
+
+    .page-sensors #mapDropdownTemplate {
+        width: 30vw;
+    }
+}

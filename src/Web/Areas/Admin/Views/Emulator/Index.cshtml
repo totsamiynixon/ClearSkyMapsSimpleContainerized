@@ -1,0 +1,82 @@
+﻿@using Web.Areas.Admin.Models.Emulator
+@using Web.Areas.Admin.Emulation
+@using Web.Helpers;
+@inject Web.Helpers.Interfaces.ISettingsProvider SettingsProvider
+@model List<SensorEmulatorListItemViewModel>
+@{
+    ViewBag.Title = "Датчики-эмуляторы";
+    Layout = "~/Areas/Admin/Views/Shared/_Layout.cshtml";
+    ViewBag.Page = "page-emulator-sensors";
+}
+<div class="row">
+    <div class="col-md-12">
+        <div class="card">
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table">
+                        <thead class=" text-primary">
+                            <tr>
+                                <th>
+                                    Локация
+                                </th>
+                                <th>
+                                    IP Адрес
+                                </th>
+                                <th>
+                                    Состояние
+                                </th>
+                                <th>
+                                    Действия
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var sensor in Model)
+                            {
+                                <tr>
+                                    <td>
+                                        Lat: @sensor.Latitude,
+                                        <br />
+                                        Long: @sensor.Longitude
+                                    </td>
+                                    <td>
+                                        @sensor.IPAddress
+                                    </td>
+                                    <td>
+                                        @(sensor.IsOn ? "Включен" : "Отключен")
+                                    </td>
+                                    <td>
+                                        <a class="dropdown-toggle" href="javascript:void(0);" id="edit_button_@sensor.Guid" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                            <p>
+                                                <span class="d-lg-none d-md-block">Дейсвтия</span>
+                                            </p>
+                                        </a>
+                                        <div class="dropdown-menu dropdown-menu-right sensor-actions" aria-labelledby="edit_button_@sensor.Guid">
+
+                                            @using (Html.BeginForm($"{(!sensor.IsOn ? "PowerOn" : "PowerOff")}", "Emulator", new { area = "Admin", ReturnUrl = ViewBag.ReturnUrl }, FormMethod.Post, null, new { @class = "form-horizontal", role = "form" }))
+                                            {
+                                                @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+                                                @Html.Hidden(nameof(sensor.Guid), sensor.Guid)
+                                                <button class="dropdown-item">@(sensor.IsOn ? "Выключить" : "Включить")</button>
+                                            }
+                                        </div>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            @if (SettingsProvider.EmulationEnabled)
+            {
+                <div class="card-footer">
+                    @using (Html.BeginForm($"{(Emulator.IsEmulationEnabled ? "Stop" : "Start")}Emulation", "Emulator", new { area = "Admin", ReturnUrl = ViewBag.ReturnUrl }, FormMethod.Post, null, new { @class = "form-horizontal", role = "form" }))
+                    {
+                        <button class="btn btn-default">@((Emulator.IsEmulationEnabled ? "Выключить" : "Включить")) эмуляцию</button>
+                    }
+                </div>
+            }
+        </div>
+
+    </div>
+</div>

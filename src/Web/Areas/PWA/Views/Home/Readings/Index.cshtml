@@ -1,0 +1,10 @@
+﻿<script type="text/x-template" id="readingsPageTemplate">
+    <div class="readings-page">
+        <div class="inner-content">
+            <div class="map-holder">
+                <div id="map"></div>
+            </div>
+        </div>
+        @{await Html.RenderPartialAsync("Readings/_DetailsModal");}
+    </div>
+</script>

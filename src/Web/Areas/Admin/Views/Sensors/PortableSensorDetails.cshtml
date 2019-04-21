@@ -1,0 +1,119 @@
+﻿@using Web.Areas.Admin.Models.Sensors
+@using Web.Extensions;
+@using Web.Helpers;
+@inject Web.Helpers.Interfaces.ISettingsProvider SettingsProvider
+@{
+    ViewBag.Title = "Детали портативного дачтика";
+    Layout = "~/Areas/Admin/Views/Shared/_Layout.cshtml";
+    ViewBag.Page = "page-portable-sensor-details";
+}
+<div id="app">
+</div>
+
+<script type="text/x-template" id="portableSensorDetailsPageTemplate">
+    <div class="row">
+        <div class="offset-md-1 col-md-5 col-sm-12 col-xs-12">
+            <div class="map-holder">
+                <div id="map"></div>
+            </div>
+        </div>
+        <div class="offset-md-1 col-md-5 col-sm-12 col-xs-12">
+            <div class="card">
+                <div class="card-body">
+                    <div class="list-group">
+                        <a href="javascript:void(0);" class="list-group-item list-group-item-action flex-column align-items-star">
+                            <div class="d-flex w-100 justify-content-between">
+                                <h5 class="mb-1">{{sensor.latestReadings.cO2}}</h5>
+                            </div>
+                            <p class="mb-1">Углекислый газ (CO2)</p>
+                        </a>
+                    </div>
+                    <div class="list-group">
+                        <a href="javascript:void(0);" class="list-group-item list-group-item-action flex-column align-items-star">
+                            <div class="d-flex w-100 justify-content-between">
+                                <h5 class="mb-1">{{sensor.latestReadings.lpg}}</h5>
+                            </div>
+                            <p class="mb-1">LPG</p>
+                        </a>
+                    </div>
+                    <div class="list-group">
+                        <a href="javascript:void(0);" class="list-group-item list-group-item-action flex-column align-items-star">
+                            <div class="d-flex w-100 justify-content-between">
+                                <h5 class="mb-1">{{sensor.latestReadings.co}}</h5>
+                            </div>
+                            <p class="mb-1">CO</p>
+                        </a>
+                    </div>
+                    <div class="list-group">
+                        <a href="javascript:void(0);" class="list-group-item list-group-item-action flex-column align-items-star">
+                            <div class="d-flex w-100 justify-content-between">
+                                <h5 class="mb-1">{{sensor.latestReadings.cH4}}</h5>
+                            </div>
+                            <p class="mb-1">CH4</p>
+                        </a>
+                    </div>
+                    <div class="list-group">
+                        <a href="javascript:void(0);" class="list-group-item list-group-item-action flex-column align-items-star">
+                            <div class="d-flex w-100 justify-content-between">
+                                <h5 class="mb-1">{{sensor.latestReadings.dust}}</h5>
+                            </div>
+                            <p class="mb-1">Пыль</p>
+                        </a>
+                    </div>
+                    <div class="list-group">
+                        <a href="javascript:void(0);" class="list-group-item list-group-item-action flex-column align-items-star">
+                            <div class="d-flex w-100 justify-content-between">
+                                <h5 class="mb-1">{{sensor.latestReadings.temp}}</h5>
+                            </div>
+                            <p class="mb-1">Температура</p>
+                        </a>
+                    </div>
+                    <div class="list-group">
+                        <a href="javascript:void(0);" class="list-group-item list-group-item-action flex-column align-items-star">
+                            <div class="d-flex w-100 justify-content-between">
+                                <h5 class="mb-1">{{sensor.latestReadings.hum}}</h5>
+                            </div>
+                            <p class="mb-1">Hum</p>
+                        </a>
+                    </div>
+                    <div class="list-group">
+                        <a href="javascript:void(0);" class="list-group-item list-group-item-action flex-column align-items-star">
+                            <div class="d-flex w-100 justify-content-between">
+                                <h5 class="mb-1">{{sensor.latestReadings.preassure}}</h5>
+                            </div>
+                            <p class="mb-1">Давление</p>
+                        </a>
+                    </div>
+                    <div class="list-group">
+                        <a href="javascript:void(0);" class="list-group-item list-group-item-action flex-column align-items-star">
+                            <div class="d-flex w-100 justify-content-between">
+                                <h5 class="mb-1">{{sensor.latestReadings.preassure}}</h5>
+                            </div>
+                            <p class="mb-1">Давление</p>
+                        </a>
+                    </div>
+                    <div class="list-group">
+                        <a href="javascript:void(0);" class="list-group-item list-group-item-action flex-column align-items-star">
+                            <div class="d-flex w-100 justify-content-between">
+                                <h5 class="mb-1">{{sensor.latestReadings.created}}</h5>
+                            </div>
+                            <p class="mb-1">Снято</p>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</script>
+@section Scripts {
+    <!--  Yandex Maps Plugin    -->
+    <script src="https://api-maps.yandex.ru/2.1/?lang=ru_RU&amp;apikey=@(SettingsProvider.YandexMapsJavaScriptAPIKey)" type="text/javascript"></script>
+    <script src="~/admin/js/front/pages/portableSensorDetails.js"></script>
+    <script>
+        jQuery(function ($) {
+            window.CSM_Admin.getModule("PortableSensorDetails")({
+                id: @Model
+            })
+        });
+    </script>
+}

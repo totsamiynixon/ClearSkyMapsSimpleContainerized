@@ -1,0 +1,44 @@
+﻿@inject Web.Helpers.Interfaces.ISettingsProvider SettingsProvider
+@if (User.Identity.IsAuthenticated)
+{
+    <div class="sidebar" data-color="white" data-active-color="danger">
+        <div class="logo">
+            <a href="@Url.Content("~/")" class="simple-text logo-mini">
+                <div class="logo-image-small">
+                    <img src="~/admin/img/logo.png">
+                </div>
+            </a>
+            <a href="@Url.Content("~/")" class="simple-text logo-normal">
+                Clear Sky Maps
+            </a>
+        </div>
+        <div class="sidebar-wrapper">
+            <ul class="nav">
+                @if (User.IsInRole("Supervisor"))
+                {
+                    <li>
+                        <a href="users">
+                            <i class="nc-icon nc-bank"></i>
+                            <p>Пользователи</p>
+                        </a>
+                    </li>
+                }
+                <li>
+                    <a href="sensors">
+                        <i class="nc-icon nc-bank"></i>
+                        <p>Датчики</p>
+                    </a>
+                </li>
+                @if (SettingsProvider.EmulationEnabled)
+                {
+                    <li>
+                        <a href="emulator">
+                            <i class="nc-icon nc-bank"></i>
+                            <p>Эмуляция</p>
+                        </a>
+                    </li>
+                }
+            </ul>
+        </div>
+    </div>
+}

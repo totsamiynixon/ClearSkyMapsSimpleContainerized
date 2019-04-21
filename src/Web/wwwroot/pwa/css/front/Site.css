@@ -1,0 +1,100 @@
+﻿
+/* Override the default bootstrap behavior where horizontal description lists 
+   will truncate terms that are too long to fit in the left column 
+*/
+.dl-horizontal dt {
+    white-space: normal;
+}
+
+/* Set width on the form input elements since they're 100% wide by default */
+input,
+select,
+textarea {
+    max-width: 280px;
+}
+
+#current-sensor-readings.table thead th {
+    font-size: 11px;
+}
+
+.readings-page .map-holder {
+    position: relative;
+    height: 100vh;
+}
+
+#map {
+    position: absolute;
+    height: 100%;
+    width: 100%;
+    overflow: hidden;
+}
+
+.readings-page .richmarker-wrapper {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    background-color: #000;
+    box-shadow: none;
+    color: #fff;
+    position: relative;
+}
+
+    .readings-page .richmarker-wrapper p {
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        line-height: 50px;
+        text-align: center
+    }
+
+.readings-page .charts .tab-content {
+    margin-bottom: 100px;
+}
+
+#sensor-details .modal-dialog {
+    max-width: 800px;
+}
+
+@media(max-width:767px) {
+    #sensor-details {
+        font-size: 3vw;
+    }
+
+        #sensor-details #nav-table {
+            overflow-x: scroll;
+        }
+
+        #sensor-details .tab-content .dropdown-menu {
+            overflow-y: scroll;
+            height: 25vw;
+        }
+}
+
+
+/*VUE TRANSITIONS*/
+
+#app .fade-enter-active,
+#app .fade-leave-active {
+    transition-duration: 0.3s;
+    transition-property: opacity;
+    transition-timing-function: ease;
+}
+
+#app .fade-enter,
+#app .fade-leave-active {
+    opacity: 0
+}
+
+/**/
+
+.offline-page {
+    position: relative;
+    height: 100vh;
+}
+
+    .offline-page .content {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+    }

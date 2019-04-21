@@ -1,0 +1,39 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <link rel="apple-touch-icon" sizes="180x180" href="~/admin/img/favicon/apple-touch-icon.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="~/admin/img/favicon/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="~/admin/img/favicon/favicon-16x16.png">
+    <link rel="mask-icon" href="~/admin/img/favicon/safari-pinned-tab.svg" color="#0f5a70">
+    <meta name="msapplication-TileColor" content="#2d89ef">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+    <title>
+        CSM Admin
+    </title>
+    <base href="@Url.Content("~/admin/")" />
+    <meta content='width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0, shrink-to-fit=no' name='viewport' />
+    <link href="https://fonts.googleapis.com/css?family=Montserrat:400,700,200" rel="stylesheet" />
+    <link href="https://maxcdn.bootstrapcdn.com/font-awesome/latest/css/font-awesome.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.8.1/css/all.css" integrity="sha384-50oBUHEmvpQ+1lW4y57PTFmhCaXp0ML5d60M1M7uH2+nqUivzIebhndOJK28anvf" crossorigin="anonymous">
+    @await Styles.RenderAsync("bundles/admin.css")
+    @RenderSection("Styles", false)
+</head>
+
+<body class="@ViewBag.Page">
+    <div class="wrapper ">
+        <partial name="Partials/Sidebar" />
+        <div class="main-panel">
+            <partial name="Partials/Navbar" />
+            <div class="content">
+                @RenderBody()
+            </div>
+        </div>
+    </div>
+    @await Scripts.RenderAsync("bundles/admin.js")
+    @RenderSection("Scripts", false)
+    <partial name="Partials/Alerts" />
+</body>
+
+</html>

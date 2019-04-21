@@ -1,0 +1,30 @@
+﻿@*@using Web.Areas.Admin.Controllers;
+@if (this.ViewContext.Controller is BaseController)
+{
+    <script>
+        jQuery(function ($) {
+            var types = {
+                0:"success",
+                1:"warning",
+                2:"danger",
+                3:"info"
+            };
+            var notifications = @(Html.Raw(Json.Encode((this.ViewContext.Controller as BaseController).GetAlerts())));
+            notifications.forEach(function (notification) {
+                $.notify({
+                    icon: "nc-icon nc-bell-55",
+                    message: notification.Message
+
+                }, {
+                        type: types[notification.Type],
+                        timer: 8000,
+                        placement: {
+                            from: "top",
+                            align: "right"
+                        }
+                    });
+            })
+
+        })
+    </script>
+}*@
