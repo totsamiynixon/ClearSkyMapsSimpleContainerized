@@ -276,8 +276,10 @@ namespace Web.Data
                 var userAdmin = new User
                 {
                     Email = "supervisor@clearskymaps.com",
+                    NormalizedEmail= "SUPERVISOR@CLERSKYMAPS.COM",
                     SecurityStamp = Guid.NewGuid().ToString(),
                     UserName = "supervisor@clearskymaps.com",
+                    NormalizedUserName = "SUPERVISOR@CLERSKYMAPS.COM",
                     IsActive = true
                 };
                 context.Users.Add(userAdmin);

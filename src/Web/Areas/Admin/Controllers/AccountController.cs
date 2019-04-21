@@ -45,7 +45,7 @@ namespace Web.Areas.Admin.Controllers
                 return View(model);
             }
             await Authenticate(model.Email, string.Join(",", await _userManager.GetRolesAsync(user)));
-            return RedirectToRoute("Admin_default", new { area = "Admin", controller = "Sensors", action = "Index" });
+            return Redirect(returnUrl);
         }
 
         private async Task Authenticate(string userName, string roles)
