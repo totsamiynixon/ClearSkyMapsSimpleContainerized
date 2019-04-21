@@ -31,7 +31,7 @@ for:
         name: CSMProduction
     deploy:
       - provider: WebDeploy
-        server: https://$(MAIN_DOMAIN):8172/MsDeploy.axd
+        server: http://$(MAIN_DOMAIN)/msdeployagentservice
         website: $(PRODUCTION_SITE_NAME)
         username: $(WEB_DEPLOY_USERNAME)
         password: $(WEB_DEPLOY_PASSWORD)
@@ -60,7 +60,7 @@ for:
         name: CSMStaging
     deploy:
       - provider: WebDeploy
-        server: https://$(MAIN_DOMAIN):8172/MsDeploy.axd
+        server: http://$(MAIN_DOMAIN)/msdeployagentservice
         website: $(STAGING_SITE_NAME)
         username: $(WEB_DEPLOY_USERNAME)
         password: $(WEB_DEPLOY_PASSWORD)
