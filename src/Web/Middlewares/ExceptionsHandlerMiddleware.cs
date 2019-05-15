@@ -46,7 +46,7 @@ namespace Web.Middlewares
                     await result.ExecuteResultAsync(actionContext);
                     return;
                 }
-                _logger.LogError("An unhandled exception has occurred: " + ex.Message, ex);
+                _logger.LogError(ex, "An unhandled exception has occurred: " + ex.Message);
                 if (context.Response.HasStarted)
                 {
                     _logger.LogWarning("The response has already started, the error handler will not be executed.");
