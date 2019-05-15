@@ -229,23 +229,20 @@ namespace Web.Data
 
         public void ReinitializeDb()
         {
-            if (!_dbInitialized)
+            lock (Lock)
             {
-                lock (Lock)
+                using (var _context = GetFreshContext())
                 {
-                    using (var _context = GetFreshContext())
+                    try
                     {
-                        try
-                        {
-                            _context.Database.Migrate();
-                            Seed(_context);
-                            _dbInitialized = true;
+                        _context.Database.Migrate();
+                        Seed(_context);
+                        _dbInitialized = true;
 
-                        }
-                        catch (SqlException exception) when (exception.Number == 1801)
-                        {
-                            // retry
-                        }
+                    }
+                    catch (SqlException exception) when (exception.Number == 1801)
+                    {
+                        // retry
                     }
                 }
             }
@@ -276,7 +273,7 @@ namespace Web.Data
                 var userAdmin = new User
                 {
                     Email = "supervisor@clearskymaps.com",
-                    NormalizedEmail= "SUPERVISOR@CLERSKYMAPS.COM",
+                    NormalizedEmail = "SUPERVISOR@CLERSKYMAPS.COM",
                     SecurityStamp = Guid.NewGuid().ToString(),
                     UserName = "supervisor@clearskymaps.com",
                     NormalizedUserName = "SUPERVISOR@CLERSKYMAPS.COM",
