@@ -14,6 +14,7 @@ using Web.Areas.Admin.Filters;
 using Microsoft.AspNetCore.Authorization;
 using Web.Helpers.Interfaces;
 using Web;
+using Web.Helpers;
 
 namespace Web.Areas.Admin.Controllers
 {
@@ -63,7 +64,10 @@ namespace Web.Areas.Admin.Controllers
         [RestoreModelStateFromTempData]
         public ActionResult CreateStaticSensor()
         {
-            return View();
+            return View(new CreateStaticSensorModel
+            {
+                ApiKey = CryptoHelper.GenerateApiKey()
+            });
         }
 
 
@@ -106,9 +110,12 @@ namespace Web.Areas.Admin.Controllers
 
         [HttpGet]
         [RestoreModelStateFromTempData]
-        public ActionResult CreatPortableSensor()
+        public ActionResult CreatePortableSensor()
         {
-            return View();
+            return View(new CreatePortableSensorModel
+            {
+                ApiKey = CryptoHelper.GenerateApiKey()
+            });
         }
 
 
