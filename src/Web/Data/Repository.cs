@@ -236,8 +236,20 @@ namespace Web.Data
                     try
                     {
                         _context.Database.Migrate();
+
+                    }
+                    catch (SqlException exception) when (exception.Number == 1801)
+                    {
+                        // retry
+                    }
+                }
+
+                using (var _context = GetFreshIdentityDbContext())
+                {
+                    try
+                    {
+                        _context.Database.Migrate();
                         Seed(_context);
-                        _dbInitialized = true;
 
                     }
                     catch (SqlException exception) when (exception.Number == 1801)
@@ -253,7 +265,12 @@ namespace Web.Data
             return (DataContext)_serviceProvider.GetService(typeof(DataContext));
         }
 
-        private void Seed(DataContext context)
+        private IdentityDbContext GetFreshIdentityDbContext()
+        {
+            return (IdentityDbContext)_serviceProvider.GetService(typeof(IdentityDbContext));
+        }
+
+        private void Seed(IdentityDbContext context)
         {
             if (!context.Roles.Any())
             {
@@ -273,10 +290,10 @@ namespace Web.Data
                 var userAdmin = new User
                 {
                     Email = "supervisor@clearskymaps.com",
-                    NormalizedEmail = "SUPERVISOR@CLERSKYMAPS.COM",
+                    NormalizedEmail = "SUPERVISOR@CLEARSKYMAPS.COM",
                     SecurityStamp = Guid.NewGuid().ToString(),
                     UserName = "supervisor@clearskymaps.com",
-                    NormalizedUserName = "SUPERVISOR@CLERSKYMAPS.COM",
+                    NormalizedUserName = "SUPERVISOR@CLEARSKYMAPS.COM",
                     IsActive = true
                 };
                 context.Users.Add(userAdmin);

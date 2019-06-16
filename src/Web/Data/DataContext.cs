@@ -9,7 +9,7 @@ using Web.Data.Models.Identity;
 
 namespace Web.Data
 {
-    public class DataContext : IdentityDbContext<User, IdentityRole, string>
+    public class DataContext : DbContext
     {
         public DataContext(DbContextOptions<DataContext> options)
             : base(options)

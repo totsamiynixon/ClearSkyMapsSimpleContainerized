@@ -15,7 +15,6 @@ namespace Web.Areas.Admin.Controllers
     public class UsersController : Controller
     {
 
-
         private static readonly IMapper _mapper = new Mapper(new MapperConfiguration(x =>
         {
             x.CreateMap<User, UserListItemViewModel>();

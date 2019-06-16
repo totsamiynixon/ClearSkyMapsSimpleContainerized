@@ -38,14 +38,14 @@ namespace Web.Areas.Admin.Controllers
             {
                 return View(model);
             }
-            var user = await _userManager.FindByNameAsync(model.Email);
+            var user = await _userManager.FindByEmailAsync(model.Email);
             if (user == null || !user.IsActive)
             {
                 ModelState.AddModelError("", "Ошибка при попытке входа");
                 return View(model);
             }
             await Authenticate(model.Email, string.Join(",", await _userManager.GetRolesAsync(user)));
-            return Redirect(returnUrl);
+            return Redirect(returnUrl ?? "admin");
         }
 
         private async Task Authenticate(string userName, string roles)

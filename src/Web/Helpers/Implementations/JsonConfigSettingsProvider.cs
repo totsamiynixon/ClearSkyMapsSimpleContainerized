@@ -86,6 +86,8 @@ namespace Web.Helpers.Implementations
 
         public string ConnectionString => Emulator.IsEmulationEnabled ? Settings["Emulation:ConnectionString"].ToString() : Settings["ConnectionString"].ToString();
 
+        public string IdentityConnectionString => Settings["ConnectionString"].ToString();
+
         public string YandexMapsJavaScriptAPIKey => Settings["Yandex:MapsJavaScriptAPIKey"].ToString();
     }
 }

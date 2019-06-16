@@ -25,6 +25,8 @@ namespace Web.Helpers.Interfaces
 
         string ConnectionString { get; }
 
+        string IdentityConnectionString { get; }
+
         string YandexMapsJavaScriptAPIKey { get; }
     }
 }

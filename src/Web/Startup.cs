@@ -81,13 +81,30 @@ namespace Web
                             ((ISettingsProvider)scope.ServiceProvider.GetService(typeof(ISettingsProvider))).ConnectionString);
                     }
                 }
+            }, ServiceLifetime.Transient)
+            ;
+            services.AddDbContext<IdentityDbContext>(options =>
+            {
+
+                var scopeFactory = services
+                   .BuildServiceProvider()
+                   .GetRequiredService<IServiceScopeFactory>();
+
+                using (var scope = scopeFactory.CreateScope())
+                {
+                    {
+                        options.UseSqlServer(
+                            ((ISettingsProvider)scope.ServiceProvider.GetService(typeof(ISettingsProvider))).IdentityConnectionString);
+                    }
+                }
             }, ServiceLifetime.Transient);
+
             services.AddDefaultIdentity<User>()
                 .AddDefaultUI(UIFramework.Bootstrap4)
                 .AddUserManager<UserManager<User>>()
                 .AddRoles<IdentityRole>()
                 .AddRoleManager<RoleManager<IdentityRole>>()
-                .AddEntityFrameworkStores<DataContext>();
+                .AddEntityFrameworkStores<IdentityDbContext>();
 
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
             services.AddMemoryCache();
