@@ -14,7 +14,7 @@ namespace Web.Areas.Admin.Models.Emulator
 
         public bool IsOn { get; set; }
 
-        public string IPAddress { get; set; }
+        public string ApiKey { get; set; }
 
         public string Guid { get; set; }
     }

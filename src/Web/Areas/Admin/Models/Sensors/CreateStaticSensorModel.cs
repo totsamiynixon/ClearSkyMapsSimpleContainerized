@@ -8,7 +8,7 @@ namespace Web.Areas.Admin.Models.Sensors
 {
     public class CreateStaticSensorModel
     {
-        public string IPAddress { get; set; }
+        public string ApiKey { get; set; }
 
         public double Latitude { get; set; }
 

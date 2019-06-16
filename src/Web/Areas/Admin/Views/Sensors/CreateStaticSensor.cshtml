@@ -1,4 +1,5 @@
 ﻿@using Web.Areas.Admin.Models.Sensors
+@using Web.Helpers
 @model CreateStaticSensorModel
 @{
     ViewBag.Title = "Регистрация статического датчика";
@@ -15,9 +16,9 @@
                         @Html.AntiForgeryToken()
                         @Html.ValidationSummary(true, "", new { @class = "text-danger" })
                         <div class="form-group">
-                            @Html.LabelFor(m => m.IPAddress)
-                            @Html.TextBoxFor(m => m.IPAddress, new { @class = "form-control" })
-                            @Html.ValidationMessageFor(m => m.IPAddress, "", new { @class = "text-danger" })
+                            @Html.LabelFor(m => m.ApiKey)
+                            @Html.TextBoxFor(m => m.ApiKey, new { @class = "form-control", value = CryptoHelper.GenerateApiKey(), disabled = true })
+                            @Html.ValidationMessageFor(m => m.ApiKey, "", new { @class = "text-danger" })
                         </div>
                         <div class="form-group">
                             @Html.LabelFor(m => m.Latitude)

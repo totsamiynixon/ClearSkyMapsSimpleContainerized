@@ -8,9 +8,9 @@ namespace Web.Data
 {
     public interface IRepository
     {
-        Task<StaticSensor> AddStaticSensorAsync(string ipAddress, double latitude, double longitude);
+        Task<StaticSensor> AddStaticSensorAsync(string apiKey, double latitude, double longitude);
 
-        Task<PortableSensor> AddPortableSensorAsync(string ipAddress);
+        Task<PortableSensor> AddPortableSensorAsync(string apiKey);
 
         Task<StaticSensor> UpdateStaticSensorCoordinatesAsync(int id, double latitude, double longitude);
 
@@ -25,6 +25,8 @@ namespace Web.Data
         Task<List<StaticSensor>> GetStaticSensorsAsync(bool withReadings);
 
         Task<Sensor> GetSensorByIdAsync(int id);
+
+        Task<Sensor> GetSensorByApiKeyAsync(string apiKey);
 
         Task<StaticSensor> GetStaticSensorByIdAsync(int id, bool withReadings = false);
 

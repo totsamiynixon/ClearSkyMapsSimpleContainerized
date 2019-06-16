@@ -1,15 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Net;
-using System.Net.NetworkInformation;
-using System.Net.Sockets;
 using System.Threading.Tasks;
 using Web.Data;
 using Web.Data.Models;
 using Web.Helpers;
 using Web.Helpers.Interfaces;
-using Z.EntityFramework.Plus;
 
 namespace Web.Areas.Admin.Emulation
 {
@@ -21,9 +16,9 @@ namespace Web.Areas.Admin.Emulation
         private static List<string> _guids { get; set; }
         public static List<SensorEmulator> Devices { get; private set; }
 
-        private static ISensorConnectionHelper SensorConnectionHelper => (Startup.ServiceProvider().GetService(typeof(ISensorConnectionHelper)) as ISensorConnectionHelper);
         private static IRepository Repository => (Startup.ServiceProvider().GetService(typeof(IRepository)) as IRepository);
         private static ISensorCacheHelper SensorCacheHelper => (Startup.ServiceProvider().GetService(typeof(ISensorCacheHelper)) as ISensorCacheHelper);
+        private static ISettingsProvider SettingsProvider => (Startup.ServiceProvider().GetService(typeof(ISettingsProvider)) as ISettingsProvider);
 
 
         public static async Task RunEmulationAsync()
@@ -31,7 +26,6 @@ namespace Web.Areas.Admin.Emulation
             if (!IsEmulationEnabled)
             {
                 IsEmulationEnabled = true;
-                SensorConnectionHelper.DisconnectAllSensors();
                 Repository.ReinitializeDb();
                 SensorCacheHelper.RemoveAllSensorsFromCache();
             }
@@ -47,7 +41,6 @@ namespace Web.Areas.Admin.Emulation
             if (IsEmulationEnabled)
             {
                 IsEmulationEnabled = false;
-                SensorConnectionHelper.DisconnectAllSensors();
                 Repository.ReinitializeDb();
                 SensorCacheHelper.RemoveAllSensorsFromCache();
             }
@@ -65,7 +58,7 @@ namespace Web.Areas.Admin.Emulation
                 var guid = Guid.NewGuid().ToString();
                 _guids.Add(guid);
                 var fakeSensor = GetStaticFakeSensor(guid);
-                await Repository.AddStaticSensorAsync(fakeSensor.sensor.IPAddress, fakeSensor.sensor.Latitude, fakeSensor.sensor.Longitude);
+                await Repository.AddStaticSensorAsync(fakeSensor.sensor.ApiKey, fakeSensor.sensor.Latitude, fakeSensor.sensor.Longitude);
                 Devices.Add(fakeSensor.emulator);
             }
             var iterationsForPortable = _emulatorRandom.Next(5, 10);
@@ -74,20 +67,21 @@ namespace Web.Areas.Admin.Emulation
                 var guid = Guid.NewGuid().ToString();
                 _guids.Add(guid);
                 var fakeSensor = GetPortableFakeSensor(guid);
-                await Repository.AddPortableSensorAsync(fakeSensor.sensor.IPAddress);
+                await Repository.AddPortableSensorAsync(fakeSensor.sensor.ApiKey);
                 Devices.Add(fakeSensor.emulator);
             }
         }
 
         private static (SensorEmulator emulator, StaticSensor sensor) GetStaticFakeSensor(string guid)
         {
-            var sensorEmulator = new SensorEmulator(GetLocalIPAddress(), GetAvailableLocalPort().ToString(), guid);
-            var coordinates = sensorEmulator.GetCoordinates();
+
+            var apiKey = CryptoHelper.GenerateApiKey();
+            var sensorEmulator = new SensorEmulator(guid, SettingsProvider.ServerIP, apiKey, typeof(StaticSensor));
             var sensor = new StaticSensor
             {
-                IPAddress = $"{sensorEmulator.GetIp()}:{sensorEmulator.GetPort()}",
-                Latitude = coordinates.latitude,
-                Longitude = coordinates.longitude
+                ApiKey = apiKey,
+                Latitude = sensorEmulator.Latitude,
+                Longitude = sensorEmulator.Longitude
             };
             return (sensorEmulator, sensor);
         }
@@ -95,54 +89,13 @@ namespace Web.Areas.Admin.Emulation
 
         private static (SensorEmulator emulator, PortableSensor sensor) GetPortableFakeSensor(string guid)
         {
-            var sensorEmulator = new SensorEmulator(GetLocalIPAddress(), GetAvailableLocalPort().ToString(), guid);
+            var apiKey = CryptoHelper.GenerateApiKey();
+            var sensorEmulator = new SensorEmulator(guid, SettingsProvider.ServerIP, apiKey, typeof(PortableSensor));
             var sensor = new PortableSensor
             {
-                IPAddress = $"{sensorEmulator.GetIp()}:{sensorEmulator.GetPort()}"
+                ApiKey = apiKey
             };
             return (sensorEmulator, sensor);
-        }
-
-        public static string GetLocalIPAddress()
-        {
-            var host = Dns.GetHostEntry(Dns.GetHostName());
-            foreach (var ip in host.AddressList)
-            {
-                if (ip.AddressFamily == AddressFamily.InterNetwork)
-                {
-                    return ip.ToString();
-                }
-            }
-            throw new Exception("No network adapters with an IPv4 address in the system!");
-        }
-
-        public static int GetAvailableLocalPort()
-        {
-
-            for (var port = 10000; port <= 11000; port++)
-            {
-                bool isAvailable = true;
-                if (Devices.Any(f => f.GetPort() == port.ToString()))
-                {
-                    isAvailable = false;
-                }
-                IPGlobalProperties ipGlobalProperties = IPGlobalProperties.GetIPGlobalProperties();
-                TcpConnectionInformation[] tcpConnInfoArray = ipGlobalProperties.GetActiveTcpConnections();
-
-                foreach (TcpConnectionInformation tcpi in tcpConnInfoArray)
-                {
-                    if (tcpi.LocalEndPoint.Port == port)
-                    {
-                        isAvailable = false;
-                        break;
-                    }
-                }
-                if (isAvailable)
-                {
-                    return port;
-                }
-            }
-            throw new Exception("Free port not found");
         }
     }
 }

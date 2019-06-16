@@ -10,7 +10,6 @@ using System.Threading.Tasks;
 using Web.Areas.Admin.Models.Sensors;
 using Web.Data;
 using Web.Data.Models;
-using Web.SensorActions.Output;
 using Web.Areas.Admin.Filters;
 using Microsoft.AspNetCore.Authorization;
 using Web.Helpers.Interfaces;
@@ -24,8 +23,7 @@ namespace Web.Areas.Admin.Controllers
     {
         private static IMapper _mapper = new Mapper(new MapperConfiguration(x =>
         {
-            x.CreateMap<Sensor, SensorListItemViewModel>()
-            .ForMember(f => f.IsConnected, m => m.MapFrom(f => (Startup.ServiceProvider().GetService(typeof(ISensorConnectionHelper)) as ISensorConnectionHelper).IsConnected(f.Id)));
+            x.CreateMap<Sensor, SensorListItemViewModel>();
             x.CreateMap<StaticSensor, StaticSensorListItemViewModel>()
             //.ForMember(f => f.PollutionLevel, m => m.MapFrom(f => (Startup.ServiceProvider()().GetService(typeof(ISensorCacheHelper)) as ISensorCacheHelper).GetPollutionLevelAsync(f.Id)))
             .IncludeBase<Sensor, SensorListItemViewModel>();
@@ -36,19 +34,16 @@ namespace Web.Areas.Admin.Controllers
             x.CreateMap<Sensor, ChangeVisibilityStaticSensorViewModel>().ForMember(f => f.Details, m => m.MapFrom(f => f));
             x.CreateMap<Sensor, DeleteSensorViewModel>().ForMember(f => f.Details, m => m.MapFrom(f => f));
             x.CreateMap<CreateStaticSensorModel, Sensor>();
-            x.CreateMap<Sensor, PushStateActionPayload>();
         }));
 
 
         private readonly IRepository _repository;
         private readonly ISensorCacheHelper _sensorCacheHelper;
-        private readonly ISensorConnectionHelper _sensorConnectionHelper;
 
-        public SensorsController(IRepository repository, ISensorCacheHelper sensorCacheHelper, ISensorConnectionHelper sensorConnectionHelper)
+        public SensorsController(IRepository repository, ISensorCacheHelper sensorCacheHelper)
         {
             _repository = repository;
             _sensorCacheHelper = sensorCacheHelper;
-            _sensorConnectionHelper = sensorConnectionHelper;
         }
 
         public async Task<ActionResult> Index()
@@ -82,7 +77,7 @@ namespace Web.Areas.Admin.Controllers
             }
             try
             {
-                await _repository.AddStaticSensorAsync(model.IPAddress, model.Latitude, model.Longitude);
+                await _repository.AddStaticSensorAsync(model.ApiKey, model.Latitude, model.Longitude);
             }
             catch (DbUpdateException e)
             {
@@ -127,7 +122,7 @@ namespace Web.Areas.Admin.Controllers
             }
             try
             {
-                await _repository.AddPortableSensorAsync(model.IPAddress);
+                await _repository.AddPortableSensorAsync(model.ApiKey);
             }
             catch (DbUpdateException e)
             {
@@ -185,7 +180,6 @@ namespace Web.Areas.Admin.Controllers
                 return RedirectToAction("Delete", new { sensorId = model.Id });
             }
             await _repository.DeleteSensorAsync(model.Id.Value);
-            _sensorConnectionHelper.TriggerChangeState(await _repository.GetSensorByIdAsync(model.Id.Value));
             return RedirectToAction("Index");
         }
 
@@ -221,7 +215,6 @@ namespace Web.Areas.Admin.Controllers
             {
                 await _sensorCacheHelper.UpdateStaticSensorCacheAsync(sensor as StaticSensor);
             }
-            _sensorConnectionHelper.TriggerChangeState(sensor);
             return RedirectToAction("Index");
         }
 
@@ -254,54 +247,6 @@ namespace Web.Areas.Admin.Controllers
             }
             sensor = await _repository.UpdateStaticSensorVisibilityAsync(model.Id.Value, model.IsVisible.Value);
             await _sensorCacheHelper.UpdateStaticSensorCacheAsync(sensor as StaticSensor);
-            return RedirectToAction("Index");
-        }
-
-
-        [HttpPost]
-        public async Task<ActionResult> Connect(SensorConnectDisconnectModel model)
-        {
-            if (!ModelState.IsValid)
-            {
-                return RedirectToAction("Index");
-            }
-            var sensor = await _repository.GetSensorByIdAsync(model.Id);
-            if (sensor == null)
-            {
-                return NotFound("Датчик с таким id не найден");
-            }
-            if (_sensorConnectionHelper.IsConnected(sensor.Id))
-            {
-                return RedirectToAction("Index");
-            }
-            try
-            {
-                _sensorConnectionHelper.ConnectSensor(sensor);
-            }
-            catch
-            {
-                return RedirectToAction("Index");
-            }
-            return RedirectToAction("Index");
-        }
-
-        [HttpPost]
-        public async Task<ActionResult> Disconnect(SensorConnectDisconnectModel model)
-        {
-            if (!ModelState.IsValid)
-            {
-                return RedirectToAction("Index");
-            }
-            var sensor = await _repository.GetSensorByIdAsync(model.Id);
-            if (sensor == null)
-            {
-                return NotFound("Датчик с таким id не найден");
-            }
-            if (!_sensorConnectionHelper.IsConnected(sensor.Id))
-            {
-                return RedirectToAction("Index");
-            }
-            _sensorConnectionHelper.DisconnectSensor(sensor.Id);
             return RedirectToAction("Index");
         }
 

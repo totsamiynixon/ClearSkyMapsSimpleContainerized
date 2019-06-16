@@ -55,7 +55,6 @@ namespace Web
             services.AddTransient<IRepository, Repository>();
             services.AddTransient<IPollutionCalculator, PollutionCalculator>();
             services.AddTransient<ISensorCacheHelper, SensorCacheHelper>();
-            services.AddTransient<ISensorConnectionHelper, SensorWebSocketConnectionHelper>();
             services.AddTransient<IPWADispatchHelper, PWASignalrDispatchHelper>();
             services.AddTransient<IAdminDispatchHelper, AdminSignalRHubDispatchHelper>();
             services.AddTransient<IPWABootstrapper, PWAFileCompilerBootstrapper>();

@@ -46,11 +46,11 @@
             map = new ymaps.Map("map", {
                 center: [53.904502, 27.561261],
                 zoom: 12,
-                controls: ["zoomControl"]
+                //controls: ["zoomControl"]
             },
                 {
                     searchControlProvider: 'yandex#search',
-                    restrictMapArea: true
+                    //restrictMapArea: true
                 });
         }
         function initMarkers() {

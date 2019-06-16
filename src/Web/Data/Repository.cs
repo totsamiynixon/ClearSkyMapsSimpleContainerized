@@ -5,8 +5,10 @@ using System.Collections.Generic;
 using System.Data.SqlClient;
 using System.Linq;
 using System.Threading.Tasks;
+using Web.Data.Migrations;
 using Web.Data.Models;
 using Web.Data.Models.Identity;
+using Web.Helpers;
 using Z.EntityFramework.Plus;
 
 namespace Web.Data
@@ -24,14 +26,14 @@ namespace Web.Data
         }
 
 
-        public async Task<StaticSensor> AddStaticSensorAsync(string ipAddress, double latitude, double longitude)
+        public async Task<StaticSensor> AddStaticSensorAsync(string apiKey, double latitude, double longitude)
         {
             using (var _context = GetFreshContext())
             {
                 var sensor = new StaticSensor
                 {
                     Readings = new List<StaticSensorReading>(),
-                    IPAddress = ipAddress,
+                    ApiKey = apiKey,
                 };
                 sensor.Latitude = latitude;
                 sensor.Longitude = longitude;
@@ -41,13 +43,13 @@ namespace Web.Data
             };
         }
 
-        public async Task<PortableSensor> AddPortableSensorAsync(string ipAddress)
+        public async Task<PortableSensor> AddPortableSensorAsync(string apiKey)
         {
             using (var _context = GetFreshContext())
             {
                 var sensor = new PortableSensor
                 {
-                    IPAddress = ipAddress
+                    ApiKey = apiKey
                 };
                 _context.PortableSensors.Add(sensor);
                 await _context.SaveChangesAsync();
@@ -111,7 +113,7 @@ namespace Web.Data
                       .StaticSensors.AsNoTracking().Where(f => f.IsActive && f.IsVisible && !f.IsDeleted).Select(f => new StaticSensor
                       {
                           Id = f.Id,
-                          IPAddress = f.IPAddress,
+                          ApiKey = f.ApiKey,
                           IsActive = f.IsActive,
                           IsDeleted = f.IsDeleted,
                           IsVisible = f.IsVisible,
@@ -136,7 +138,7 @@ namespace Web.Data
                     query = query.Select(f => new StaticSensor
                     {
                         Id = f.Id,
-                        IPAddress = f.IPAddress,
+                        ApiKey = f.ApiKey,
                         IsActive = f.IsActive,
                         IsDeleted = f.IsDeleted,
                         IsVisible = f.IsVisible,
@@ -160,6 +162,14 @@ namespace Web.Data
             }
         }
 
+        public async Task<Sensor> GetSensorByApiKeyAsync(string apiKey)
+        {
+            using (var context = GetFreshContext())
+            {
+                return await context.Sensors.AsNoTracking().FirstOrDefaultAsync(f => f.ApiKey == apiKey && f.IsActive && !f.IsDeleted);
+            }
+        }
+
         public async Task<StaticSensor> GetStaticSensorByIdAsync(int id, bool withReadings = false)
         {
             using (var context = GetFreshContext())
@@ -171,7 +181,7 @@ namespace Web.Data
                     query = query.Select(f => new StaticSensor
                     {
                         Id = f.Id,
-                        IPAddress = f.IPAddress,
+                        ApiKey = f.ApiKey,
                         IsActive = f.IsActive,
                         IsDeleted = f.IsDeleted,
                         IsVisible = f.IsVisible,
@@ -236,6 +246,7 @@ namespace Web.Data
                     try
                     {
                         _context.Database.Migrate();
+                        Seed(_context);
 
                     }
                     catch (SqlException exception) when (exception.Number == 1801)
@@ -309,6 +320,21 @@ namespace Web.Data
                     RoleId = supervisorRole.Id,
                     UserId = userAdmin.Id
                 });
+                context.SaveChanges();
+            }
+        }
+
+        private void Seed(DataContext context)
+        {
+            var appliedMigrations = context.Database.GetAppliedMigrations();
+            if (appliedMigrations.Last().Contains(nameof(AddApiKey)))
+            {
+                var sensors = context.Sensors.Where(f=>f.ApiKey == null).ToList();
+                foreach (var sensor in sensors)
+                {
+                    sensor.ApiKey = CryptoHelper.GenerateApiKey();
+                    context.Entry(sensor).State = EntityState.Modified;
+                }
                 context.SaveChanges();
             }
         }

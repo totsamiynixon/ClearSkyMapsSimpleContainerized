@@ -1,9 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Web;
+﻿using System.Collections.Generic;
 
-namespace Web.Models.Api.Subscribers
+namespace Web.Areas.PWA.Models.Api.Subscribers
 {
     public class UpdateSubscriptionModel
     {
