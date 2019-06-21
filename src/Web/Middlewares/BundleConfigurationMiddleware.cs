@@ -26,6 +26,7 @@ namespace Web.Middlewares
                         .Include("/pwa/js/libs/vue-router.js")
                         .Include("/pwa/js/libs/signalr.min.js")
                         .Include("/pwa/js/front/main.js")
+                        .Include("/pwa/js/front/vue-filters.js")
                         .Include("/pwa/js/front/readings.js")
                         .Include("/pwa/js/front/offline.js")
                         .Include("/pwa/js/front/app.js");
