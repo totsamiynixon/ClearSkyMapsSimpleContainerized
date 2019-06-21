@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using AutoMapper;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Web.Areas.PWA.Models.Sensors;
 using Web.Data;
 using Web.Data.Models;
 using Web.Helpers.Interfaces;
@@ -26,7 +27,7 @@ namespace Web.Areas.PWA.Controllers.API
         private static IMapper _mapper = new Mapper(new MapperConfiguration(x =>
         {
             x.CreateMap<StaticSensor, StaticSensorModel>();
-            x.CreateMap<Reading, StaticSensorReadingModel>();
+            x.CreateMap<Reading, SensorDataModel>();
         }));
 
         [HttpGet]

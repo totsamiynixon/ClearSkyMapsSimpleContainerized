@@ -55,7 +55,6 @@ namespace Web
             services.AddTransient<IRepository, Repository>();
             services.AddTransient<IPollutionCalculator, PollutionCalculator>();
             services.AddTransient<ISensorCacheHelper, SensorCacheHelper>();
-            services.AddTransient<ISensorConnectionHelper, SensorWebSocketConnectionHelper>();
             services.AddTransient<IPWADispatchHelper, PWASignalrDispatchHelper>();
             services.AddTransient<IAdminDispatchHelper, AdminSignalRHubDispatchHelper>();
             services.AddTransient<IPWABootstrapper, PWAFileCompilerBootstrapper>();
@@ -112,6 +111,7 @@ namespace Web
             services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
              .AddCookie(options =>
                 {
+                    options.Cookie.Name = "CSM.Auth";
                     options.LoginPath = new PathString("/Admin/Account/Login");
                 });
 
@@ -129,9 +129,9 @@ namespace Web
             {
                 return _scopeFactory.CreateScope().ServiceProvider;
             };
-            //ConfigureLogging(loggerFactory);
+            ConfigureLogging(loggerFactory);
             app.UseMiddleware<ExceptionHandlerMiddleware>();
-            app.UseHttpsRedirection();
+           // app.UseHttpsRedirection();
             app.UseStaticFiles();
             app.UseCookiePolicy();
             app.UseAuthentication();

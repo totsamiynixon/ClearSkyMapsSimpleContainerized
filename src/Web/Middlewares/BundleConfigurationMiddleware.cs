@@ -26,6 +26,7 @@ namespace Web.Middlewares
                         .Include("/pwa/js/libs/vue-router.js")
                         .Include("/pwa/js/libs/signalr.min.js")
                         .Include("/pwa/js/front/main.js")
+                        .Include("/pwa/js/front/vue-filters.js")
                         .Include("/pwa/js/front/readings.js")
                         .Include("/pwa/js/front/offline.js")
                         .Include("/pwa/js/front/app.js");
@@ -44,6 +45,7 @@ namespace Web.Middlewares
                     .Include("/admin/theme/js/plugins/bootstrap-notify.js")
                     .Include("/admin/theme/js/paper-dashboard.min.js")
                     .Include("/admin/js/libs/signalr.min.js")
+                    .Include("/admin/js/libs/moment.js")
                     .Include("/admin/js/libs/vue.js")
                     .Include("/admin/js/front/main.js")
                     .Include("/admin/js/front/pages/sensors.js");

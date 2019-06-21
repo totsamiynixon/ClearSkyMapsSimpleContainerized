@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-
-namespace Web.Helpers.Interfaces
+﻿namespace Web.Helpers.Interfaces
 {
     public interface ISettingsProvider
     {
@@ -28,5 +23,7 @@ namespace Web.Helpers.Interfaces
         string IdentityConnectionString { get; }
 
         string YandexMapsJavaScriptAPIKey { get; }
+
+        string ServerIP { get; }
     }
 }

@@ -7,6 +7,6 @@ namespace Web.Areas.Admin.Models.Sensors
 {
     public class CreatePortableSensorModel
     {
-        public string IPAddress { get; set; }
+        public string ApiKey { get; set; }
     }
 }

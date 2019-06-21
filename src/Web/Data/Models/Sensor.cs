@@ -13,6 +13,6 @@ namespace Web.Data.Models
 
         public bool IsActive { get; set; }
 
-        public string IPAddress { get; set; }
+        public string ApiKey { get; set; }
     }
 }

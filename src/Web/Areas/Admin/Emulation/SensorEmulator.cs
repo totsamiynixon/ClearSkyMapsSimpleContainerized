@@ -1,66 +1,74 @@
-﻿using Fleck;
-using Microsoft.Extensions.Caching.Memory;
-using Newtonsoft.Json;
+﻿using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
 using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Net;
 using System.Net.Http;
-using System.Text;
-using System.Threading.Tasks;
-using System.Timers;
-using System.Web;
-using Web.Enums;
-using Web.Helpers;
-using Web.SensorActions.Input;
-using Web.SensorActions.Output;
-using WebSocketSharp;
+using Web.Areas.Admin.Emulation.Models;
+using Web.Data.Models;
 
 namespace Web.Areas.Admin.Emulation
 {
     public class SensorEmulator
     {
         private readonly string _sensorGuid;
-        private readonly string _ip;
-        private readonly string _port;
-        private (double latitude, double longitude)? _location;
-        private IWebSocketConnection _connection;
+        private readonly string _apiKey;
+        private readonly string _serverIp;
+        private readonly System.Timers.Timer _timer;
 
-        private IMemoryCache MemCache => (Startup.ServiceProvider().GetService(typeof(IMemoryCache)) as IMemoryCache);
-
+        private static readonly HttpClient _httpClient = new HttpClient();
         private static readonly Random _emulatorRandom = new Random();
 
 
-        public SensorEmulator(string ip, string port, string guid)
+        public SensorEmulator(string guid, string serverIp, string apiKey, Type type)
         {
             _sensorGuid = guid;
-            _ip = ip;
-            _port = port;
+            _apiKey = apiKey;
+            _serverIp = serverIp;
+            var location = GetLocation();
+            Latitude = location.randomLatitude;
+            Longitude = location.randomLongitude;
+            _timer = new System.Timers.Timer();
+            if (type == typeof(StaticSensor))
+            {
+                _timer.Interval = 10000;
+            }
+            else if (type == typeof(PortableSensor))
+            {
+                _timer.Interval = 500;
+            }
+            else
+            {
+                throw new InvalidCastException("Provided sensor is not portable or static");
+            }
+            _timer.Elapsed += async (s, e) =>
+            {
+                try
+                {
+                    var data = GetSensorData();
+                    var response = await _httpClient.PostAsJsonAsync($"http://{_serverIp}/api/integration", data);
+                }
+                catch (Exception ex)
+                {
+
+                }
+            };
         }
 
+        public bool IsPowerOn => _timer.Enabled;
 
-        public SensorState State { get; private set; }
+        public string ApiKey => _apiKey;
 
-        public bool IsPowerOn { get; private set; }
+        public double Latitude { get; private set; }
+
+        public double Longitude { get; private set; }
 
         public void PowerOn()
         {
-            RestoreState();
-            InitializeWebSockets();
-            IsPowerOn = true;
+            _timer.Start();
         }
 
         public void PowerOff()
         {
-
-            State = null;
-            if (_connection != null)
-            {
-                _connection.Close();
-            }
-            IsPowerOn = false;
+            _timer.Stop();
         }
 
         public string GetGuid()
@@ -68,85 +76,13 @@ namespace Web.Areas.Admin.Emulation
             return _sensorGuid;
         }
 
-        public string GetIp()
-        {
-            return _ip;
-        }
-
-        public string GetPort()
-        {
-            return _port;
-        }
-
-        public (double latitude, double longitude) GetCoordinates()
-        {
-            if (!_location.HasValue)
-            {
-                _location = GetLocation();
-            }
-            return _location.Value;
-        }
-
         #region Private
-
-
-        private void InitializeWebSockets()
-        {
-            var server = new WebSocketServer($"ws://{_ip}:{_port}");
-            server.Start(socket =>
-            {
-                socket.OnOpen = () =>
-                {
-
-                };
-                socket.OnClose = () => Console.WriteLine("Close!");
-                socket.OnMessage = async (data) => await HandleMessageAsync(data, socket);
-            });
-        }
-
-        private void RestoreState()
-        {
-            State = MemCache.Get<SensorState>(_sensorGuid) ?? new SensorState();
-            if (!_location.HasValue)
-            {
-                _location = GetLocation();
-            }
-            State.Latitude = _location.Value.latitude;
-            State.Longitude = _location.Value.longitude;
-        }
-
-        private async Task HandleMessageAsync(string data, IWebSocketConnection socket)
-        {
-            dynamic json = JsonConvert.DeserializeObject(data);
-            if (json.type == OuputSensorActionType.PushState)
-            {
-                SetState(JsonConvert.DeserializeObject<PushStateActionPayload>(JsonConvert.SerializeObject(json.payload)));
-            }
-            if (json.type == OuputSensorActionType.PullReadings)
-            {
-                var action = GetPushReadingsAction();
-                await socket.Send(SerializeJson(action));
-                return;
-            }
-            if (json.type == OuputSensorActionType.PullCoordinates)
-            {
-                var action = GetPushCoordinatesAction();
-                await socket.Send(SerializeJson(action));
-            }
-
-        }
-
-        private void SetState(PushStateActionPayload payload)
-        {
-            State.IsActive = payload.IsActive;
-            MemCache.Set(_sensorGuid, State);
-        }
 
         #region Helpers
 
-        private PushReadingsAction GetPushReadingsAction()
+        private SensorDataModel GetSensorData()
         {
-            var action = new PushReadingsAction(new PushReadingsActionPayload
+            return new SensorDataModel
             {
                 CO2 = (float)Math.Round((float)_emulatorRandom.NextDouble() * 350, 3),
                 LPG = (float)Math.Round((float)_emulatorRandom.NextDouble() * 350, 3),
@@ -156,19 +92,11 @@ namespace Web.Areas.Admin.Emulation
                 Temp = (float)Math.Round((float)_emulatorRandom.NextDouble() * 40, 3),
                 Preassure = (float)Math.Round((float)_emulatorRandom.NextDouble() * 20, 3),
                 Hum = (float)Math.Round((float)_emulatorRandom.NextDouble() * 40, 3),
-                Created = DateTime.UtcNow - new TimeSpan(0, 0, 10)
-            });
-            return action;
-        }
-
-        private PushCoordinatesAction GetPushCoordinatesAction()
-        {
-            var action = new PushCoordinatesAction(new PushCoordinatesActionPayload
-            {
-                Latitude = _location.Value.latitude,
-                Longitude = _location.Value.longitude
-            });
-            return action;
+                Created = DateTime.UtcNow - new TimeSpan(0, 0, 10),
+                Latitude = Latitude,
+                Longitude = Longitude,
+                ApiKey = _apiKey
+            };
         }
 
         private static string SerializeJson(object json)
@@ -204,7 +132,7 @@ namespace Web.Areas.Admin.Emulation
 
             double foundLongitude = new_x + longitude;
             double foundLatitude = y + latittude;
-            return (foundLongitude, foundLatitude);
+            return (foundLatitude, foundLongitude);
         }
     }
     #endregion

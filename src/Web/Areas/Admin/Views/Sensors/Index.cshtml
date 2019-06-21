@@ -44,7 +44,7 @@
                                             Id
                                         </th>
                                         <th>
-                                            IP адресс
+                                            Ключ
                                         </th>
                                         <th>
                                             Видимость
@@ -52,9 +52,9 @@
                                         <th>
                                             Статус
                                         </th>
-                                        <th>
+                                        @*<th>
                                             Подключение
-                                        </th>
+                                        </th>*@
                                         <th>
                                             Действия
                                         </th>
@@ -68,16 +68,13 @@
                                                 @sensor.Id
                                             </td>
                                             <td>
-                                                @sensor.IPAddress
+                                                @sensor.ApiKey
                                             </td>
                                             <td>
                                                 @(sensor.IsVisible ? "Видимый" : "Скрыт")
                                             </td>
                                             <td>
                                                 @(sensor.IsActive ? "Активен" : "Деактивирован")
-                                            </td>
-                                            <td>
-                                                @(sensor.IsConnected ? "Подключен" : "Отключен")
                                             </td>
                                             <td>
                                                 <a class="dropdown-toggle" href="javascript:void(0);" id="static_edit_button_@sensor.Id" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
@@ -88,12 +85,6 @@
                                                 <div class="dropdown-menu dropdown-menu-right sensor-actions" aria-labelledby="stati_edit_button_@sensor.Id">
                                                     <a class="dropdown-item" href="sensors/changeActivation?sensorId=@(sensor.Id)">Активировать/Деактивировать</a>
                                                     <a class="dropdown-item" href="sensors/ChangeVisibilityStaticSensor?sensorId=@(sensor.Id)">Показать/скрыть</a>
-                                                    @using (Html.BeginForm($"{(!sensor.IsConnected ? "Connect" : "Disconnect")}", "Sensors", new { area = "Admin", ReturnUrl = ViewBag.ReturnUrl }, FormMethod.Post, null, new { @class = "form-horizontal", role = "form" }))
-                                                    {
-                                                        @Html.ValidationSummary(true, "", new { @class = "text-danger" })
-                                                        @Html.Hidden(nameof(sensor.Id), sensor.Id)
-                                                        <button class="dropdown-item">@(!sensor.IsConnected ? "Подключить" : "Отключить")</button>
-                                                    }
                                                     <a class="dropdown-item" href="sensors/delete?sensorId=@(sensor.Id)">Удалить</a>
                                                 </div>
                                             </td>
@@ -119,13 +110,10 @@
                                             Id
                                         </th>
                                         <th>
-                                            IP адресс
+                                            ApiKey
                                         </th>
                                         <th>
                                             Статус
-                                        </th>
-                                        <th>
-                                            Подключение
                                         </th>
                                         <th>
                                             Действия
@@ -140,13 +128,10 @@
                                                 @sensor.Id
                                             </td>
                                             <td>
-                                                @sensor.IPAddress
+                                                @sensor.ApiKey
                                             </td>
                                             <td>
                                                 @(sensor.IsActive ? "Активен" : "Деактивирован")
-                                            </td>
-                                            <td>
-                                                @(sensor.IsConnected ? "Подключен" : "Отключен")
                                             </td>
                                             <td>
                                                 <a class="dropdown-toggle" href="javascript:void(0);" id="portable_edit_button_@sensor.Id" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
@@ -156,12 +141,6 @@
                                                 </a>
                                                 <div class="dropdown-menu dropdown-menu-right sensor-actions" aria-labelledby="portable_edit_button_@sensor.Id">
                                                     <a class="dropdown-item" href="sensors/changeActivation?sensorId=@(sensor.Id)">Активировать/Деактивировать</a>
-                                                    @using (Html.BeginForm($"{(!sensor.IsConnected ? "Connect" : "Disconnect")}", "Sensors", new { area = "Admin", ReturnUrl = ViewBag.ReturnUrl }, FormMethod.Post, null, new { @class = "form-horizontal", role = "form" }))
-                                                    {
-                                                        @Html.ValidationSummary(true, "", new { @class = "text-danger" })
-                                                        @Html.Hidden(nameof(sensor.Id), sensor.Id)
-                                                        <button class="dropdown-item">@(!sensor.IsConnected ? "Подключить" : "Отключить")</button>
-                                                    }
                                                     <a class="dropdown-item" href="sensors/portableSensorDetails?sensorId=@(sensor.Id)">Детали</a>
                                                     <a class="dropdown-item" href="sensors/delete?sensorId=@(sensor.Id)">Удалить</a>
                                                 </div>

@@ -25,10 +25,10 @@ namespace Web.Data.Migrations
                         .ValueGeneratedOnAdd()
                         .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
+                    b.Property<string>("ApiKey");
+
                     b.Property<string>("Discriminator")
                         .IsRequired();
-
-                    b.Property<string>("IPAddress");
 
                     b.Property<bool>("IsActive");
 
