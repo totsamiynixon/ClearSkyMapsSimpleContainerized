@@ -9,7 +9,8 @@ try
         "Emulation:Enabled" = $env:EMULATION_ENABLED;
         "Application:Environment" = $env:ASPNETCORE_ENVIRONMENT;
         "Application:Version" = $env:APPLICATION_VERSION;
-        "Yandex:MapsJavaScriptAPIKey" = $env:YANDEX__MAPS_JAVASCRIPT_API_KEY
+        "Yandex:MapsJavaScriptAPIKey" = $env:YANDEX__MAPS_JAVASCRIPT_API_KEY;
+        "Server:IP" = $env:SERVER__URL
    }
    $jsonRequest | ConvertTo-Json -depth 100 | Out-File $path;
 }

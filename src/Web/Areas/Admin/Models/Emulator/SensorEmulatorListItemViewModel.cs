@@ -17,5 +17,7 @@ namespace Web.Areas.Admin.Models.Emulator
         public string ApiKey { get; set; }
 
         public string Guid { get; set; }
+
+        public string Type { get; set; }
     }
 }
