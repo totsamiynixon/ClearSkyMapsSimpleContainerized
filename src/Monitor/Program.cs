@@ -1,26 +1,24 @@
 ﻿using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System;
-using System.Collections.Generic;
-using System.Collections.Specialized;
 using System.IO.Ports;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
-using System.Text;
 using System.Threading;
-using System.Threading.Tasks;
+using System.Device.Location;
 
 namespace Monitor
 {
     class Program
     {
-        private const string URL = "URL HERE";
+        private const string URL = "";
 
         private static readonly HttpClient client = new HttpClient();
 
         static void Main(string[] args)
         {
+            Set_GPS();
             var serialPort1 = new SerialPort();
             serialPort1.PortName = "COM3"; //Указываем наш порт - в данном случае COM1.
             serialPort1.BaudRate = 9600; //указываем скорость.
@@ -99,8 +97,8 @@ namespace Monitor
                     CO = float.Parse(groupes[6]),
                     CH4 = float.Parse(groupes[7]),
                     Dust = float.Parse(groupes[8]),
-                    Longitude = float.Parse(groupes[9]),
-                    Latitude = float.Parse(groupes[10]),
+                    Longitude = Longitude,
+                    Latitude = Latitude,
                     Created = DateTime.Now
 
                 };
@@ -109,6 +107,41 @@ namespace Monitor
             {
                 return null;
             }
+
         }
+
+        #region Geolocation
+
+        private static double Latitude { get; set; }
+
+        private static double Longitude { get; set; }
+
+        private static void Set_GPS()
+        {
+            GeoCoordinateWatcher watcher;
+
+            watcher = new GeoCoordinateWatcher(GeoPositionAccuracy.Default)
+            {
+                MovementThreshold = 20
+            };
+
+            watcher.PositionChanged += (o, e) =>
+            {
+
+                var epl = e.Position.Location;
+
+                // Access the position information thusly:
+                Latitude = epl.Latitude;
+                Longitude = epl.Longitude;
+                epl.Altitude.ToString();
+                epl.HorizontalAccuracy.ToString();
+                epl.VerticalAccuracy.ToString();
+                epl.Course.ToString();
+                epl.Speed.ToString();
+                e.Position.Timestamp.LocalDateTime.ToString();
+            };
+            watcher.Start();
+        }
+        #endregion
     }
 }

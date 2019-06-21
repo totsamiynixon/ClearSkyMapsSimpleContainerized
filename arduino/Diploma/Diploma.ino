@@ -11,7 +11,7 @@
 
 
 //CONSTANTS
-const String API_KEY = "API_KEY;
+const String API_KEY = "";
 const String SERVER_URL = "SERVER_URL";
 const double MOL_CO2 = 44.01;
 const float MOL_LPG = 0;
