@@ -21,6 +21,7 @@ for:
       FIREBASE_CLOUD_MESSAGING__MESSAGING_SENDER_ID: $(PROD___FIREBASE_CLOUD_MESSAGING__MESSAGING_SENDER_ID)
       YANDEX__MAPS_JAVASCRIPT_API_KEY: $(PROD___YANDEX__MAPS_JAVASCRIPT_API_KEY)
       CONNECTION_STRING: $(PROD___CONNECTION_STRING)
+      SERVER__URL: $(PROD___SERVER__URL)
       EMULATION_ENABLED: false
     build_script:
       - cmd: dotnet publish src/ClearSkyMapsSimple.sln -c Release -o ../../release -r win10-x64
@@ -51,6 +52,7 @@ for:
       CONNECTION_STRING: $(STAGING___CONNECTION_STRING)
       EMULATION_ENABLED: true
       EMULATION_CONNECTION_STRING: $(STAGING__EMULATION_CONNECTION_STRING)
+      SERVER__URL: $(STAGING___SERVER__URL)
     build_script:
       - cmd: dotnet publish src/ClearSkyMapsSimple.sln -c Release -o ../../release -r win10-x64
       - ps:  .\deploy\generate-config.ps1 -path  .\release\config.json

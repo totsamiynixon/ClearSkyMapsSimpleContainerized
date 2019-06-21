@@ -27,7 +27,9 @@ namespace Web.Areas.Admin.Controllers
             .ForMember(f => f.Longitude, m => m.MapFrom((s, d) => s.Longitude))
             .ForMember(f => f.Guid, m => m.MapFrom(s => s.GetGuid()))
             .ForMember(f => f.IsOn, m => m.MapFrom(s => s.IsPowerOn))
-            .ForMember(f => f.ApiKey, m => m.MapFrom(s => s.ApiKey));
+            .ForMember(f => f.ApiKey, m => m.MapFrom(s => s.ApiKey))
+            .ForMember(f => f.Type, m => m.MapFrom(s => s.SensorType.Name))
+            ;
 
         }));
 

@@ -14,6 +14,7 @@ namespace Web.Areas.Admin.Emulation
         private readonly string _serverIp;
         private readonly System.Timers.Timer _timer;
 
+
         private static readonly HttpClient _httpClient = new HttpClient();
         private static readonly Random _emulatorRandom = new Random();
 
@@ -23,6 +24,7 @@ namespace Web.Areas.Admin.Emulation
             _sensorGuid = guid;
             _apiKey = apiKey;
             _serverIp = serverIp;
+            SensorType = type;
             var location = GetLocation();
             Latitude = location.randomLatitude;
             Longitude = location.randomLongitude;
@@ -52,6 +54,7 @@ namespace Web.Areas.Admin.Emulation
                 }
             };
         }
+        public Type SensorType { get; private set; }
 
         public bool IsPowerOn => _timer.Enabled;
 

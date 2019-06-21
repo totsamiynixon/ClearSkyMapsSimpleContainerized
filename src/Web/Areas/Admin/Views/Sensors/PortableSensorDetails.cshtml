@@ -99,13 +99,15 @@
 </script>
 @section Scripts {
     <!--  Yandex Maps Plugin    -->
-    <script src="https://api-maps.yandex.ru/2.1/?lang=ru_RU&amp;apikey=@(SettingsProvider.YandexMapsJavaScriptAPIKey)" type="text/javascript"></script>
+    <script src="https://api-maps.yandex.ru/2.1/?lang=ru_RU&amp;apikey=@(SettingsProvider.YandexMapsJavaScriptAPIKey)&onload=initPortableSensorPage" type="text/javascript"></script>
     <script src="~/admin/js/front/pages/portableSensorDetails.js"></script>
     <script>
-        jQuery(function ($) {
-            window.CSM_Admin.getModule("PortableSensorDetails")({
-                id: @Model
+        function initPortableSensorPage() {
+            jQuery(function ($) {
+                window.CSM_Admin.getModule("PortableSensorDetails")({
+                    id: @Model
             })
-        });
+            });
+        }
     </script>
 }
