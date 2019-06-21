@@ -129,9 +129,9 @@ namespace Web
             {
                 return _scopeFactory.CreateScope().ServiceProvider;
             };
-            //ConfigureLogging(loggerFactory);
+            ConfigureLogging(loggerFactory);
             app.UseMiddleware<ExceptionHandlerMiddleware>();
-            app.UseHttpsRedirection();
+           // app.UseHttpsRedirection();
             app.UseStaticFiles();
             app.UseCookiePolicy();
             app.UseAuthentication();
