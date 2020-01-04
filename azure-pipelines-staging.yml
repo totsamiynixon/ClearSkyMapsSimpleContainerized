@@ -44,22 +44,27 @@ steps:
     platform: '$(buildPlatform)'
     configuration: '$(buildConfiguration)'
 
+- task: DotNetCoreCLI@2
+  inputs:
+    command: publish
+    publishWebProjects: True
+    arguments: '--configuration $(BuildConfiguration) --output $(Build.ArtifactStagingDirectory)'
+    zipAfterPublish: True
+
 - task: PowerShell@2
   displayName: Transform Configs
   inputs:
     filePath: .\deploy\generate-config.ps1
-    arguments: -path  .\release\config.json
+    arguments: -path  $(Build.ArtifactStagingDirectory)\config.json
   
 - task: PowerShell@2
   displayName: Transform Web Configs
   inputs:
     filePath: .\deploy\webconfig-transform.ps1
-    arguments: -path  .\release\web.config
+    arguments: -path $(Build.ArtifactStagingDirectory)\web.config
 
-- task: AzureWebApp@1
-  displayName: Azure App Service Deploy
+# this code takes all the files in $(Build.ArtifactStagingDirectory) and uploads them as an artifact of your build.
+- task: PublishBuildArtifacts@1
   inputs:
-    azureSubscription: $(AZURE_SUBSCRIPTION)
-    appType: webApp
-    appName: $(AZURE_APP_NAME)
-    package: $(System.ArtifactsDirectory)/**/*.zip
+    pathtoPublish: '$(Build.ArtifactStagingDirectory)' 
+    artifactName: 'ClearSkyMapsSimpleStaging'
