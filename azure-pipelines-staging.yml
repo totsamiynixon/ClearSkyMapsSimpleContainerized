@@ -16,12 +16,15 @@ variables:
 
 steps:
 - task: NuGetToolInstaller@1
+  displayName: Install NuGet Tools
 
 - task: NuGetCommand@2
+  displayName: Restore NuGet Packages
   inputs:
     restoreSolution: '$(solution)'
 
 - task: VSBuild@1
+  displayName: Build Solution
   inputs:
     solution: '$(solution)'
     msbuildArgs: '/p:DeployOnBuild=true /p:WebPublishMethod=Package /p:PackageAsSingleFile=true /p:SkipInvalidConfigurations=true /p:PackageLocation="$(build.artifactStagingDirectory)"'
@@ -29,6 +32,27 @@ steps:
     configuration: '$(buildConfiguration)'
 
 - task: VSTest@2
+  displayName: Run Tests
   inputs:
     platform: '$(buildPlatform)'
     configuration: '$(buildConfiguration)'
+
+- task: PowerShell@2
+  displayName: Transform Configs
+  inputs:
+    filePath: .\deploy\generate-config.ps1
+    arguments: -path  .\release\config.json
+  
+- task: PowerShell@2
+  displayName: Transform Web Configs
+  inputs:
+    filePath: .\deploy\webconfig-transform.ps1
+    arguments: -path  .\release\web.config
+
+- task: AzureWebApp@1
+  displayName: Azure App Service Deploy
+  inputs:
+    azureSubscription: $(azureSubscription)
+    appType: webApp
+    appName: 'ClearSkyMapsSimpleStaging'
+    package: $(System.ArtifactsDirectory)/**/*.zip
