@@ -22,9 +22,6 @@ using Web.Areas.PWA.Helpers.Implementations;
 using Web.Areas.Admin.Helpers.Interfaces;
 using Web.Areas.Admin.Helpers.Implementations;
 using Web.Areas.PWA;
-using Web.Logging;
-using System.IO;
-using Microsoft.AspNetCore.Mvc.Razor;
 
 namespace Web
 {
@@ -46,8 +43,6 @@ namespace Web
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-
-
             services.AddTransient<UserManager<User>>();
             services.AddTransient<RoleManager<User>>();
 
@@ -57,7 +52,6 @@ namespace Web
             services.AddTransient<ISensorCacheHelper, SensorCacheHelper>();
             services.AddTransient<IPWADispatchHelper, PWASignalrDispatchHelper>();
             services.AddTransient<IAdminDispatchHelper, AdminSignalRHubDispatchHelper>();
-            services.AddTransient<IPWABootstrapper, PWAFileCompilerBootstrapper>();
 
             services.Configure<CookiePolicyOptions>(options =>
             {
@@ -67,33 +61,33 @@ namespace Web
             });
 
             services.AddDbContext<DataContext>(options =>
-            {
-
-                var scopeFactory = services
-                   .BuildServiceProvider()
-                   .GetRequiredService<IServiceScopeFactory>();
-
-                using (var scope = scopeFactory.CreateScope())
                 {
+                    var scopeFactory = services
+                        .BuildServiceProvider()
+                        .GetRequiredService<IServiceScopeFactory>();
+
+                    using (var scope = scopeFactory.CreateScope())
                     {
-                        options.UseSqlServer(
-                            ((ISettingsProvider)scope.ServiceProvider.GetService(typeof(ISettingsProvider))).ConnectionString);
+                        {
+                            options.UseSqlServer(
+                                ((ISettingsProvider) scope.ServiceProvider.GetService(typeof(ISettingsProvider)))
+                                .ConnectionString);
+                        }
                     }
-                }
-            }, ServiceLifetime.Transient)
-            ;
+                }, ServiceLifetime.Transient)
+                ;
             services.AddDbContext<IdentityDbContext>(options =>
             {
-
                 var scopeFactory = services
-                   .BuildServiceProvider()
-                   .GetRequiredService<IServiceScopeFactory>();
+                    .BuildServiceProvider()
+                    .GetRequiredService<IServiceScopeFactory>();
 
                 using (var scope = scopeFactory.CreateScope())
                 {
                     {
                         options.UseSqlServer(
-                            ((ISettingsProvider)scope.ServiceProvider.GetService(typeof(ISettingsProvider))).IdentityConnectionString);
+                            ((ISettingsProvider) scope.ServiceProvider.GetService(typeof(ISettingsProvider)))
+                            .IdentityConnectionString);
                     }
                 }
             }, ServiceLifetime.Transient);
@@ -109,7 +103,7 @@ namespace Web
             services.AddMemoryCache();
 
             services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
-             .AddCookie(options =>
+                .AddCookie(options =>
                 {
                     options.Cookie.Name = "CSM.Auth";
                     options.LoginPath = new PathString("/Admin/Account/Login");
@@ -123,15 +117,9 @@ namespace Web
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IHostingEnvironment env, ILoggerFactory loggerFactory)
         {
-
             _scopeFactory = app.ApplicationServices.GetRequiredService<IServiceScopeFactory>();
-            ServiceProvider = () =>
-            {
-                return _scopeFactory.CreateScope().ServiceProvider;
-            };
-            ConfigureLogging(loggerFactory);
+            ServiceProvider = () => { return _scopeFactory.CreateScope().ServiceProvider; };
             app.UseMiddleware<ExceptionHandlerMiddleware>();
-           // app.UseHttpsRedirection();
             app.UseStaticFiles();
             app.UseCookiePolicy();
             app.UseAuthentication();
@@ -150,14 +138,6 @@ namespace Web
             app.UsePWAArea(env);
             app.InitializeDatabase();
             app.AppBundles();
-        }
-
-
-        private void ConfigureLogging(ILoggerFactory loggerFactory)
-        {
-            var errorPath = Path.Combine(Directory.GetCurrentDirectory(), "logs/errors.txt");
-            var infoPath = Path.Combine(Directory.GetCurrentDirectory(), "logs/info.txt");
-            loggerFactory.AddFile(errorPath, infoPath);
         }
     }
 }
