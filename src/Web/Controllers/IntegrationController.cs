@@ -41,8 +41,8 @@ namespace Web.Controllers
             _sensorCacheHelper = sensorCacheHelper;
         }
 
-        //[Route("static")]
-        [HttpPost]
+        [Route("static")]
+/*        [HttpPost]
         public async Task<IActionResult> PortDataAsync(SensorDataModel model)
         {
             var sensor = await _repository.GetSensorByApiKeyAsync(model.ApiKey);
@@ -67,75 +67,75 @@ namespace Web.Controllers
                 _pwaDispatchHelper.DispatchReadingsForStaticSensor(sensor.Id, pollutionLevel, reading);
             }
             return Ok();
+        }*/
+
+
+        [HttpPost]
+        public async Task<IActionResult> PortDataAsync()
+        {
+
+            string content = string.Empty;
+            using (var reader = new StreamReader(Request.Body))
+            {
+                content = reader.ReadToEnd();
+            }
+            var model = GetModelFromString(content);
+            if (model == null)
+            {
+                return BadRequest("Invalid Data");
+            }
+            var sensor = await _repository.GetSensorByApiKeyAsync(model.ApiKey);
+            if (sensor == null)
+            {
+                return NotFound();
+            }
+            if (sensor is PortableSensor)
+            {
+                var reading = _mapper.Map<SensorDataModel, Reading>(model);
+                _adminDispatchHelper.DispatchReadingsForPortableSensor(sensor.Id, reading);
+                _adminDispatchHelper.DispatchCoordinatesForPortableSensor(sensor.Id, model.Latitude, model.Longitude);
+            }
+            else if (sensor is StaticSensor)
+            {
+                var reading = _mapper.Map<SensorDataModel, StaticSensorReading>(model);
+                reading.StaticSensorId = sensor.Id;
+                await _repository.AddReadingAsync(reading);
+                await _sensorCacheHelper.UpdateSensorCacheWithReadingAsync(reading);
+                _adminDispatchHelper.DispatchReadingsForStaticSensor(sensor.Id, reading);
+                var pollutionLevel = await _sensorCacheHelper.GetPollutionLevelAsync(sensor.Id);
+                _pwaDispatchHelper.DispatchReadingsForStaticSensor(sensor.Id, pollutionLevel, reading);
+            }
+            return Ok();
         }
 
 
-        //[HttpPost]
-        //public async Task<IActionResult> PortDataAsync()
-        //{
-
-        //    string content = string.Empty;
-        //    using (var reader = new StreamReader(Request.Body))
-        //    {
-        //        content = reader.ReadToEnd();
-        //    }
-        //    var model = GetModelFromString(content);
-        //    if (model == null)
-        //    {
-        //        return BadRequest("Invalid Data");
-        //    }
-        //    var sensor = await _repository.GetSensorByApiKeyAsync(model.ApiKey);
-        //    if (sensor == null)
-        //    {
-        //        return NotFound();
-        //    }
-        //    if (sensor is PortableSensor)
-        //    {
-        //        var reading = _mapper.Map<SensorDataModel, Reading>(model);
-        //        _adminDispatchHelper.DispatchReadingsForPortableSensor(sensor.Id, reading);
-        //        _adminDispatchHelper.DispatchCoordinatesForPortableSensor(sensor.Id, model.Latitude, model.Longitude);
-        //    }
-        //    else if (sensor is StaticSensor)
-        //    {
-        //        var reading = _mapper.Map<SensorDataModel, StaticSensorReading>(model);
-        //        reading.StaticSensorId = sensor.Id;
-        //        await _repository.AddReadingAsync(reading);
-        //        await _sensorCacheHelper.UpdateSensorCacheWithReadingAsync(reading);
-        //        _adminDispatchHelper.DispatchReadingsForStaticSensor(sensor.Id, reading);
-        //        var pollutionLevel = await _sensorCacheHelper.GetPollutionLevelAsync(sensor.Id);
-        //        _pwaDispatchHelper.DispatchReadingsForStaticSensor(sensor.Id, pollutionLevel, reading);
-        //    }
-        //    return Ok();
-        //}
-
-
-        //private SensorDataModel GetModelFromString(string data)
-        //{
-        //    try
-        //    {
-        //        var deserialized = JsonConvert.DeserializeObject<JObject>(data);
-        //        var serializedData = deserialized["data"].ToString();
-        //        var groupes = serializedData.Split("; ").ToArray();
-        //        return new SensorDataModel
-        //        {
-        //            ApiKey = groupes[0],
-        //            Temp = float.Parse(groupes[1]),
-        //            Hum = float.Parse(groupes[2]),
-        //            Preassure = float.Parse(groupes[3]),
-        //            CO2 = float.Parse(groupes[4]),
-        //            LPG = float.Parse(groupes[5]),
-        //            CO = float.Parse(groupes[6]),
-        //            CH4 = float.Parse(groupes[7]),
-        //            Dust = float.Parse(groupes[8]),
-        //            Longitude = float.Parse(groupes[9]),
-        //            Latitude = float.Parse(groupes[10])
-        //        };
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        return null;
-        //    }
-        //}
+        private SensorDataModel GetModelFromString(string data)
+        {
+            try
+            {
+                var deserialized = JsonConvert.DeserializeObject<JObject>(data);
+                var serializedData = deserialized["data"].ToString();
+                var groupes = serializedData.Split("; ").ToArray();
+                return new SensorDataModel
+                {
+                    ApiKey = groupes[0],
+                    Temp = float.Parse(groupes[1]),
+                    Hum = float.Parse(groupes[2]),
+                    Preassure = float.Parse(groupes[3]),
+                    CO2 = float.Parse(groupes[4]),
+                    LPG = float.Parse(groupes[5]),
+                    CO = float.Parse(groupes[6]),
+                    CH4 = float.Parse(groupes[7]),
+                    Dust = float.Parse(groupes[8]),
+                    Longitude = float.Parse(groupes[9]),
+                    Latitude = float.Parse(groupes[10])
+                };
+            }
+            catch (Exception ex)
+            {
+                return null;
+            }
+        }
     }
 }
 
