@@ -30,19 +30,18 @@ namespace Web.Controllers
         {
             x.CreateMap<SensorDataModel, PortableSensorReading>();
             x.CreateMap<SensorDataModel, StaticSensorReading>();
-
         }));
 
-        public IntegrationController(IRepository repository, IAdminDispatchHelper adminDispatchHelper, IPWADispatchHelper pwaDispatchHelper, ISensorCacheHelper sensorCacheHelper)
+        public IntegrationController(IRepository repository, IAdminDispatchHelper adminDispatchHelper,
+            IPWADispatchHelper pwaDispatchHelper, ISensorCacheHelper sensorCacheHelper)
         {
             _repository = repository;
             _adminDispatchHelper = adminDispatchHelper;
             _pwaDispatchHelper = pwaDispatchHelper;
             _sensorCacheHelper = sensorCacheHelper;
         }
-
-        [Route("static")]
-/*        [HttpPost]
+        /*[Route("static")]
+        [HttpPost]
         public async Task<IActionResult> PortDataAsync(SensorDataModel model)
         {
             var sensor = await _repository.GetSensorByApiKeyAsync(model.ApiKey);
@@ -73,22 +72,24 @@ namespace Web.Controllers
         [HttpPost]
         public async Task<IActionResult> PortDataAsync()
         {
-
             string content = string.Empty;
             using (var reader = new StreamReader(Request.Body))
             {
                 content = reader.ReadToEnd();
             }
+
             var model = GetModelFromString(content);
             if (model == null)
             {
                 return BadRequest("Invalid Data");
             }
+
             var sensor = await _repository.GetSensorByApiKeyAsync(model.ApiKey);
             if (sensor == null)
             {
                 return NotFound();
             }
+
             if (sensor is PortableSensor)
             {
                 var reading = _mapper.Map<SensorDataModel, Reading>(model);
@@ -105,6 +106,7 @@ namespace Web.Controllers
                 var pollutionLevel = await _sensorCacheHelper.GetPollutionLevelAsync(sensor.Id);
                 _pwaDispatchHelper.DispatchReadingsForStaticSensor(sensor.Id, pollutionLevel, reading);
             }
+
             return Ok();
         }
 
@@ -138,4 +140,3 @@ namespace Web.Controllers
         }
     }
 }
-
