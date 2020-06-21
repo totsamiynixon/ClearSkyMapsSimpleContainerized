@@ -58,15 +58,18 @@ namespace Web.Controllers
                 _adminDispatchHelper.DispatchReadingsForPortableSensor(sensor.Id, reading);
                 _adminDispatchHelper.DispatchCoordinatesForPortableSensor(sensor.Id, model.Latitude, model.Longitude);
             }
-            else if (sensor is StaticSensor)
+            else if (sensor is StaticSensor staticSensor)
             {
                 var reading = _mapper.Map<SensorDataModel, StaticSensorReading>(model);
                 reading.StaticSensorId = sensor.Id;
                 await _repository.AddReadingAsync(reading);
-                await _sensorCacheHelper.UpdateSensorCacheWithReadingAsync(reading);
                 _adminDispatchHelper.DispatchReadingsForStaticSensor(sensor.Id, reading);
-                var pollutionLevel = await _sensorCacheHelper.GetPollutionLevelAsync(sensor.Id);
-                _pwaDispatchHelper.DispatchReadingsForStaticSensor(sensor.Id, pollutionLevel, reading);
+                if (staticSensor.IsAvailable())
+                {
+                    await _sensorCacheHelper.UpdateSensorCacheWithReadingAsync(reading);
+                    var pollutionLevel = await _sensorCacheHelper.GetPollutionLevelAsync(sensor.Id);
+                    _pwaDispatchHelper.DispatchReadingsForStaticSensor(sensor.Id, pollutionLevel, reading);
+                }
             }
 
             return Ok();

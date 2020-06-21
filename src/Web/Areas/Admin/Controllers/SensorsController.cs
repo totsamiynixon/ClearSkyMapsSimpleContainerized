@@ -178,7 +178,7 @@ namespace Web.Areas.Admin.Controllers
         }
 
 
-        [HttpGet]
+        [HttpPost]
         [Authorize(Roles = "Supervisor")]
         public async Task<ActionResult> Delete(DeleteSensorModel model)
         {
