@@ -1,13 +1,9 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using AutoMapper;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
 using Web.Areas.Admin.Helpers.Interfaces;
 using Web.Areas.PWA.Helpers.Interfaces;
 using Web.Data;
@@ -40,45 +36,11 @@ namespace Web.Controllers
             _pwaDispatchHelper = pwaDispatchHelper;
             _sensorCacheHelper = sensorCacheHelper;
         }
-        /*[Route("static")]
-        [HttpPost]
-        public async Task<IActionResult> PortDataAsync(SensorDataModel model)
+   
+        [HttpGet("getaspost")]
+        public async Task<IActionResult> GetAsPostDataAsync(string data)
         {
-            var sensor = await _repository.GetSensorByApiKeyAsync(model.ApiKey);
-            if (sensor == null)
-            {
-                return NotFound();
-            }
-            if (sensor is PortableSensor)
-            {
-                var reading = _mapper.Map<SensorDataModel, PortableSensorReading>(model);
-                _adminDispatchHelper.DispatchReadingsForPortableSensor(sensor.Id, reading);
-                _adminDispatchHelper.DispatchCoordinatesForPortableSensor(sensor.Id, model.Latitude, model.Longitude);
-            }
-            else if (sensor is StaticSensor)
-            {
-                var reading = _mapper.Map<SensorDataModel, StaticSensorReading>(model);
-                reading.StaticSensorId = sensor.Id;
-                await _repository.AddReadingAsync(reading);
-                await _sensorCacheHelper.UpdateSensorCacheWithReadingAsync(reading);
-                _adminDispatchHelper.DispatchReadingsForStaticSensor(sensor.Id, reading);
-                var pollutionLevel = await _sensorCacheHelper.GetPollutionLevelAsync(sensor.Id);
-                _pwaDispatchHelper.DispatchReadingsForStaticSensor(sensor.Id, pollutionLevel, reading);
-            }
-            return Ok();
-        }*/
-
-
-        [HttpPost]
-        public async Task<IActionResult> PortDataAsync()
-        {
-            string content = string.Empty;
-            using (var reader = new StreamReader(Request.Body))
-            {
-                content = reader.ReadToEnd();
-            }
-
-            var model = GetModelFromString(content);
+            var model = GetModelFromString(data);
             if (model == null)
             {
                 return BadRequest("Invalid Data");
@@ -115,9 +77,8 @@ namespace Web.Controllers
         {
             try
             {
-                var deserialized = JsonConvert.DeserializeObject<JObject>(data);
-                var serializedData = deserialized["data"].ToString();
-                var groupes = serializedData.Split("; ").ToArray();
+                var trimmed = data.Trim(';');
+                var groupes = trimmed.Split(",").ToArray();
                 return new SensorDataModel
                 {
                     ApiKey = groupes[0],
