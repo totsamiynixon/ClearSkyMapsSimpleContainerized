@@ -8,6 +8,11 @@ namespace Web.Data.Models
 {
     public abstract class Reading
     {
+
+        public Reading()
+        {
+            Created = DateTime.UtcNow;
+        }
         public int Id { get; set; }
         [PDK(300, 4)]
         public float CO2 { get; set; }

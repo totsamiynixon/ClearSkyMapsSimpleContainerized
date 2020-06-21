@@ -15,6 +15,5 @@ namespace Web.Models.Api.Sensor
         public float Preassure { get; set; }
         public double Latitude { get; set; }
         public double Longitude { get; set; }
-        public DateTime Created { get; set; }
     }
 }

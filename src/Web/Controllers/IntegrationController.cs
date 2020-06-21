@@ -78,7 +78,7 @@ namespace Web.Controllers
             try
             {
                 var trimmed = data.Trim(';');
-                var groupes = trimmed.Split(",").ToArray();
+                var groupes = trimmed.Split(",").Select(x => x.Replace('.', ',')).ToArray();
                 return new SensorDataModel
                 {
                     ApiKey = groupes[0],

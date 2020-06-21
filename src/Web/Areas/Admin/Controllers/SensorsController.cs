@@ -77,7 +77,7 @@ namespace Web.Areas.Admin.Controllers
         {
             if (!ModelState.IsValid)
             {
-                return RedirectToAction("Create");
+                return RedirectToAction("CreateStaticSensor");
             }
             try
             {
