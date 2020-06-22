@@ -186,7 +186,8 @@ namespace Web.Areas.Admin.Controllers
             {
                 return RedirectToAction("Delete", new { sensorId = model.Id });
             }
-            await _repository.DeleteSensorAsync(model.Id.Value);
+            await _repository.DeleteSensorAsync(model.Id.Value, model.IsCompletely);
+            await _sensorCacheHelper.RemoveStaticSensorFromCacheAsync(model.Id.Value);
             return RedirectToAction("Index");
         }
 

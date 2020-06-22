@@ -30,7 +30,7 @@ namespace Web.Data
 
         Task<StaticSensor> GetStaticSensorByIdAsync(int id, bool withReadings = false);
 
-        Task DeleteSensorAsync(int id);
+        Task DeleteSensorAsync(int id, bool isCompletely);
 
         Task RemoveSensorsFromDatabaseAsync(params int[] ids);
 

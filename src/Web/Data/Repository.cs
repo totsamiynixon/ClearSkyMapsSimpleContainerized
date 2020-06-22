@@ -196,14 +196,21 @@ namespace Web.Data
             }
         }
 
-        public async Task DeleteSensorAsync(int id)
+        public async Task DeleteSensorAsync(int id, bool isCompletely)
         {
             using (var _context = GetFreshContext())
             {
-                await _context.Sensors.Where(f => f.Id == id).UpdateAsync(f => new StaticSensor
+                if (!isCompletely)
                 {
-                    IsDeleted = true
-                });
+                    await _context.Sensors.Where(f => f.Id == id).UpdateAsync(f => new StaticSensor
+                    {
+                        IsDeleted = true
+                    });
+                }
+                else
+                {
+                    await _context.Sensors.Where(f => f.Id == id).DeleteAsync();
+                }
             }
         }
 
