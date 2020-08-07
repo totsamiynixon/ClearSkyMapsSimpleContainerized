@@ -38,7 +38,7 @@ namespace Web.Areas.PWA.Application.Readings.Notifications
             if (sensor is StaticSensor staticSensor && staticSensor.IsAvailable())
             {
                 var pollutionLevel = await _sensorCacheHelper.GetPollutionLevelAsync(sensor.Id);
-                _pwaDispatchHelper.DispatchReadingsForStaticSensor(sensor.Id, pollutionLevel, _mapper.Map<SensorReadingDTO, StaticSensorReading>(notification.Reading));
+                _pwaDispatchHelper.DispatchReadingsForStaticSensor(sensor.Id, pollutionLevel, notification.Reading);
             }
         }
     }

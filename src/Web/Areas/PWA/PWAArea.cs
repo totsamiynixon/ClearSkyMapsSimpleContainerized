@@ -11,8 +11,8 @@ namespace Web.Areas.PWA
         {
             app.UseEndpoints(endpoints =>
             {
-                endpoints.MapAreaControllerRoute("pwaArea", "PWA",
-                    "{area:exists}/{controller=sensors}/{action=index}/{id?}");
+                endpoints.MapAreaControllerRoute("pwa_area", "PWA",
+                    "pwa/{controller=home}/{action=index}/{id?}");
                 endpoints.MapHub<PWAStaticSensorHub>("/pwahub");
             });
                 

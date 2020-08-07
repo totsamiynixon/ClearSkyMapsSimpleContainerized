@@ -66,7 +66,7 @@ namespace Web.Helpers.Implementations
              });
         }
 
-        public void RemoveAllSensorsFromCache()
+        public void ClearCache()
         {
             _memCache.Remove(_sensorCacheKey);
         }

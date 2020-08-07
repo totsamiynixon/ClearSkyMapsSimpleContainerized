@@ -1,12 +1,12 @@
-﻿using Newtonsoft.Json;
-using Newtonsoft.Json.Serialization;
-using System;
+﻿using System;
 using System.Net.Http;
 using System.Text;
-using Web.Areas.Admin.Emulation.Models;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Serialization;
 using Web.Domain.Entities;
+using Web.Emulation.Models;
 
-namespace Web.Areas.Admin.Emulation
+namespace Web.Emulation
 {
     public class SensorEmulator
     {
@@ -47,7 +47,7 @@ namespace Web.Areas.Admin.Emulation
                 try
                 {
                     var data = GetSensorData();
-                    var response = await _httpClient.PostAsync($"http://{_serverIp}/api/integration", new StringContent(JsonConvert.SerializeObject(data), Encoding.UTF8, "application/json"));
+                    var response = await _httpClient.GetAsync($"{_serverIp}/api/integration/getaspost?data={data}");
                 }
                 catch (Exception ex)
                 {

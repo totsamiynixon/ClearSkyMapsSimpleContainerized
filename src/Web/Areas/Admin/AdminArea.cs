@@ -12,7 +12,7 @@ namespace Web.Areas.Admin
         {
             app.UseEndpoints(endpoints =>
             {
-                endpoints.MapAreaControllerRoute("adminArea", "Admin",  "{area:exists}/{controller=sensors}/{action=index}/{id?}");
+                endpoints.MapAreaControllerRoute("admin_area", "Admin",  "admin/{controller=sensors}/{action=index}/{id?}");
                 endpoints.MapHub<AdminPortableSensorHub>("/adminportable");
                 endpoints.MapHub<AdminStaticSensorHub>("/adminstatic");
             });

@@ -4,7 +4,7 @@
     {
         public string ConnectionString { get; set; }
         
-        public EmulationAppSettings Emulator { get; set; }
+        public EmulationAppSettings Emulation { get; set; }
         
         public FirebaseCloudMessagingAppSettings FirebaseCloudMessaging { get; set; }
         
@@ -12,7 +12,8 @@
         
         public YandexAppSettings Yandex { get; set; }
         
-        public string ServerIP { get; set; }
+        //TODO: Check how to manage service ip 
+        public string ServerUrl { get; set; }
     }
 
     public class FirebaseCloudMessagingAppSettings

@@ -16,22 +16,18 @@ namespace Web.Application.Readings.Commands
     public class CreateReadingCommandHandler : IRequestHandler<CreateReadingCommand, bool>
     {
         private readonly IRepository _repository;
-        private readonly IAdminDispatchHelper _adminDispatchHelper;
-        private readonly IPWADispatchHelper _pwaDispatchHelper;
         private readonly ISensorCacheHelper _sensorCacheHelper;
         private readonly IMediator _mediator;
 
         private static readonly IMapper _mapper = new Mapper(new MapperConfiguration(x =>
         {
             x.CreateMap<SensorReadingDTO, StaticSensorReading>();
+            x.CreateMap<SensorReadingDTO, PortableSensorReading>();
         }));
 
-        public CreateReadingCommandHandler(IRepository repository, IAdminDispatchHelper adminDispatchHelper,
-            IPWADispatchHelper pwaDispatchHelper, ISensorCacheHelper sensorCacheHelper, IMediator mediator)
+        public CreateReadingCommandHandler(IRepository repository, ISensorCacheHelper sensorCacheHelper, IMediator mediator)
         {
             _repository = repository;
-            _adminDispatchHelper = adminDispatchHelper;
-            _pwaDispatchHelper = pwaDispatchHelper;
             _sensorCacheHelper = sensorCacheHelper;
             _mediator = mediator;
         }
@@ -45,7 +41,7 @@ namespace Web.Application.Readings.Commands
 
             if (sensor is PortableSensor)
             {
-                await _mediator.Publish(new PortableReadingCreatedNotification(sensor.Id, request.Reading), cancellationToken);
+                await _mediator.Publish(new PortableReadingCreatedNotification(sensor.Id, _mapper.Map<SensorReadingDTO, PortableSensorReading>(request.Reading)), cancellationToken);
             }
             else if (sensor is StaticSensor staticSensor)
             {
@@ -53,11 +49,8 @@ namespace Web.Application.Readings.Commands
                 reading.StaticSensorId = sensor.Id;
                 
                 await _repository.AddReadingAsync(reading);
-                
-                if (staticSensor.IsAvailable())
-                    await _sensorCacheHelper.UpdateSensorCacheWithReadingAsync(reading);
-                
-                await _mediator.Publish(new StaticSensorReadingCreatedNotification(sensor.Id, request.Reading), cancellationToken);
+
+                await _mediator.Publish(new StaticSensorReadingCreatedNotification(sensor.Id, reading), cancellationToken);
 
             }
 

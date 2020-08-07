@@ -6,7 +6,7 @@ using Web.Infrastructure.Data.Initialize.Seed;
 
 namespace Web.Infrastructure.Data.Initialize
 {
-    public class DefaultDatabaseInitializer : IDatabaseInitializer
+    public class DefaultApplicationDatabaseInitializer : IApplicationDatabaseInitializer
     {
         private static readonly object Lock = new object();
 
@@ -15,7 +15,7 @@ namespace Web.Infrastructure.Data.Initialize
         private readonly IDatabaseSeeder<DataContext> _databaseSeeder;
         private readonly IDatabaseSeeder<IdentityDataContext> _identityDatabaseSeeder;
 
-        public DefaultDatabaseInitializer(IDataContextFactory<DataContext> dataContextFactory,
+        public DefaultApplicationDatabaseInitializer(IDataContextFactory<DataContext> dataContextFactory,
             IDataContextFactory<IdentityDataContext> identityDataContextFactory,
             IDatabaseSeeder<DataContext> databaseSeeder, IDatabaseSeeder<IdentityDataContext> identityDatabaseSeeder)
         {

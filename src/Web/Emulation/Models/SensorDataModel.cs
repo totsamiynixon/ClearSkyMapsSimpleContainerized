@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Web.Areas.Admin.Emulation.Models
+namespace Web.Emulation.Models
 {
     public class SensorDataModel
     {
@@ -27,5 +27,10 @@ namespace Web.Areas.Admin.Emulation.Models
         public double Latitude { get; set; }
 
         public double Longitude { get; set; }
+
+        public override string ToString()
+        {
+            return $"{ApiKey},{Temp},{Hum},{Preassure},{CO2},{LPG},{CO},{CH4},{Dust},{Longitude},{Latitude};";
+        }
     }
 }

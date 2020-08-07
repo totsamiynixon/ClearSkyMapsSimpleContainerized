@@ -7,6 +7,6 @@ namespace Web.Areas.Admin.Infrastructure.Hubs
     public interface IAdminStaticSensorClient
     {
         [HubMethodName("DispatchReading")]
-        Task DispatchReadingAsync(StaticSensorReadingDispatchModel reading);
+        Task DispatchReading(StaticSensorReadingDispatchModel reading);
     }
 }

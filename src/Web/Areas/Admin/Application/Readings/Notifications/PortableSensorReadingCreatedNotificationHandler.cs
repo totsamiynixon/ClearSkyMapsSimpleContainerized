@@ -14,10 +14,6 @@ namespace Web.Areas.Admin.Application.Readings.Notifications
         
         private readonly IAdminDispatchHelper _adminDispatchHelper;
         
-        private static readonly IMapper _mapper = new Mapper(new MapperConfiguration(x =>
-        {
-            x.CreateMap<SensorReadingDTO, PortableSensorReading>();
-        }));
 
         public PortableSensorReadingCreatedNotificationHandler(IAdminDispatchHelper adminDispatchHelper)
         {
@@ -25,7 +21,7 @@ namespace Web.Areas.Admin.Application.Readings.Notifications
         }
         public async Task Handle(PortableReadingCreatedNotification notification, CancellationToken cancellationToken)
         {
-            await _adminDispatchHelper.DispatchReadingsForPortableSensorAsync(notification.SensorId, _mapper.Map<SensorReadingDTO, PortableSensorReading>(notification.Reading));
+            await _adminDispatchHelper.DispatchReadingsForPortableSensorAsync(notification.SensorId, notification.Reading);
             await _adminDispatchHelper.DispatchCoordinatesForPortableSensorAsync(notification.SensorId, notification.Reading.Latitude, notification.Reading.Longitude);
         }
     }

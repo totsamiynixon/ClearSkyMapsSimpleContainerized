@@ -1,12 +1,13 @@
 ﻿using System.Threading.Tasks;
 using Web.Areas.Admin.Models.Emulator;
 using System.Collections.Generic;
-using System.Linq;
 using Microsoft.AspNetCore.Mvc;
 using AutoMapper;
-using Web.Areas.Admin.Emulation;
-using Web.Helpers.Interfaces;
+using MediatR;
 using Microsoft.AspNetCore.Authorization;
+using Web.Application.Emulation.Commands;
+using Web.Application.Emulation.Exceptions;
+using Web.Emulation;
 
 namespace Web.Areas.Admin.Controllers
 {
@@ -14,26 +15,25 @@ namespace Web.Areas.Admin.Controllers
     [Authorize]
     public class EmulatorController : Controller
     {
-        private readonly ISettingsProvider _settingsProvider;
         private readonly Emulator _emulator;
+        private readonly IMediator _mediator;
 
         private static readonly IMapper _mapper = new Mapper(new MapperConfiguration(x =>
         {
             x.CreateMap<SensorEmulator, SensorEmulatorListItemViewModel>()
-            .ForMember(f => f.Latitude, m => m.MapFrom((s, d) => s.Latitude))
-            .ForMember(f => f.Longitude, m => m.MapFrom((s, d) => s.Longitude))
-            .ForMember(f => f.Guid, m => m.MapFrom(s => s.GetGuid()))
-            .ForMember(f => f.IsOn, m => m.MapFrom(s => s.IsPowerOn))
-            .ForMember(f => f.ApiKey, m => m.MapFrom(s => s.ApiKey))
-            .ForMember(f => f.Type, m => m.MapFrom(s => s.SensorType.Name))
-            ;
-
+                .ForMember(f => f.Latitude, m => m.MapFrom((s, d) => s.Latitude))
+                .ForMember(f => f.Longitude, m => m.MapFrom((s, d) => s.Longitude))
+                .ForMember(f => f.Guid, m => m.MapFrom(s => s.GetGuid()))
+                .ForMember(f => f.IsOn, m => m.MapFrom(s => s.IsPowerOn))
+                .ForMember(f => f.ApiKey, m => m.MapFrom(s => s.ApiKey))
+                .ForMember(f => f.Type, m => m.MapFrom(s => s.SensorType.Name))
+                ;
         }));
 
-        public EmulatorController(ISettingsProvider settingsProvider, Emulator emulator)
+        public EmulatorController(Emulator emulator, IMediator mediator)
         {
-            _settingsProvider = settingsProvider;
             _emulator = emulator;
+            _mediator = mediator;
         }
 
         [HttpGet]
@@ -44,73 +44,77 @@ namespace Web.Areas.Admin.Controllers
             {
                 emulators = _emulator.Devices;
             }
+
             return View(_mapper.Map<List<SensorEmulator>, List<SensorEmulatorListItemViewModel>>(emulators));
         }
 
 
         [HttpPost]
-        public async Task<ActionResult> StartEmulation()
+        public async Task<IActionResult> StartEmulation()
         {
-            if (!_settingsProvider.EmulationEnabled)
+            try
             {
-                return Forbid("Emulation is not available");
+                await _mediator.Send(new BeginEmulationCommand());
             }
-            await _emulator.RunEmulationAsync();
+            catch (EmulationIsNotAvailableException ex)
+            {
+                return Forbid(ex.Message);
+            }
+
             return RedirectToAction("Index");
         }
 
         [HttpPost]
-        public ActionResult StopEmulation()
+        public async Task<IActionResult> StopEmulation()
         {
-            if (!_settingsProvider.EmulationEnabled)
+            try
             {
-                return Forbid("Emulation is not available");
+                await _mediator.Send(new StopEmulationCommand());
             }
-            _emulator.StopEmulation();
+            catch (EmulationIsNotAvailableException ex)
+            {
+                return Forbid(ex.Message);
+            }
+            
             return RedirectToAction("Index");
         }
 
         [HttpPost]
         public ActionResult PowerOn(string guid)
         {
-            if (!_settingsProvider.EmulationEnabled)
+            try
             {
-                return Forbid("Emulation is not available");
+                _mediator.Send(new DevicePowerOnCommand(guid));
             }
-            var emulator = _emulator.Devices.FirstOrDefault(f => f.GetGuid() == guid);
-            if (emulator == null)
+            catch (EmulationIsNotAvailableException ex)
             {
-                return NotFound("Emulators not found");
+                return Forbid(ex.Message);
             }
-            if (emulator.IsPowerOn)
+            catch (EmulationDeviceNotFoundException ex)
             {
-                return Ok("Emulator has been started already");
+                return NotFound(ex.Message);
             }
-
-            emulator.PowerOn();
-            return Ok("Emulator has been successfully started");
+            
+            return Ok("Emulator device has been successfully started");
         }
 
         [HttpPost]
         public ActionResult PowerOff(string guid)
         {
-            if (!_settingsProvider.EmulationEnabled)
+            try
             {
-                return Forbid("Emulation is not available");
+                _mediator.Send(new DevicePowerOffCommand(guid));
             }
-            var emulator = _emulator.Devices.FirstOrDefault(f => f.GetGuid() == guid);
-            if (emulator == null)
+            catch (EmulationIsNotAvailableException ex)
             {
-                return NotFound("Emulators not found");
+                return Forbid(ex.Message);
             }
-            if (!emulator.IsPowerOn)
+            catch (EmulationDeviceNotFoundException ex)
             {
-                return Ok("Emulator has been stopped already");
+                return NotFound(ex.Message);
             }
-
-            emulator.PowerOff();
-            return Ok("Emulator has been successfully stopped");
+            
+            return Ok("Emulator device has been successfully stopped");
         }
-
     }
 }

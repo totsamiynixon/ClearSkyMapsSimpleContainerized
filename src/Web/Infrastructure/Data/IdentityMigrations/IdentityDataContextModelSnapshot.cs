@@ -8,8 +8,8 @@ using Microsoft.EntityFrameworkCore.Metadata;
 
 namespace Web.Infrastructure.Data.IdentityMigrations
 {
-    [DbContext(typeof(IdentityDbContext))]
-    partial class IdentityDbContextModelSnapshot : ModelSnapshot
+    [DbContext(typeof(IdentityDataContext))]
+    partial class IdentityDataContextModelSnapshot : ModelSnapshot
     {
         protected override void BuildModel(ModelBuilder modelBuilder)
         {

@@ -1,17 +1,15 @@
-﻿using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 
 namespace Web.Infrastructure.Data.Factory
 {
-    public class DefaultIdentityDataContextFactory : IDataContextFactory<IdentityDataContext>
+    public class EmulationIdentityDataContextFactory : IEmulationDataContextFactory<IdentityDataContext>
     {
         private readonly AppSettings _appSettings;
-
-        public DefaultIdentityDataContextFactory(AppSettings appSettings)
+        public EmulationIdentityDataContextFactory(AppSettings appSettings)
         {
             _appSettings = appSettings;
         }
-
+        
         public IdentityDataContext Create()
         {
             var optionsBuilder = new DbContextOptionsBuilder<IdentityDataContext>();

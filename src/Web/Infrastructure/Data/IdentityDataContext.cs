@@ -7,7 +7,7 @@ namespace Web.Infrastructure.Data
 {
     public class IdentityDataContext : IdentityDbContext<User, IdentityRole, string>
     {
-        public IdentityDataContext(DbContextOptions<IdentityDbContext> options)
+        public IdentityDataContext(DbContextOptions<IdentityDataContext> options)
            : base(options)
         {
         }

@@ -38,12 +38,12 @@ namespace Web.Areas.Admin.Helpers.Implementations
 
         public async Task DispatchReadingsForPortableSensorAsync(int sensorId, Reading reading)
         {
-           await _portableSensorHubContext.Clients.Group(AdminPortableSensorHub.PortableSensorGroup(sensorId)).DispatchReadingAsync(_mapper.Map<Reading, PortableSensorReadingsDispatchModel>(reading));
+           await _portableSensorHubContext.Clients.Group(AdminPortableSensorHub.PortableSensorGroup(sensorId)).DispatchReading(_mapper.Map<Reading, PortableSensorReadingsDispatchModel>(reading));
         }
 
         public async Task DispatchReadingsForStaticSensorAsync(int sensorId, Reading reading)
         {
-            await _staticSensorHubContext.Clients.All.DispatchReadingAsync(_mapper.Map<Reading, StaticSensorReadingDispatchModel>(reading));
+            await _staticSensorHubContext.Clients.All.DispatchReading(_mapper.Map<Reading, StaticSensorReadingDispatchModel>(reading));
         }
     }
 }

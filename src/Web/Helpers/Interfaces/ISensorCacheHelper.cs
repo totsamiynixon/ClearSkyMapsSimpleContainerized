@@ -16,7 +16,7 @@ namespace Web.Helpers.Interfaces
 
         Task RemoveStaticSensorFromCacheAsync(int sensorId);
 
-        void RemoveAllSensorsFromCache();
+        void ClearCache();
 
         Task UpdateSensorCacheWithReadingAsync(StaticSensorReading reading);
 

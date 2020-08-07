@@ -1,6 +1,8 @@
 ﻿@using Web.Areas.Admin.Models.Emulator
-@using Web.Areas.Admin.Emulation
-@inject Web.Helpers.Interfaces.ISettingsProvider SettingsProvider
+@using Web.Emulation
+@using Web.Infrastructure
+@inject AppSettings AppSettings
+@inject Emulator Emulator
 @model List<SensorEmulatorListItemViewModel>
 @{
     ViewBag.Title = "Датчики-эмуляторы";
@@ -72,7 +74,7 @@
                     </table>
                 </div>
             </div>
-            @if (SettingsProvider.EmulationEnabled)
+            @if (AppSettings.Emulation.Enabled)
             {
                 <div class="card-footer">
                     @using (Html.BeginForm($"{(Emulator.IsEmulationEnabled ? "Stop" : "Start")}Emulation", "Emulator", new { area = "Admin", ReturnUrl = ViewBag.ReturnUrl }, FormMethod.Post, null, new { @class = "form-horizontal", role = "form" }))

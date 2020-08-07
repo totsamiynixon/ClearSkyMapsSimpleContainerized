@@ -2,7 +2,7 @@
 
 namespace Web.Infrastructure.Data.Initialize
 {
-    public interface IDatabaseInitializer
+    public interface IApplicationDatabaseInitializer
     {
         Task InitializeDbAsync();
     }

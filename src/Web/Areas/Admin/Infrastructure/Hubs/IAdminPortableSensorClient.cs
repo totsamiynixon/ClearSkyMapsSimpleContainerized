@@ -6,9 +6,9 @@ namespace Web.Areas.Admin.Infrastructure.Hubs
 {
     public interface IAdminPortableSensorClient
     {
-        [HubMethodName("DispatchReading")]
-        Task DispatchReadingAsync(PortableSensorReadingsDispatchModel reading);
-        [HubMethodName("DispatchCoordinates")]
+        //[HubMethodName("DispatchReading")]
+        Task DispatchReading(PortableSensorReadingsDispatchModel reading);
+        //[HubMethodName("DispatchCoordinates")]
         Task DispatchCoordinatesAsync(PortableSensorCoordinatesDispatchModel coordinates);
     }
 }

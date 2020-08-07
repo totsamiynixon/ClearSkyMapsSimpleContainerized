@@ -9,7 +9,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 namespace Web.Infrastructure.Data.IdentityMigrations
 {
-    [DbContext(typeof(IdentityDbContext))]
+    [DbContext(typeof(IdentityDataContext))]
     [Migration("20190515100610_init")]
     partial class init
     {

@@ -1,6 +1,7 @@
 ﻿@using Web.Areas.Admin.Models.Sensors
 @using Web.Extensions;
-@inject Web.Helpers.Interfaces.ISettingsProvider SettingsProvider
+@using Web.Infrastructure
+@inject AppSettings AppSettings
 @model SensorsIndexViewModel
 @{
     ViewBag.Title = "Датчики";
@@ -160,7 +161,7 @@
 </div>
 @section Scripts {
     <!--  Yandex Maps Plugin    -->
-    <script src="https://api-maps.yandex.ru/2.1/?lang=ru_RU&amp;apikey=@(SettingsProvider.YandexMapsJavaScriptAPIKey)" type="text/javascript"></script>
+    <script src="https://api-maps.yandex.ru/2.1/?lang=ru_RU&amp;apikey=@(AppSettings.Yandex.MapsJavaScriptAPIKey)" type="text/javascript"></script>
     <script src="~/admin/js/front/pages/sensors.js"></script>
     <script>
         jQuery(function ($) {

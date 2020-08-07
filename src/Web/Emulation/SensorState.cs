@@ -1,4 +1,4 @@
-﻿namespace Web.Areas.Admin.Emulation
+﻿namespace Web.Emulation
 {
     public class SensorState
     {

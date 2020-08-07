@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Builder;
+﻿using MediatR;
+using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
@@ -17,6 +18,7 @@ using Web.Areas.Admin.Helpers.Interfaces;
 using Web.Areas.Admin.Helpers.Implementations;
 using Web.Areas.PWA;
 using Web.Domain.Entities.Identity;
+using Web.Emulation;
 using Web.Infrastructure;
 using Web.Infrastructure.Data;
 using Web.Infrastructure.Data.Factory;
@@ -46,20 +48,51 @@ namespace Web
 
             //TODO: Check how it works
             services.AddTransient<AppSettings>((_) => config);
+            services.AddMediatR(typeof(Startup));
             
             services.AddTransient<UserManager<User>>();
             services.AddTransient<RoleManager<User>>();
-            
+
+            services.AddSingleton<Emulator>();
             services.AddTransient<IRepository, Repository>();
             services.AddTransient<IPollutionCalculator, PollutionCalculator>();
             services.AddTransient<ISensorCacheHelper, SensorCacheHelper>();
             services.AddTransient<IPWADispatchHelper, PWASignalrDispatchHelper>();
             services.AddTransient<IAdminDispatchHelper, AdminSignalRHubDispatchHelper>();
-            services.AddSingleton<IDataContextFactory<DataContext>, DefaultDataContextFactory>();
-            services.AddSingleton<IDataContextFactory<IdentityDataContext>, DefaultIdentityDataContextFactory>();
+
+            services.AddSingleton<IEmulationDataContextFactory<DataContext>, EmulationDataContextFactory>();
+            services.AddSingleton<IEmulationDataContextFactory<IdentityDataContext>, EmulationIdentityDataContextFactory>();
+
+            services.AddSingleton<IDataContextFactory<DataContext>>(provider =>
+            {
+                var appSettings = provider.GetService<AppSettings>();
+                var emulator = provider.GetService<Emulator>();
+                return emulator.IsEmulationEnabled
+                    ? (IDataContextFactory<DataContext>)new EmulationDataContextFactory(appSettings)
+                    : (IDataContextFactory<DataContext>)new DefaultDataContextFactory(appSettings);
+            });
+            services.AddSingleton<IDataContextFactory<IdentityDataContext>>(provider =>
+            {
+                var appSettings = provider.GetService<AppSettings>();
+                var emulator = provider.GetService<Emulator>();
+                return emulator.IsEmulationEnabled
+                    ? (IDataContextFactory<IdentityDataContext>)new EmulationIdentityDataContextFactory(appSettings)
+                    : (IDataContextFactory<IdentityDataContext>)new DefaultIdentityDataContextFactory(appSettings);
+            });
             services.AddSingleton<IDatabaseSeeder<DataContext>, DataContextDatabaseSeeder>();
             services.AddSingleton<IDatabaseSeeder<IdentityDataContext>, IdentityDataContextDatabaseSeeder>();
-            services.AddSingleton<IDatabaseInitializer, DefaultDatabaseInitializer>();
+            services.AddSingleton<IApplicationDatabaseInitializer, DefaultApplicationDatabaseInitializer>();
+
+            //TODO: Check why doesnt work with identity
+            /*services.AddDbContext<DataContext>(
+                (provider, builder) => provider.GetService<IDataContextFactory<DataContext>>().Create());
+            services.AddDbContext<IdentityDataContext>(
+                (provider, builder) => provider.GetService<IDataContextFactory<IdentityDataContext>>().Create());*/
+                
+            services.AddScoped<DataContext>(
+                (provider) => provider.GetService<IDataContextFactory<DataContext>>().Create());
+            services.AddScoped<IdentityDataContext>(
+                (provider) => provider.GetService<IDataContextFactory<IdentityDataContext>>().Create());
 
             services.Configure<CookiePolicyOptions>(options =>
             {
@@ -67,14 +100,7 @@ namespace Web
                 options.CheckConsentNeeded = context => true;
                 options.MinimumSameSitePolicy = SameSiteMode.None;
             });
-
-
-            services.AddDbContext<DataContext>(
-                (provider, builder) => provider.GetService<IDataContextFactory<DataContext>>().Create(), ServiceLifetime.Transient);
-            services.AddDbContext<IdentityDataContext>(
-                (provider, builder) => provider.GetService<IDataContextFactory<IdentityDataContext>>().Create(),
-                ServiceLifetime.Transient);
-
+            
             services.AddIdentityCore<User>()
                 .AddUserManager<UserManager<User>>()
                 .AddRoles<IdentityRole>()
@@ -105,18 +131,21 @@ namespace Web
 
             app.UseStaticFiles();
             app.UseCookiePolicy();
+            
             app.UseAuthentication();
+            app.UseAuthorization();
 
+
+            app.UseAdminArea(Configuration, env);
+            app.UsePWAArea(env);
+            
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllers();
                 endpoints.MapControllerRoute(
                     name: "default",
-                    pattern: "{controller=home}/{action=index}/{id?}");
+                    pattern: "{area=pwa}/{controller=home}/{action=index}/{id?}");
             });
-
-            app.UseAdminArea(Configuration, env);
-            app.UsePWAArea(env);
             
         }
     }

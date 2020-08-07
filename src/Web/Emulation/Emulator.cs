@@ -3,10 +3,9 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using Web.Domain.Entities;
 using Web.Helpers;
-using Web.Helpers.Interfaces;
-using Web.Infrastructure.Data.Repository;
+using Web.Infrastructure;
 
-namespace Web.Areas.Admin.Emulation
+namespace Web.Emulation
 {
     public class Emulator
     {
@@ -15,16 +14,12 @@ namespace Web.Areas.Admin.Emulation
         private bool _firstInit = true;
         private List<string> _guids { get; set; }
         public List<SensorEmulator> Devices { get; private set; }
-
-        private readonly IRepository _repository;
-        private readonly ISensorCacheHelper _sensorCacheHelper;
-        private readonly ISettingsProvider _settingsProvider;
         
-        public Emulator(IRepository repository, ISensorCacheHelper sensorCacheHelper, ISettingsProvider settingsProvider)
+        private readonly AppSettings _appSettings;
+        
+        public Emulator(AppSettings appSettings)
         {
-            _repository = repository;
-            _sensorCacheHelper = sensorCacheHelper;
-            _settingsProvider = settingsProvider;
+            _appSettings = appSettings;
         }
         
         public async Task RunEmulationAsync()
@@ -32,8 +27,8 @@ namespace Web.Areas.Admin.Emulation
             if (!IsEmulationEnabled)
             {
                 IsEmulationEnabled = true;
-                _repository.ReinitializeDb();
-                _sensorCacheHelper.RemoveAllSensorsFromCache();
+                /*_repository.ReinitializeDb();
+                _sensorCacheHelper.RemoveAllSensorsFromCache();*/
             }
             if (_firstInit)
             {
@@ -47,8 +42,8 @@ namespace Web.Areas.Admin.Emulation
             if (IsEmulationEnabled)
             {
                 IsEmulationEnabled = false;
-                _repository.ReinitializeDb();
-                _sensorCacheHelper.RemoveAllSensorsFromCache();
+                /*_repository.ReinitializeDb();
+                _sensorCacheHelper.RemoveAllSensorsFromCache();*/
             }
         }
 
@@ -56,15 +51,15 @@ namespace Web.Areas.Admin.Emulation
         {
             _guids = new List<string>();
             Devices = new List<SensorEmulator>();
-            await _repository.RemoveAllSensorsFromDatabaseAsync();
-            _sensorCacheHelper.RemoveAllSensorsFromCache();
+            /*await _repository.RemoveAllSensorsFromDatabaseAsync();
+            _sensorCacheHelper.RemoveAllSensorsFromCache();*/
             var iterationsForStatic = _emulatorRandom.Next(5, 10);
             for (int i = 0; i < iterationsForStatic; i++)
             {
                 var guid = Guid.NewGuid().ToString();
                 _guids.Add(guid);
                 var fakeSensor = GetStaticFakeSensor(guid);
-                await _repository.AddStaticSensorAsync(fakeSensor.sensor.ApiKey, fakeSensor.sensor.Latitude, fakeSensor.sensor.Longitude);
+               // await _repository.AddStaticSensorAsync(fakeSensor.sensor.ApiKey, fakeSensor.sensor.Latitude, fakeSensor.sensor.Longitude);
                 Devices.Add(fakeSensor.emulator);
             }
             var iterationsForPortable = _emulatorRandom.Next(5, 10);
@@ -73,7 +68,7 @@ namespace Web.Areas.Admin.Emulation
                 var guid = Guid.NewGuid().ToString();
                 _guids.Add(guid);
                 var fakeSensor = GetPortableFakeSensor(guid);
-                await _repository.AddPortableSensorAsync(fakeSensor.sensor.ApiKey);
+                //await _repository.AddPortableSensorAsync(fakeSensor.sensor.ApiKey);
                 Devices.Add(fakeSensor.emulator);
             }
         }
@@ -82,7 +77,7 @@ namespace Web.Areas.Admin.Emulation
         {
 
             var apiKey = CryptoHelper.GenerateApiKey();
-            var sensorEmulator = new SensorEmulator(guid, _settingsProvider.ServerIP, apiKey, typeof(StaticSensor));
+            var sensorEmulator = new SensorEmulator(guid, _appSettings.ServerUrl, apiKey, typeof(StaticSensor));
             var sensor = new StaticSensor
             {
                 ApiKey = apiKey,
@@ -96,7 +91,7 @@ namespace Web.Areas.Admin.Emulation
         private (SensorEmulator emulator, PortableSensor sensor) GetPortableFakeSensor(string guid)
         {
             var apiKey = CryptoHelper.GenerateApiKey();
-            var sensorEmulator = new SensorEmulator(guid, _settingsProvider.ServerIP, apiKey, typeof(PortableSensor));
+            var sensorEmulator = new SensorEmulator(guid, _appSettings.ServerUrl, apiKey, typeof(PortableSensor));
             var sensor = new PortableSensor
             {
                 ApiKey = apiKey
