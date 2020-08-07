@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Web;
-using Web.Enums;
-
-namespace Web.Areas.Admin.Models.Emulator
+﻿namespace Web.Areas.Admin.Models.Emulator
 {
     public class SensorEmulatorListItemViewModel
     {

@@ -1,33 +1,39 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using Web.Data;
-using Web.Data.Models;
+using Web.Domain.Entities;
 using Web.Helpers;
 using Web.Helpers.Interfaces;
+using Web.Infrastructure.Data.Repository;
 
 namespace Web.Areas.Admin.Emulation
 {
-    public static class Emulator
+    public class Emulator
     {
-        public static bool IsEmulationEnabled { get; private set; }
-        private static Random _emulatorRandom = new Random();
-        private static bool _firstInit = true;
-        private static List<string> _guids { get; set; }
-        public static List<SensorEmulator> Devices { get; private set; }
+        public bool IsEmulationEnabled { get; private set; }
+        private Random _emulatorRandom = new Random();
+        private bool _firstInit = true;
+        private List<string> _guids { get; set; }
+        public List<SensorEmulator> Devices { get; private set; }
 
-        private static IRepository Repository => (Startup.ServiceProvider().GetService(typeof(IRepository)) as IRepository);
-        private static ISensorCacheHelper SensorCacheHelper => (Startup.ServiceProvider().GetService(typeof(ISensorCacheHelper)) as ISensorCacheHelper);
-        private static ISettingsProvider SettingsProvider => (Startup.ServiceProvider().GetService(typeof(ISettingsProvider)) as ISettingsProvider);
-
-
-        public static async Task RunEmulationAsync()
+        private readonly IRepository _repository;
+        private readonly ISensorCacheHelper _sensorCacheHelper;
+        private readonly ISettingsProvider _settingsProvider;
+        
+        public Emulator(IRepository repository, ISensorCacheHelper sensorCacheHelper, ISettingsProvider settingsProvider)
+        {
+            _repository = repository;
+            _sensorCacheHelper = sensorCacheHelper;
+            _settingsProvider = settingsProvider;
+        }
+        
+        public async Task RunEmulationAsync()
         {
             if (!IsEmulationEnabled)
             {
                 IsEmulationEnabled = true;
-                Repository.ReinitializeDb();
-                SensorCacheHelper.RemoveAllSensorsFromCache();
+                _repository.ReinitializeDb();
+                _sensorCacheHelper.RemoveAllSensorsFromCache();
             }
             if (_firstInit)
             {
@@ -36,29 +42,29 @@ namespace Web.Areas.Admin.Emulation
             }
         }
 
-        public static void StopEmulation()
+        public void StopEmulation()
         {
             if (IsEmulationEnabled)
             {
                 IsEmulationEnabled = false;
-                Repository.ReinitializeDb();
-                SensorCacheHelper.RemoveAllSensorsFromCache();
+                _repository.ReinitializeDb();
+                _sensorCacheHelper.RemoveAllSensorsFromCache();
             }
         }
 
-        private static async Task SeedSensorsAsync()
+        private async Task SeedSensorsAsync()
         {
             _guids = new List<string>();
             Devices = new List<SensorEmulator>();
-            await Repository.RemoveAllSensorsFromDatabaseAsync();
-            SensorCacheHelper.RemoveAllSensorsFromCache();
+            await _repository.RemoveAllSensorsFromDatabaseAsync();
+            _sensorCacheHelper.RemoveAllSensorsFromCache();
             var iterationsForStatic = _emulatorRandom.Next(5, 10);
             for (int i = 0; i < iterationsForStatic; i++)
             {
                 var guid = Guid.NewGuid().ToString();
                 _guids.Add(guid);
                 var fakeSensor = GetStaticFakeSensor(guid);
-                await Repository.AddStaticSensorAsync(fakeSensor.sensor.ApiKey, fakeSensor.sensor.Latitude, fakeSensor.sensor.Longitude);
+                await _repository.AddStaticSensorAsync(fakeSensor.sensor.ApiKey, fakeSensor.sensor.Latitude, fakeSensor.sensor.Longitude);
                 Devices.Add(fakeSensor.emulator);
             }
             var iterationsForPortable = _emulatorRandom.Next(5, 10);
@@ -67,16 +73,16 @@ namespace Web.Areas.Admin.Emulation
                 var guid = Guid.NewGuid().ToString();
                 _guids.Add(guid);
                 var fakeSensor = GetPortableFakeSensor(guid);
-                await Repository.AddPortableSensorAsync(fakeSensor.sensor.ApiKey);
+                await _repository.AddPortableSensorAsync(fakeSensor.sensor.ApiKey);
                 Devices.Add(fakeSensor.emulator);
             }
         }
 
-        private static (SensorEmulator emulator, StaticSensor sensor) GetStaticFakeSensor(string guid)
+        private (SensorEmulator emulator, StaticSensor sensor) GetStaticFakeSensor(string guid)
         {
 
             var apiKey = CryptoHelper.GenerateApiKey();
-            var sensorEmulator = new SensorEmulator(guid, SettingsProvider.ServerIP, apiKey, typeof(StaticSensor));
+            var sensorEmulator = new SensorEmulator(guid, _settingsProvider.ServerIP, apiKey, typeof(StaticSensor));
             var sensor = new StaticSensor
             {
                 ApiKey = apiKey,
@@ -87,10 +93,10 @@ namespace Web.Areas.Admin.Emulation
         }
 
 
-        private static (SensorEmulator emulator, PortableSensor sensor) GetPortableFakeSensor(string guid)
+        private (SensorEmulator emulator, PortableSensor sensor) GetPortableFakeSensor(string guid)
         {
             var apiKey = CryptoHelper.GenerateApiKey();
-            var sensorEmulator = new SensorEmulator(guid, SettingsProvider.ServerIP, apiKey, typeof(PortableSensor));
+            var sensorEmulator = new SensorEmulator(guid, _settingsProvider.ServerIP, apiKey, typeof(PortableSensor));
             var sensor = new PortableSensor
             {
                 ApiKey = apiKey

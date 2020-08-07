@@ -5,16 +5,14 @@ using System.Collections.Generic;
 using System.Data.Entity.Infrastructure;
 using System.Data.SqlClient;
 using System.Linq;
-using System.Net;
 using System.Threading.Tasks;
 using Web.Areas.Admin.Models.Sensors;
-using Web.Data;
-using Web.Data.Models;
-using Web.Areas.Admin.Filters;
 using Microsoft.AspNetCore.Authorization;
 using Web.Helpers.Interfaces;
-using Web;
+using Web.Areas.Admin.Infrastructure.Filters;
+using Web.Domain.Entities;
 using Web.Helpers;
+using Web.Infrastructure.Data.Repository;
 
 namespace Web.Areas.Admin.Controllers
 {

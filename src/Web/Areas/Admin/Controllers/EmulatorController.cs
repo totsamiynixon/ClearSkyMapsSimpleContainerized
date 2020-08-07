@@ -1,6 +1,4 @@
-﻿using System.Net;
-using System.Threading.Tasks;
-using Web.Data;
+﻿using System.Threading.Tasks;
 using Web.Areas.Admin.Models.Emulator;
 using System.Collections.Generic;
 using System.Linq;
@@ -16,9 +14,8 @@ namespace Web.Areas.Admin.Controllers
     [Authorize]
     public class EmulatorController : Controller
     {
-        private readonly IRepository _repository;
-        private readonly ISensorCacheHelper _sensorCacheHelper;
         private readonly ISettingsProvider _settingsProvider;
+        private readonly Emulator _emulator;
 
         private static readonly IMapper _mapper = new Mapper(new MapperConfiguration(x =>
         {
@@ -33,20 +30,19 @@ namespace Web.Areas.Admin.Controllers
 
         }));
 
-        public EmulatorController(IRepository repository, ISensorCacheHelper sensorCacheHelper, ISettingsProvider settingsProvider)
+        public EmulatorController(ISettingsProvider settingsProvider, Emulator emulator)
         {
-            _repository = repository;
-            _sensorCacheHelper = sensorCacheHelper;
             _settingsProvider = settingsProvider;
+            _emulator = emulator;
         }
 
         [HttpGet]
         public ActionResult Index()
         {
             List<SensorEmulator> emulators = new List<SensorEmulator>();
-            if (Emulator.IsEmulationEnabled)
+            if (_emulator.IsEmulationEnabled)
             {
-                emulators = Emulator.Devices;
+                emulators = _emulator.Devices;
             }
             return View(_mapper.Map<List<SensorEmulator>, List<SensorEmulatorListItemViewModel>>(emulators));
         }
@@ -57,9 +53,9 @@ namespace Web.Areas.Admin.Controllers
         {
             if (!_settingsProvider.EmulationEnabled)
             {
-                return NotFound("Емуляция недоступна в данной среде");
+                return Forbid("Emulation is not available");
             }
-            await Emulator.RunEmulationAsync();
+            await _emulator.RunEmulationAsync();
             return RedirectToAction("Index");
         }
 
@@ -68,9 +64,9 @@ namespace Web.Areas.Admin.Controllers
         {
             if (!_settingsProvider.EmulationEnabled)
             {
-                return NotFound("Емуляция недоступна в данной среде");
+                return Forbid("Emulation is not available");
             }
-            Emulator.StopEmulation();
+            _emulator.StopEmulation();
             return RedirectToAction("Index");
         }
 
@@ -79,22 +75,20 @@ namespace Web.Areas.Admin.Controllers
         {
             if (!_settingsProvider.EmulationEnabled)
             {
-                return NotFound("Емуляция недоступна в данной среде");
+                return Forbid("Emulation is not available");
             }
-            var emulator = Emulator.Devices.Where(f => f.GetGuid() == guid).FirstOrDefault();
+            var emulator = _emulator.Devices.FirstOrDefault(f => f.GetGuid() == guid);
             if (emulator == null)
             {
-                return NotFound("Емуляторы не найдены!");
+                return NotFound("Emulators not found");
             }
             if (emulator.IsPowerOn)
             {
-                return Ok("Эмулятор уже запущен!");
+                return Ok("Emulator has been started already");
             }
-            else
-            {
-                emulator.PowerOn();
-                return Ok("Эмулятор успешно запущен!");
-            }
+
+            emulator.PowerOn();
+            return Ok("Emulator has been successfully started");
         }
 
         [HttpPost]
@@ -102,22 +96,20 @@ namespace Web.Areas.Admin.Controllers
         {
             if (!_settingsProvider.EmulationEnabled)
             {
-                return NotFound("Емуляция недоступна в данной среде");
+                return Forbid("Emulation is not available");
             }
-            var emulator = Emulator.Devices.Where(f => f.GetGuid() == guid).FirstOrDefault();
+            var emulator = _emulator.Devices.FirstOrDefault(f => f.GetGuid() == guid);
             if (emulator == null)
             {
-                return NotFound("Емуляторы не найдены!");
+                return NotFound("Emulators not found");
             }
             if (!emulator.IsPowerOn)
             {
-                return Ok("Эмулятор уже остановлен!");
+                return Ok("Emulator has been stopped already");
             }
-            else
-            {
-                emulator.PowerOff();
-                return Ok("Эмулятор успешно остановлен!");
-            }
+
+            emulator.PowerOff();
+            return Ok("Emulator has been successfully stopped");
         }
 
     }

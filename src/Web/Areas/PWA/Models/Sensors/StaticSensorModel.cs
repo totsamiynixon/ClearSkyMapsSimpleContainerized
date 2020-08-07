@@ -1,8 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Web.Enums;
+﻿using System.Collections.Generic;
+using Web.Domain.Enums;
 
 namespace Web.Areas.PWA.Models.Sensors
 {

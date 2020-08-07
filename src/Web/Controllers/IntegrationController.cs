@@ -1,15 +1,11 @@
 ﻿using System;
-using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
-using AutoMapper;
+using MediatR;
 using Microsoft.AspNetCore.Mvc;
-using Web.Areas.Admin.Helpers.Interfaces;
-using Web.Areas.PWA.Helpers.Interfaces;
-using Web.Data;
-using Web.Data.Models;
-using Web.Helpers.Interfaces;
-using Web.Models.Api.Sensor;
+using Web.Application.Readings.Commands;
+using Web.Application.Readings.DTO;
+using Web.Application.Readings.Exceptions;
 
 namespace Web.Controllers
 {
@@ -17,74 +13,43 @@ namespace Web.Controllers
     [ApiController]
     public class IntegrationController : ControllerBase
     {
-        private readonly IRepository _repository;
-        private readonly IAdminDispatchHelper _adminDispatchHelper;
-        private readonly IPWADispatchHelper _pwaDispatchHelper;
-        private readonly ISensorCacheHelper _sensorCacheHelper;
+        private readonly IMediator _mediator;
 
-        private static readonly IMapper _mapper = new Mapper(new MapperConfiguration(x =>
+        public IntegrationController(IMediator mediator)
         {
-            x.CreateMap<SensorDataModel, PortableSensorReading>();
-            x.CreateMap<SensorDataModel, StaticSensorReading>();
-        }));
-
-        public IntegrationController(IRepository repository, IAdminDispatchHelper adminDispatchHelper,
-            IPWADispatchHelper pwaDispatchHelper, ISensorCacheHelper sensorCacheHelper)
-        {
-            _repository = repository;
-            _adminDispatchHelper = adminDispatchHelper;
-            _pwaDispatchHelper = pwaDispatchHelper;
-            _sensorCacheHelper = sensorCacheHelper;
+            _mediator = mediator;
         }
-   
+
         [HttpGet("getaspost")]
         public async Task<IActionResult> GetAsPostDataAsync(string data)
         {
             var model = GetModelFromString(data);
-            if (model == null)
+            if (model.apiKey == null || model.reading == null)
             {
                 return BadRequest("Invalid Data");
             }
 
-            var sensor = await _repository.GetSensorByApiKeyAsync(model.ApiKey);
-            if (sensor == null)
+            try
             {
-                return NotFound();
+                await _mediator.Send(new CreateReadingCommand(model.reading, model.apiKey));
             }
-
-            if (sensor is PortableSensor)
+            catch (SensorNotFoundException ex)
             {
-                var reading = _mapper.Map<SensorDataModel, Reading>(model);
-                _adminDispatchHelper.DispatchReadingsForPortableSensor(sensor.Id, reading);
-                _adminDispatchHelper.DispatchCoordinatesForPortableSensor(sensor.Id, model.Latitude, model.Longitude);
-            }
-            else if (sensor is StaticSensor staticSensor)
-            {
-                var reading = _mapper.Map<SensorDataModel, StaticSensorReading>(model);
-                reading.StaticSensorId = sensor.Id;
-                await _repository.AddReadingAsync(reading);
-                _adminDispatchHelper.DispatchReadingsForStaticSensor(sensor.Id, reading);
-                if (staticSensor.IsAvailable())
-                {
-                    await _sensorCacheHelper.UpdateSensorCacheWithReadingAsync(reading);
-                    var pollutionLevel = await _sensorCacheHelper.GetPollutionLevelAsync(sensor.Id);
-                    _pwaDispatchHelper.DispatchReadingsForStaticSensor(sensor.Id, pollutionLevel, reading);
-                }
+                return NotFound(ex.Message);
             }
 
             return Ok();
         }
 
 
-        private SensorDataModel GetModelFromString(string data)
+        private (string apiKey,SensorReadingDTO reading) GetModelFromString(string data)
         {
             try
             {
                 var trimmed = data.Trim(';');
                 var groupes = trimmed.Split(",").Select(x => x.Replace('.', ',')).ToArray();
-                return new SensorDataModel
+                return (apiKey: groupes[0], reading: new SensorReadingDTO
                 {
-                    ApiKey = groupes[0],
                     Temp = float.Parse(groupes[1]),
                     Hum = float.Parse(groupes[2]),
                     Preassure = float.Parse(groupes[3]),
@@ -95,11 +60,11 @@ namespace Web.Controllers
                     Dust = float.Parse(groupes[8]),
                     Longitude = float.Parse(groupes[9]),
                     Latitude = float.Parse(groupes[10])
-                };
+                });
             }
             catch (Exception ex)
             {
-                return null;
+                return (null, null);
             }
         }
     }

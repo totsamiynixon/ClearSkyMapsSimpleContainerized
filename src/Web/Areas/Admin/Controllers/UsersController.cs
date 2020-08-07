@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Web.Areas.Admin.Models.Users;
-using Web.Data.Models.Identity;
+using Web.Domain.Entities.Identity;
 
 namespace Web.Areas.Admin.Controllers
 {

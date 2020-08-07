@@ -1,9 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Web;
-using Web.Data.Models;
-using Web.Enums;
+using Web.Domain.Enums;
 
 namespace Web.Models.Hub
 {

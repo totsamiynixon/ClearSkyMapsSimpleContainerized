@@ -7,7 +7,7 @@ using System.Collections.Generic;
 using System.Security.Claims;
 using System.Threading.Tasks;
 using Web.Areas.Admin.Models.Account;
-using Web.Data.Models.Identity;
+using Web.Domain.Entities.Identity;
 
 namespace Web.Areas.Admin.Controllers
 {

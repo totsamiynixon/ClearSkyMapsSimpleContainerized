@@ -1,13 +1,9 @@
 ﻿using AutoMapper;
 using Microsoft.AspNetCore.SignalR;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using Web.Areas.PWA.Helpers.Interfaces;
 using Web.Areas.PWA.Hubs;
-using Web.Data.Models;
-using Web.Enums;
+using Web.Domain.Entities;
+using Web.Domain.Enums;
 using Web.Models.Hub;
 
 namespace Web.Areas.PWA.Helpers.Implementations

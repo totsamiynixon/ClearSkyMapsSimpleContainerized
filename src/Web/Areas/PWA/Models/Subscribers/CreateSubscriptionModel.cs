@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace Web.Areas.PWA.Models.Api.Subscribers
+namespace Web.Areas.PWA.Models.Subscribers
 {
     public class CreateSubscriptionModel
     {

@@ -1,20 +1,14 @@
-﻿using System;
-using Microsoft.AspNetCore.Builder;
+﻿using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.Identity.UI;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using Web.Data;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Web.Data.Models.Identity;
 using Web.Extensions;
 using Web.Helpers.Interfaces;
 using Web.Helpers.Implementations;
 using Microsoft.Extensions.Logging;
-using Web.Middlewares;
 using Web.Areas.Admin;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Web.Areas.PWA.Helpers.Interfaces;
@@ -22,19 +16,24 @@ using Web.Areas.PWA.Helpers.Implementations;
 using Web.Areas.Admin.Helpers.Interfaces;
 using Web.Areas.Admin.Helpers.Implementations;
 using Web.Areas.PWA;
+using Web.Domain.Entities.Identity;
+using Web.Infrastructure;
+using Web.Infrastructure.Data;
+using Web.Infrastructure.Data.Factory;
+using Web.Infrastructure.Data.Initialize;
+using Web.Infrastructure.Data.Initialize.Seed;
+using Web.Infrastructure.Data.Repository;
+using Web.Infrastructure.Middlewares;
 
 namespace Web
 {
     public class Startup
     {
         public IConfiguration Configuration { get; }
-        public static Func<IServiceProvider> ServiceProvider { get; private set; }
 
-        private IServiceScopeFactory _scopeFactory { get; set; }
+        private readonly IWebHostEnvironment _environment;
 
-        private readonly IHostingEnvironment _environment;
-
-        public Startup(IConfiguration configuration, IServiceProvider serviceProvider, IHostingEnvironment env)
+        public Startup(IConfiguration configuration, IWebHostEnvironment env)
         {
             Configuration = configuration;
             _environment = env;
@@ -43,15 +42,24 @@ namespace Web
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            var config = Configuration.GetSection("Settings").Get<AppSettings>();
+
+            //TODO: Check how it works
+            services.AddTransient<AppSettings>((_) => config);
+            
             services.AddTransient<UserManager<User>>();
             services.AddTransient<RoleManager<User>>();
-
-            services.AddTransient<ISettingsProvider, JsonConfigSettingsProvider>();
+            
             services.AddTransient<IRepository, Repository>();
             services.AddTransient<IPollutionCalculator, PollutionCalculator>();
             services.AddTransient<ISensorCacheHelper, SensorCacheHelper>();
             services.AddTransient<IPWADispatchHelper, PWASignalrDispatchHelper>();
             services.AddTransient<IAdminDispatchHelper, AdminSignalRHubDispatchHelper>();
+            services.AddSingleton<IDataContextFactory<DataContext>, DefaultDataContextFactory>();
+            services.AddSingleton<IDataContextFactory<IdentityDataContext>, DefaultIdentityDataContextFactory>();
+            services.AddSingleton<IDatabaseSeeder<DataContext>, DataContextDatabaseSeeder>();
+            services.AddSingleton<IDatabaseSeeder<IdentityDataContext>, IdentityDataContextDatabaseSeeder>();
+            services.AddSingleton<IDatabaseInitializer, DefaultDatabaseInitializer>();
 
             services.Configure<CookiePolicyOptions>(options =>
             {
@@ -60,46 +68,20 @@ namespace Web
                 options.MinimumSameSitePolicy = SameSiteMode.None;
             });
 
-            services.AddDbContext<DataContext>(options =>
-                {
-                    var scopeFactory = services
-                        .BuildServiceProvider()
-                        .GetRequiredService<IServiceScopeFactory>();
 
-                    using (var scope = scopeFactory.CreateScope())
-                    {
-                        {
-                            options.UseSqlServer(
-                                ((ISettingsProvider) scope.ServiceProvider.GetService(typeof(ISettingsProvider)))
-                                .ConnectionString);
-                        }
-                    }
-                }, ServiceLifetime.Transient)
-                ;
-            services.AddDbContext<IdentityDbContext>(options =>
-            {
-                var scopeFactory = services
-                    .BuildServiceProvider()
-                    .GetRequiredService<IServiceScopeFactory>();
+            services.AddDbContext<DataContext>(
+                (provider, builder) => provider.GetService<IDataContextFactory<DataContext>>().Create(), ServiceLifetime.Transient);
+            services.AddDbContext<IdentityDataContext>(
+                (provider, builder) => provider.GetService<IDataContextFactory<IdentityDataContext>>().Create(),
+                ServiceLifetime.Transient);
 
-                using (var scope = scopeFactory.CreateScope())
-                {
-                    {
-                        options.UseSqlServer(
-                            ((ISettingsProvider) scope.ServiceProvider.GetService(typeof(ISettingsProvider)))
-                            .IdentityConnectionString);
-                    }
-                }
-            }, ServiceLifetime.Transient);
-
-            services.AddDefaultIdentity<User>()
-                .AddDefaultUI(UIFramework.Bootstrap4)
+            services.AddIdentityCore<User>()
                 .AddUserManager<UserManager<User>>()
                 .AddRoles<IdentityRole>()
                 .AddRoleManager<RoleManager<IdentityRole>>()
-                .AddEntityFrameworkStores<IdentityDbContext>();
+                .AddEntityFrameworkStores<IdentityDataContext>();
 
-            services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
+            services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_3_0);
             services.AddMemoryCache();
 
             services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
@@ -115,29 +97,27 @@ namespace Web
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, IHostingEnvironment env, ILoggerFactory loggerFactory)
+        public void Configure(IApplicationBuilder app, IWebHostEnvironment env, ILoggerFactory loggerFactory)
         {
-            _scopeFactory = app.ApplicationServices.GetRequiredService<IServiceScopeFactory>();
-            ServiceProvider = () => { return _scopeFactory.CreateScope().ServiceProvider; };
             app.UseMiddleware<ExceptionHandlerMiddleware>();
+
+            app.UseRouting();
+
             app.UseStaticFiles();
             app.UseCookiePolicy();
             app.UseAuthentication();
-            app.UseMvc(routes =>
-            {
-                routes.MapRoute(
-                    name: "areaRoute",
-                    template: "{area:exists}/{controller=sensors}/{action=index}/{id?}"
-                );
 
-                routes.MapRoute(
+            app.UseEndpoints(endpoints =>
+            {
+                endpoints.MapControllers();
+                endpoints.MapControllerRoute(
                     name: "default",
-                    template: "{controller=home}/{action=index}/{id?}");
+                    pattern: "{controller=home}/{action=index}/{id?}");
             });
-            app.UseAdminArea(env);
+
+            app.UseAdminArea(Configuration, env);
             app.UsePWAArea(env);
-            app.InitializeDatabase();
-            app.AppBundles();
+            
         }
     }
 }

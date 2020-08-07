@@ -1,5 +1,5 @@
-﻿using Web.Data.Models;
-using Web.Enums;
+﻿using Web.Domain.Entities;
+using Web.Domain.Enums;
 
 namespace Web.Models.Cache
 {

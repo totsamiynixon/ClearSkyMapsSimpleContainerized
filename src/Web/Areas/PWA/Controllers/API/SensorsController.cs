@@ -1,15 +1,12 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using AutoMapper;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Web.Areas.PWA.Models.API.Sensors;
 using Web.Areas.PWA.Models.Sensors;
-using Web.Data;
-using Web.Data.Models;
+using Web.Domain.Entities;
 using Web.Helpers.Interfaces;
-using Web.Models.Api.Sensor;
 
 namespace Web.Areas.PWA.Controllers.API
 {

@@ -1,4 +1,4 @@
-﻿namespace Web.Areas.PWA.Models.Api.Notifications
+﻿namespace Web.Areas.PWA.Models.Notifications
 {
     public class SubscribeOnSersorModel
     {

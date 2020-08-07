@@ -3,10 +3,10 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Web.Data;
-using Web.Data.Models;
-using Web.Enums;
+using Web.Domain.Entities;
+using Web.Domain.Enums;
 using Web.Helpers.Interfaces;
+using Web.Infrastructure.Data.Repository;
 using Web.Models.Cache;
 
 namespace Web.Helpers.Implementations
@@ -57,7 +57,7 @@ namespace Web.Helpers.Implementations
              {
                  entry.SetAbsoluteExpiration(_sensorCacheLifetime);
                  List<SensorCacheItemModel> result = new List<SensorCacheItemModel>();
-                 var sensors = await (Startup.ServiceProvider().GetService(typeof(IRepository)) as IRepository).GetStaticSensorsForCacheAsync();
+                 var sensors = await _repository.GetStaticSensorsForCacheAsync();
                  foreach (var sensor in sensors)
                  {
                      result.Add(new SensorCacheItemModel(sensor, _pollutionCalculator.CalculatePollutionLevel(sensor.Readings.Cast<Reading>().ToList())));

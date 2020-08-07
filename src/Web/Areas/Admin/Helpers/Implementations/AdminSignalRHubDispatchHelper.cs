@@ -1,9 +1,10 @@
-﻿using AutoMapper;
+﻿using System.Threading.Tasks;
+using AutoMapper;
 using Microsoft.AspNetCore.SignalR;
 using Web.Areas.Admin.Helpers.Interfaces;
-using Web.Areas.Admin.Hubs;
+using Web.Areas.Admin.Infrastructure.Hubs;
 using Web.Areas.Admin.Models.Hub;
-using Web.Data.Models;
+using Web.Domain.Entities;
 using Web.Models.Hub;
 
 namespace Web.Areas.Admin.Helpers.Implementations
@@ -26,23 +27,23 @@ namespace Web.Areas.Admin.Helpers.Implementations
             _staticSensorHubContext = staticSensorHubContext;
         }
 
-        public void DispatchCoordinatesForPortableSensor(int sensorId, double latitude, double longitude)
+        public async Task DispatchCoordinatesForPortableSensorAsync(int sensorId, double latitude, double longitude)
         {
-            _portableSensorHubContext.Clients.Group(AdminPortableSensorHub.PortableSensorGroup(sensorId)).DispatchCoordinates(new PortableSensorCoordinatesDispatchModel
+            await _portableSensorHubContext.Clients.Group(AdminPortableSensorHub.PortableSensorGroup(sensorId)).DispatchCoordinatesAsync(new PortableSensorCoordinatesDispatchModel
             {
                 Latitude = latitude,
                 Longitude = longitude
             });
         }
 
-        public void DispatchReadingsForPortableSensor(int sensorId, Reading reading)
+        public async Task DispatchReadingsForPortableSensorAsync(int sensorId, Reading reading)
         {
-            _portableSensorHubContext.Clients.Group(AdminPortableSensorHub.PortableSensorGroup(sensorId)).DispatchReading(_mapper.Map<Reading, PortableSensorReadingsDispatchModel>(reading));
+           await _portableSensorHubContext.Clients.Group(AdminPortableSensorHub.PortableSensorGroup(sensorId)).DispatchReadingAsync(_mapper.Map<Reading, PortableSensorReadingsDispatchModel>(reading));
         }
 
-        public void DispatchReadingsForStaticSensor(int sensorId, Reading reading)
+        public async Task DispatchReadingsForStaticSensorAsync(int sensorId, Reading reading)
         {
-            _staticSensorHubContext.Clients.All.DispatchReading(_mapper.Map<Reading, StaticSensorReadingDispatchModel>(reading));
+            await _staticSensorHubContext.Clients.All.DispatchReadingAsync(_mapper.Map<Reading, StaticSensorReadingDispatchModel>(reading));
         }
     }
 }

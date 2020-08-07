@@ -1,33 +1,23 @@
-﻿using Microsoft.AspNetCore.Authentication.Cookies;
-using Microsoft.AspNetCore.Builder;
+﻿using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Web.Areas.Admin.Hubs;
+using Microsoft.Extensions.Configuration;
+using Web.Areas.Admin.Infrastructure.Hubs;
+using Web.Areas.Admin.Infrastructure.MIddlewares;
 
 namespace Web.Areas.Admin
 {
     public static class AdminArea
     {
-        public static IApplicationBuilder UseAdminArea(this IApplicationBuilder app, IHostingEnvironment env)
+        public static IApplicationBuilder UseAdminArea(this IApplicationBuilder app, IConfiguration configuration,  IWebHostEnvironment env)
         {
-            //app.Map("/admin", builder =>
-            //{
-            //    app.UseMvc(routes =>
-            //    {
-            //        routes.MapRoute(
-            //          name: "Admin_default",
-            //          template: "{area}/{controller=Sensors}/{action=Index}");
-            //    });
-            //});
-
-            app.UseSignalR(routes =>
+            app.UseEndpoints(endpoints =>
             {
-                routes.MapHub<AdminPortableSensorHub>("/adminportable");
-                routes.MapHub<AdminStaticSensorHub>("/adminstatic");
+                endpoints.MapAreaControllerRoute("adminArea", "Admin",  "{area:exists}/{controller=sensors}/{action=index}/{id?}");
+                endpoints.MapHub<AdminPortableSensorHub>("/adminportable");
+                endpoints.MapHub<AdminStaticSensorHub>("/adminstatic");
             });
+            
+            app.AppBundles();
 
             return app;
         }
