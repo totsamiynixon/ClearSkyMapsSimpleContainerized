@@ -26,11 +26,12 @@ namespace Web.Application.Emulation.Notifications
         public async Task Handle(EmulationStartedNotification notification, CancellationToken cancellationToken)
         {
             _sensorCacheHelper.ClearCache();
-            await using var context = _dataContextFactory.Create();
-            //await context.Database.EnsureDeletedAsync(cancellationToken);
-            
             await _applicationDatabaseInitializer.InitializeDbAsync();
             
+            await using var context = _dataContextFactory.Create();
+            context.Sensors.RemoveRange(context.Sensors);
+            await context.SaveChangesAsync(cancellationToken);
+
             foreach (var device in notification.Emulator.Devices)
             {
                 if (device.SensorType == typeof(StaticSensor))

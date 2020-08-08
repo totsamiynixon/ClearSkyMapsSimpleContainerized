@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Globalization;
 
 namespace Web.Emulation.Models
 {
@@ -30,7 +31,12 @@ namespace Web.Emulation.Models
 
         public override string ToString()
         {
-            return $"{ApiKey},{Temp},{Hum},{Preassure},{CO2},{LPG},{CO},{CH4},{Dust},{Longitude},{Latitude};";
+            return string.Join(",", ApiKey, Temp.ToString(CultureInfo.InvariantCulture),
+                Hum.ToString(CultureInfo.InvariantCulture), Preassure.ToString(CultureInfo.InvariantCulture),
+                CO2.ToString(CultureInfo.InvariantCulture), LPG.ToString(CultureInfo.InvariantCulture),
+                CO.ToString(CultureInfo.InvariantCulture), CH4.ToString(CultureInfo.InvariantCulture),
+                Dust.ToString(CultureInfo.InvariantCulture), Longitude.ToString(CultureInfo.InvariantCulture),
+                Latitude.ToString(CultureInfo.InvariantCulture));
         }
     }
 }

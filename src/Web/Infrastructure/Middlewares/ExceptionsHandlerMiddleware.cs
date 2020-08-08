@@ -37,10 +37,10 @@ namespace Web.Infrastructure.Middlewares
                 context.Response.StatusCode = 500;
                 if (_hostingEnvironment.IsDevelopment())
                 {
-                    JsonResult result = new JsonResult(ex, new JsonSerializerSettings
+                    JsonResult result = new JsonResult(JsonConvert.SerializeObject(ex, new JsonSerializerSettings
                     {
                         ReferenceLoopHandling = ReferenceLoopHandling.Ignore
-                    });
+                    }));
                     RouteData routeData = context.GetRouteData();
                     ActionDescriptor actionDescriptor = new ActionDescriptor();
                     ActionContext actionContext = new ActionContext(context, routeData ?? new RouteData(), actionDescriptor);

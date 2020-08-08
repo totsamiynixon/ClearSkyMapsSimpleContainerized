@@ -1,5 +1,4 @@
 ﻿using MediatR;
-using Web.Application.Readings.DTO;
 using Web.Domain.Entities;
 
 namespace Web.Application.Readings.Notifications

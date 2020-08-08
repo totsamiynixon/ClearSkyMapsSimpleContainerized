@@ -5,7 +5,6 @@ using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using Web.Domain.Entities;
 using Web.Infrastructure.Data.Factory;
-using Z.EntityFramework.Plus;
 
 namespace Web.Infrastructure.Data.Repository
 {
@@ -97,7 +96,7 @@ namespace Web.Infrastructure.Data.Repository
             using (var context = _dataContextFactory.Create())
             {
                 var query = context
-                    .Sensors.AsNoTracking().Where(f => !f.IsDeleted);
+                    .Set<Sensor>().AsNoTracking().Where(f => !f.IsDeleted);
                 var sensors = await query.ToListAsync();
                 return sensors;
             }
@@ -202,25 +201,26 @@ namespace Web.Infrastructure.Data.Repository
         {
             using (var context = _dataContextFactory.Create())
             {
+                var sensor = await context.Sensors.FirstOrDefaultAsync(f => f.Id == id);
                 if (!isCompletely)
                 {
-                    await context.Sensors.Where(f => f.Id == id).UpdateAsync(f => new StaticSensor
-                    {
-                        IsDeleted = true
-                    });
+                    sensor.IsDeleted = true;
                 }
                 else
-                {
-                    await context.Sensors.Where(f => f.Id == id).DeleteAsync();
+                { 
+                    context.Sensors.Remove(sensor);
                 }
+                
+                await context.SaveChangesAsync();
             }
         }
 
         public async Task RemoveSensorsFromDatabaseAsync(params int[] ids)
         {
             using (var context = _dataContextFactory.Create())
-            {
-                await context.Sensors.Where(f => ids.Any(s => s == f.Id)).DeleteAsync();
+            { 
+                context.Sensors.RemoveRange(context.Sensors.Where(f => ids.Any(s => s == f.Id)));
+                await context.SaveChangesAsync();
             }
         }
 
@@ -228,7 +228,8 @@ namespace Web.Infrastructure.Data.Repository
         {
             using (var context = _dataContextFactory.Create())
             {
-                await context.Sensors.Where(f => true).DeleteAsync();
+                context.Sensors.RemoveRange(context.Sensors.Where(f => true));
+                await context.SaveChangesAsync();
             }
         }
 

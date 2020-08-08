@@ -3,7 +3,6 @@ using System.Threading.Tasks;
 using MediatR;
 using Web.Application.Emulation.Exceptions;
 using Web.Emulation;
-using Web.Helpers.Interfaces;
 using Web.Infrastructure;
 
 namespace Web.Application.Emulation.Commands

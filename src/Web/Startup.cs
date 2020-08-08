@@ -44,10 +44,10 @@ namespace Web
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            var config = Configuration.GetSection("Settings").Get<AppSettings>();
+            var appSettings = Configuration.GetSection("Settings").Get<AppSettings>();
 
             //TODO: Check how it works
-            services.AddTransient<AppSettings>((_) => config);
+            services.AddTransient<AppSettings>((_) => appSettings);
             services.AddMediatR(typeof(Startup));
             
             services.AddTransient<UserManager<User>>();
@@ -60,28 +60,26 @@ namespace Web
             services.AddTransient<IPWADispatchHelper, PWASignalrDispatchHelper>();
             services.AddTransient<IAdminDispatchHelper, AdminSignalRHubDispatchHelper>();
 
-            services.AddSingleton<IEmulationDataContextFactory<DataContext>, EmulationDataContextFactory>();
-            services.AddSingleton<IEmulationDataContextFactory<IdentityDataContext>, EmulationIdentityDataContextFactory>();
+            services.AddSingleton<IEmulationDataContextFactory<DataContext>>(provider => new DefaultDataContextFactory<DataContext>(appSettings.Emulation.ConnectionString));
+            services.AddSingleton<IEmulationDataContextFactory<IdentityDataContext>>(provider => new DefaultDataContextFactory<IdentityDataContext>(appSettings.Emulation.ConnectionString));
 
-            services.AddSingleton<IDataContextFactory<DataContext>>(provider =>
+            services.AddTransient<IDataContextFactory<DataContext>>(provider =>
             {
-                var appSettings = provider.GetService<AppSettings>();
                 var emulator = provider.GetService<Emulator>();
-                return emulator.IsEmulationEnabled
-                    ? (IDataContextFactory<DataContext>)new EmulationDataContextFactory(appSettings)
-                    : (IDataContextFactory<DataContext>)new DefaultDataContextFactory(appSettings);
+                return new DefaultDataContextFactory<DataContext>(emulator.IsEmulationEnabled
+                    ? appSettings.Emulation.ConnectionString
+                    : appSettings.ConnectionString);
             });
-            services.AddSingleton<IDataContextFactory<IdentityDataContext>>(provider =>
+            services.AddTransient<IDataContextFactory<IdentityDataContext>>(provider =>
             {
-                var appSettings = provider.GetService<AppSettings>();
                 var emulator = provider.GetService<Emulator>();
-                return emulator.IsEmulationEnabled
-                    ? (IDataContextFactory<IdentityDataContext>)new EmulationIdentityDataContextFactory(appSettings)
-                    : (IDataContextFactory<IdentityDataContext>)new DefaultIdentityDataContextFactory(appSettings);
+                return new DefaultDataContextFactory<IdentityDataContext>(emulator.IsEmulationEnabled
+                    ? appSettings.Emulation.ConnectionString
+                    : appSettings.ConnectionString);
             });
-            services.AddSingleton<IDatabaseSeeder<DataContext>, DataContextDatabaseSeeder>();
-            services.AddSingleton<IDatabaseSeeder<IdentityDataContext>, IdentityDataContextDatabaseSeeder>();
-            services.AddSingleton<IApplicationDatabaseInitializer, DefaultApplicationDatabaseInitializer>();
+            services.AddTransient<IDatabaseSeeder<DataContext>, DataContextDatabaseSeeder>();
+            services.AddTransient<IDatabaseSeeder<IdentityDataContext>, IdentityDataContextDatabaseSeeder>();
+            services.AddTransient<IApplicationDatabaseInitializer, DefaultApplicationDatabaseInitializer>();
 
             //TODO: Check why doesnt work with identity
             /*services.AddDbContext<DataContext>(

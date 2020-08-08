@@ -1,11 +1,8 @@
 ﻿using System.Threading;
 using System.Threading.Tasks;
-using AutoMapper;
 using MediatR;
-using Web.Application.Readings.DTO;
 using Web.Application.Readings.Notifications;
 using Web.Areas.Admin.Helpers.Interfaces;
-using Web.Domain.Entities;
 
 namespace Web.Areas.Admin.Application.Readings.Notifications
 {

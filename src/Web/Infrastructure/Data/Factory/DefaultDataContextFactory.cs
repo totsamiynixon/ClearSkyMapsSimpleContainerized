@@ -1,22 +1,26 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using System;
+using Microsoft.EntityFrameworkCore;
 
 namespace Web.Infrastructure.Data.Factory
 {
-    public class DefaultDataContextFactory : IDataContextFactory<DataContext>
-    {
-        private readonly AppSettings _appSettings;
+    public class DefaultDataContextFactory<TContext> : IEmulationDataContextFactory<TContext> where TContext : DbContext
 
-        public DefaultDataContextFactory(AppSettings appSettings)
+    {
+        private readonly string _connectionString;
+
+        public DefaultDataContextFactory(string connectionString)
         {
-            _appSettings = appSettings;
+            _connectionString = connectionString;
         }
 
 
-        public DataContext Create()
+        public TContext Create()
         {
-            var optionsBuilder = new DbContextOptionsBuilder<DataContext>();
-            optionsBuilder.UseSqlServer(_appSettings.ConnectionString);
-            return new DataContext(optionsBuilder.Options);
+            var optionsBuilder = new DbContextOptionsBuilder<TContext>();
+            optionsBuilder.UseSqlServer(_connectionString);
+            /*var optionsType = typeof(DbContextOptions<>).MakeGenericType(typeof(TContext));
+            var options = (DbContextOptions)Activator.CreateInstance(optionsType);*/
+            return (TContext) Activator.CreateInstance(typeof(TContext), optionsBuilder.Options);
         }
     }
 }

@@ -2,12 +2,12 @@
 using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Collections.Generic;
-using System.Data.Entity.Infrastructure;
-using System.Data.SqlClient;
 using System.Linq;
 using System.Threading.Tasks;
 using Web.Areas.Admin.Models.Sensors;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.Data.SqlClient;
+using Microsoft.EntityFrameworkCore;
 using Web.Helpers.Interfaces;
 using Web.Areas.Admin.Infrastructure.Filters;
 using Web.Domain.Entities;

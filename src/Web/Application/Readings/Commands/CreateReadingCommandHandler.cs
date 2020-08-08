@@ -5,8 +5,6 @@ using MediatR;
 using Web.Application.Readings.DTO;
 using Web.Application.Readings.Exceptions;
 using Web.Application.Readings.Notifications;
-using Web.Areas.Admin.Helpers.Interfaces;
-using Web.Areas.PWA.Helpers.Interfaces;
 using Web.Domain.Entities;
 using Web.Helpers.Interfaces;
 using Web.Infrastructure.Data.Repository;
