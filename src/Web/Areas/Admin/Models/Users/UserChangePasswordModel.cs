@@ -2,8 +2,10 @@
 
 namespace Web.Areas.Admin.Models.Users
 {
-    public class CreateUserViewModel
+    public class UserChangePasswordModel
     {
+        public string Id { get; set; }
+
         [Display(Name = "Адрес электронной почты")]
         public string Email { get; set; }
 

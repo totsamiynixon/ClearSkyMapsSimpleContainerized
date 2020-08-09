@@ -2,12 +2,14 @@
 using System.Threading.Tasks;
 using AutoMapper;
 using MediatR;
+using Microsoft.EntityFrameworkCore;
 using Web.Application.Readings.DTO;
 using Web.Application.Readings.Notifications;
 using Web.Areas.PWA.Helpers.Interfaces;
 using Web.Domain.Entities;
 using Web.Helpers.Interfaces;
-using Web.Infrastructure.Data.Repository;
+using Web.Infrastructure.Data;
+using Web.Infrastructure.Data.Factory;
 
 namespace Web.Areas.PWA.Application.Readings.Notifications
 {
@@ -15,8 +17,8 @@ namespace Web.Areas.PWA.Application.Readings.Notifications
         StaticSensorReadingCreatedNotificationHandler : INotificationHandler<StaticSensorReadingCreatedNotification>
     {
         private readonly IPWADispatchHelper _pwaDispatchHelper;
-        private readonly IRepository _repository;
         private readonly ISensorCacheHelper _sensorCacheHelper;
+        private readonly IDataContextFactory<DataContext> _dataContextFactory;
 
         private static readonly IMapper _mapper = new Mapper(new MapperConfiguration(x =>
         {
@@ -24,18 +26,20 @@ namespace Web.Areas.PWA.Application.Readings.Notifications
         }));
 
         public StaticSensorReadingCreatedNotificationHandler(IPWADispatchHelper pwaDispatchHelper,
-            IRepository repository, ISensorCacheHelper sensorCacheHelper)
+            ISensorCacheHelper sensorCacheHelper, IDataContextFactory<DataContext> dataContextFactory)
         {
             _pwaDispatchHelper = pwaDispatchHelper;
-            _repository = repository;
             _sensorCacheHelper = sensorCacheHelper;
+            _dataContextFactory = dataContextFactory;
         }
 
         public async Task Handle(StaticSensorReadingCreatedNotification notification,
             CancellationToken cancellationToken)
         {
-            var sensor = await _repository.GetSensorByIdAsync(notification.SensorId);
-            if (sensor is StaticSensor staticSensor && staticSensor.IsAvailable())
+            await using var context = _dataContextFactory.Create();
+            var sensor = await context.StaticSensors.AsNoTracking()
+                .FirstOrDefaultAsync(z => z.Id == notification.SensorId, cancellationToken);
+            if (sensor.IsAvailable())
             {
                 var pollutionLevel = await _sensorCacheHelper.GetPollutionLevelAsync(sensor.Id);
                 _pwaDispatchHelper.DispatchReadingsForStaticSensor(sensor.Id, pollutionLevel, notification.Reading);

@@ -1,11 +1,14 @@
-﻿namespace Web.Areas.Admin.Models.Users
+﻿using System.ComponentModel.DataAnnotations;
+
+namespace Web.Areas.Admin.Models.Users
 {
     public class ActivateUserViewModel
     {
-        public string Id { get; set; }
+        public ActivateUserViewModel(ActivateUserModel model)
+        {
+            Model = model;
+        }
 
-        public string Email { get; set; }
-
-        public bool IsActive { get; set; }
+        public ActivateUserModel Model { get; }
     }
 }

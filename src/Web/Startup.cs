@@ -12,6 +12,7 @@ using Web.Helpers.Implementations;
 using Microsoft.Extensions.Logging;
 using Web.Areas.Admin;
 using Microsoft.AspNetCore.Authentication.Cookies;
+using Web.Areas.Admin.Application.Readings.Queries;
 using Web.Areas.PWA.Helpers.Interfaces;
 using Web.Areas.PWA.Helpers.Implementations;
 using Web.Areas.Admin.Helpers.Interfaces;
@@ -24,7 +25,6 @@ using Web.Infrastructure.Data;
 using Web.Infrastructure.Data.Factory;
 using Web.Infrastructure.Data.Initialize;
 using Web.Infrastructure.Data.Initialize.Seed;
-using Web.Infrastructure.Data.Repository;
 using Web.Infrastructure.Middlewares;
 
 namespace Web
@@ -54,7 +54,7 @@ namespace Web
             services.AddTransient<RoleManager<User>>();
 
             services.AddSingleton<Emulator>();
-            services.AddTransient<IRepository, Repository>();
+            services.AddTransient<IReadingsQueries, ReadingsQueries>();
             services.AddTransient<IPollutionCalculator, PollutionCalculator>();
             services.AddTransient<ISensorCacheHelper, SensorCacheHelper>();
             services.AddTransient<IPWADispatchHelper, PWASignalrDispatchHelper>();

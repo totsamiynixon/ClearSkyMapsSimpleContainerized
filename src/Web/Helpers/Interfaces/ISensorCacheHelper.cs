@@ -11,9 +11,7 @@ namespace Web.Helpers.Interfaces
         Task<List<SensorCacheItemModel>> GetStaticSensorsAsync();
 
         Task UpdateStaticSensorCacheAsync(StaticSensor sensor);
-
-        Task AddStaticSensorToCacheAsync(int sensorId);
-
+        
         Task RemoveStaticSensorFromCacheAsync(int sensorId);
 
         void ClearCache();

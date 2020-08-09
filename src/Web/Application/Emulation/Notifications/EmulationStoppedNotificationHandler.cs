@@ -21,11 +21,9 @@ namespace Web.Application.Emulation.Notifications
         public async Task Handle(EmulationStoppedNotification notification, CancellationToken cancellationToken)
         {
             _sensorCacheHelper.ClearCache();
-            
-            using (var context = _emulationDataContextFactory.Create())
-            {
-                await context.Database.EnsureDeletedAsync(cancellationToken);
-            }
+
+            await using var context = _emulationDataContextFactory.Create();
+            await context.Database.EnsureDeletedAsync(cancellationToken);
         }
     }
 }

@@ -6,38 +6,23 @@ using System.Threading.Tasks;
 using Web.Domain.Entities;
 using Web.Domain.Enums;
 using Web.Helpers.Interfaces;
-using Web.Infrastructure.Data.Repository;
 using Web.Models.Cache;
 
 namespace Web.Helpers.Implementations
 {
     public class SensorCacheHelper : ISensorCacheHelper
     {
-        private const string _sensorCacheKey = "CSMStaticSensors";
-        private static TimeSpan _sensorCacheLifetime => new TimeSpan(1, 0, 0);
+        private const string SensorCacheKey = "CSMStaticSensors";
+        private static TimeSpan SensorCacheLifetime => new TimeSpan(1, 0, 0);
 
 
         private readonly IMemoryCache _memCache;
-        private readonly IRepository _repository;
         private readonly IPollutionCalculator _pollutionCalculator;
 
-        public SensorCacheHelper(IMemoryCache cache, IRepository repository, IPollutionCalculator pollutionCalculator)
+        public SensorCacheHelper(IMemoryCache cache, IPollutionCalculator pollutionCalculator)
         {
             _memCache = cache;
-            _repository = repository;
             _pollutionCalculator = pollutionCalculator;
-        }
-
-        public async Task AddStaticSensorToCacheAsync(int sensorId)
-        {
-            var sensorsCacheItems = await GetStaticSensorsAsync();
-            var sensorInCache = sensorsCacheItems.FirstOrDefault(f => f.Sensor.Id == sensorId);
-            if (sensorInCache == null)
-            {
-                var sensor = await _repository.GetStaticSensorByIdAsync(sensorId, true);
-                sensorsCacheItems.Add(new SensorCacheItemModel(sensor, _pollutionCalculator.CalculatePollutionLevel(sensor.Readings.Cast<Reading>().ToList())));
-                _memCache.Set(_sensorCacheKey, sensorsCacheItems, _sensorCacheLifetime);
-            }
         }
 
         public async Task<PollutionLevel> GetPollutionLevelAsync(int sensorId)
@@ -51,24 +36,15 @@ namespace Web.Helpers.Implementations
             return sensorInCache.PollutionLevel;
         }
 
-        public async Task<List<SensorCacheItemModel>> GetStaticSensorsAsync()
+        public Task<List<SensorCacheItemModel>> GetStaticSensorsAsync()
         {
-            return await _memCache.GetOrCreateAsync(_sensorCacheKey, async (entry) =>
-             {
-                 entry.SetAbsoluteExpiration(_sensorCacheLifetime);
-                 List<SensorCacheItemModel> result = new List<SensorCacheItemModel>();
-                 var sensors = await _repository.GetStaticSensorsForCacheAsync();
-                 foreach (var sensor in sensors)
-                 {
-                     result.Add(new SensorCacheItemModel(sensor, _pollutionCalculator.CalculatePollutionLevel(sensor.Readings.Cast<Reading>().ToList())));
-                 }
-                 return result;
-             });
+            //TODO: Investigate that moment
+            return Task.FromResult(_memCache.Get<List<SensorCacheItemModel>>(SensorCacheKey));
         }
 
         public void ClearCache()
         {
-            _memCache.Remove(_sensorCacheKey);
+            _memCache.Remove(SensorCacheKey);
         }
 
         public async Task RemoveStaticSensorFromCacheAsync(int sensorId)
@@ -78,7 +54,7 @@ namespace Web.Helpers.Implementations
             if (sensorInCache != null)
             {
                 sensorsCacheItems.Remove(sensorInCache);
-                _memCache.Set(_sensorCacheKey, sensorsCacheItems, _sensorCacheLifetime);
+                _memCache.Set(SensorCacheKey, sensorsCacheItems, SensorCacheLifetime);
             }
         }
 
@@ -97,18 +73,29 @@ namespace Web.Helpers.Implementations
             sensorInCache.Sensor.Readings.Add(reading);
             sensorInCache.Sensor.Readings = sensorInCache.Sensor.Readings.OrderByDescending(f => f.Created).Take(10).ToList();
             sensorInCache.PollutionLevel = _pollutionCalculator.CalculatePollutionLevel(sensorInCache.Sensor.Readings.Cast<Reading>().ToList());
-            _memCache.Set(_sensorCacheKey, sensorsCacheItems, _sensorCacheLifetime);
+            _memCache.Set(SensorCacheKey, sensorsCacheItems, SensorCacheLifetime);
         }
 
         public async Task UpdateStaticSensorCacheAsync(StaticSensor sensor)
         {
             if (sensor.IsAvailable())
             {
-                await AddStaticSensorToCacheAsync(sensor.Id);
+                await AddStaticSensorToCacheAsync(sensor);
             }
             else
             {
                 await RemoveStaticSensorFromCacheAsync(sensor.Id);
+            }
+        }
+        
+        private async Task AddStaticSensorToCacheAsync(StaticSensor sensor)
+        {
+            var sensorsCacheItems = await GetStaticSensorsAsync();
+            var sensorInCache = sensorsCacheItems.FirstOrDefault(f => f.Sensor.Id == sensor.Id);
+            if (sensorInCache == null)
+            {
+                sensorsCacheItems.Add(new SensorCacheItemModel(sensor, _pollutionCalculator.CalculatePollutionLevel(sensor.Readings.Cast<Reading>().ToList())));
+                _memCache.Set(SensorCacheKey, sensorsCacheItems, SensorCacheLifetime);
             }
         }
     }

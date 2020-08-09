@@ -22,14 +22,11 @@ namespace Web.Application.Readings.Notifications
 
         public async Task Handle(StaticSensorReadingCreatedNotification notification, CancellationToken cancellationToken)
         {
-            using (var context = _dataContextFactory.Create())
-            {
-                var staticSensor = await context.Set<StaticSensor>().AsNoTracking()
-                    .FirstOrDefaultAsync(z => z.Id == notification.SensorId, cancellationToken);
-                if (staticSensor.IsAvailable())
-                    await _sensorCacheHelper.UpdateSensorCacheWithReadingAsync(notification.Reading);
-            }
-            
+            await using var context = _dataContextFactory.Create();
+            var staticSensor = await context.Set<StaticSensor>().AsNoTracking()
+                .FirstOrDefaultAsync(z => z.Id == notification.SensorId, cancellationToken);
+            if (staticSensor.IsAvailable())
+                await _sensorCacheHelper.UpdateSensorCacheWithReadingAsync(notification.Reading);
         }
     }
 }

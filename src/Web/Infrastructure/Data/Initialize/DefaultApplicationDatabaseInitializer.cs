@@ -43,7 +43,7 @@ namespace Web.Infrastructure.Data.Initialize
                     }
                 }
 
-                using (var context = _identityDataContextFactory.Create())
+                 using (var context = _identityDataContextFactory.Create())
                 {
                     try
                     {
