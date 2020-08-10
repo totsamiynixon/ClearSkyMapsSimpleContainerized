@@ -4,7 +4,7 @@ using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Text;
 using System.Threading.Tasks;
-using Web.Areas.PWA.Models.Notifications;
+using Web.Areas.PWA.Models.API.Notifications;
 using Web.Infrastructure;
 
 namespace Web.Areas.PWA.Controllers.API

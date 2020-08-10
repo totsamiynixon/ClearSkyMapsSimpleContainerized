@@ -3,7 +3,7 @@ using AutoMapper;
 using Microsoft.AspNetCore.SignalR;
 using Web.Areas.Admin.Helpers.Interfaces;
 using Web.Areas.Admin.Infrastructure.Hubs;
-using Web.Areas.Admin.Models.Hub;
+using Web.Areas.Admin.Models.Default.Hub;
 using Web.Domain.Entities;
 using Web.Models.Hub;
 

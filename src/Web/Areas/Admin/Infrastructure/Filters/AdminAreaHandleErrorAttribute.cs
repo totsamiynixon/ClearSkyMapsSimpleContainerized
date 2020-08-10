@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
 using Web.Areas.Admin.Controllers;
+using Web.Areas.Admin.Controllers.Default;
 
 namespace Web.Areas.Admin.Infrastructure.Filters
 {

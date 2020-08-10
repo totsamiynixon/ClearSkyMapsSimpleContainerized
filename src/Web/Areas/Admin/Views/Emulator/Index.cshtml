@@ -1,9 +1,8 @@
-﻿@using Web.Areas.Admin.Models.Emulator
-@using Web.Emulation
+﻿@using Web.Emulation
 @using Web.Infrastructure
 @inject AppSettings AppSettings
 @inject Emulator Emulator
-@model List<SensorEmulatorListItemViewModel>
+@model List<Web.Areas.Admin.Models.Default.Emulator.SensorEmulatorListItemViewModel>
 @{
     ViewBag.Title = "Датчики-эмуляторы";
     Layout = "~/Areas/Admin/Views/Shared/_Layout.cshtml";
