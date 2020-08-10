@@ -1,6 +1,4 @@
-﻿using System.ComponentModel.DataAnnotations;
-
-namespace Web.Areas.Admin.Models.Sensors
+﻿namespace Web.Areas.Admin.Models.Sensors
 {
     public class ChangeActivationSensorViewModel
     {

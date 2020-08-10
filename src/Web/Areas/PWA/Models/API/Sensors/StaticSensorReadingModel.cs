@@ -1,6 +1,6 @@
 ﻿namespace Web.Areas.PWA.Models.API.Sensors
 {
-    public class SensorDataModel
+    public class StaticSensorReadingModel
     {
         public float CO2 { get; set; }
         public float LPG { get; set; }

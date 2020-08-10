@@ -1,8 +1,8 @@
 ﻿using System;
 
-namespace Web.Areas.PWA.Models.Sensors
+namespace Web.Areas.PWA.Application.Readings.Queries.DTO
 {
-    public class StaticSensorReadingModel
+    public class StaticSensorReadingDTO
     {
         public int Id { get; set; }
         public float CO2 { get; set; }

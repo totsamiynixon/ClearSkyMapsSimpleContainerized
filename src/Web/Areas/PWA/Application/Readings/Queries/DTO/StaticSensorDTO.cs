@@ -1,9 +1,9 @@
 ﻿using System.Collections.Generic;
 using Web.Domain.Enums;
 
-namespace Web.Areas.PWA.Models.Sensors
+namespace Web.Areas.PWA.Application.Readings.Queries.DTO
 {
-    public class StaticSensorModel
+    public class StaticSensorDTO
     {
         public int Id { get; set; }
 
@@ -13,6 +13,6 @@ namespace Web.Areas.PWA.Models.Sensors
 
         public PollutionLevel PollutionLevel { get; set; }
 
-        public List<StaticSensorReadingModel> Readings { get; set; }
+        public List<StaticSensorReadingDTO> Readings { get; set; }
     }
 }

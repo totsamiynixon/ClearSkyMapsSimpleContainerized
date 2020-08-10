@@ -11,7 +11,6 @@ using Web.Areas.Admin.Application.Readings.Commands;
 using Web.Areas.Admin.Application.Readings.Queries;
 using Web.Areas.Admin.Application.Readings.Queries.DTO;
 using Web.Areas.Admin.Infrastructure.Filters;
-using Web.Domain.Entities;
 using Web.Helpers;
 
 namespace Web.Areas.Admin.Controllers
