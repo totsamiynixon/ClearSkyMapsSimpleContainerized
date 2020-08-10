@@ -1,15 +1,15 @@
 ﻿using AutoMapper;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using MediatR;
 using Web.Areas.Admin.Application.Users.Commands;
 using Web.Areas.Admin.Application.Users.Exceptions;
+using Web.Areas.Admin.Application.Users.Queries;
+using Web.Areas.Admin.Application.Users.Queries.DTO;
 using Web.Areas.Admin.Models.Users;
-using Web.Domain.Entities.Identity;
 
 namespace Web.Areas.Admin.Controllers
 {
@@ -20,10 +20,10 @@ namespace Web.Areas.Admin.Controllers
 
         private static readonly IMapper _mapper = new Mapper(new MapperConfiguration(x =>
         {
-            x.CreateMap<User, UserListItemViewModel>();
-            x.CreateMap<User, UserChangePasswordModel>();
-            x.CreateMap<User, DeleteUserModel>();
-            x.CreateMap<User, ActivateUserModel>();
+            x.CreateMap<UserListItemDTO, UserListItemViewModel>();
+            x.CreateMap<UserDetailsDTO, UserChangePasswordModel>();
+            x.CreateMap<UserDetailsDTO, DeleteUserModel>();
+            x.CreateMap<UserDetailsDTO, ActivateUserModel>();
 
             x.CreateMap<CreateUserModel, CreateUserCommand>()
                 .ConstructUsing(z => new CreateUserCommand(z.Email, z.Password));
@@ -36,22 +36,21 @@ namespace Web.Areas.Admin.Controllers
         }));
 
         
-
-        private readonly UserManager<User> _userManager;
+        
         private readonly IMediator _mediator;
+        private readonly IUserQueries _userQueries;
 
-        public UsersController(UserManager<User> userManager, IMediator mediator)
+        public UsersController(IMediator mediator, IUserQueries userQueries)
         {
-            _userManager = userManager;
             _mediator = mediator;
+            _userQueries = userQueries;
         }
 
         [HttpGet]
         public async Task<ActionResult> Index()
         {
-            var users = await _userManager.Users.ToListAsync();
-            var mappedUsers = _mapper.Map<List<User>, List<UserListItemViewModel>>(users);
-            return View(mappedUsers);
+            
+            return View(_mapper.Map<IEnumerable<UserListItemDTO>, List<UserListItemViewModel>>(await _userQueries.GetUsersAsync()));
         }
 
 
@@ -91,14 +90,14 @@ namespace Web.Areas.Admin.Controllers
         {
             if (string.IsNullOrEmpty(userId))
             {
-                return BadRequest("Необходим id пользователя");
+                return BadRequest("User id is required");
             }
-            var user = await _userManager.Users.FirstOrDefaultAsync(f => f.Id == userId);
+            var user = await _userQueries.GetUserAsync(userId);
             if (user == null)
             {
-                return NotFound("Пользователь с таким id не найден");
+                return NotFound($"User with id : {userId} not found");
             }
-            var mappedUser = _mapper.Map<User, UserChangePasswordModel>(user);
+            var mappedUser = _mapper.Map<UserDetailsDTO, UserChangePasswordModel>(user);
             return View(new UserChangePasswordViewModel(mappedUser));
         }
 
@@ -137,16 +136,17 @@ namespace Web.Areas.Admin.Controllers
             {
                 return BadRequest("Необходим id пользователя");
             }
-            var user = await _userManager.Users.FirstOrDefaultAsync(f => f.Id == userId);
+            var user = await _userQueries.GetUserAsync(userId);
             if (user == null)
             {
-                return NotFound("Пользователь с таким id не найден");
+                return NotFound($"User with id : {userId} not found");
             }
-            if (await _userManager.IsInRoleAsync(user, "Supervisor"))
+            if (user.Roles.Select(z=>z.Name).Contains("Supervisor"))
             {
-                return Forbid("Невозможно удалить пользователя с ролью Supervisor");
+                return Forbid("Unable delete user with role: Supervisor");
             }
-            var mappedUser = _mapper.Map<User, DeleteUserModel>(user);
+
+            var mappedUser = _mapper.Map<UserDetailsDTO, DeleteUserModel>(user);
             return View(new DeleteUserViewModel(mappedUser));
         }
 
@@ -184,18 +184,18 @@ namespace Web.Areas.Admin.Controllers
         {
             if (string.IsNullOrEmpty(userId))
             {
-                return BadRequest("Необходим id пользователя");
+                return BadRequest("User id is required");
             }
-            var user = await _userManager.Users.FirstOrDefaultAsync(f => f.Id == userId);
+            var user = await _userQueries.GetUserAsync(userId);
             if (user == null)
             {
-                return NotFound("Пользователь с таким id не найден");
+                return NotFound($"User with id : {userId} not found");
             }
-            if (await _userManager.IsInRoleAsync(user, "Supervisor"))
+            if (user.Roles.Select(z=>z.Name).Contains("Supervisor"))
             {
-                return Forbid("Невозможно активировать/деактивировать пользователя с ролью Supervisor");
+                return Forbid("Unable activate/deactivate user with role: Supervisor");
             }
-            var mappedUser = _mapper.Map<User, ActivateUserModel>(user);
+            var mappedUser = _mapper.Map<UserDetailsDTO, ActivateUserModel>(user);
             return View(new ActivateUserViewModel(mappedUser));
         }
 

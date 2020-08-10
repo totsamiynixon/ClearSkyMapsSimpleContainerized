@@ -1,6 +1,4 @@
-﻿using System.ComponentModel.DataAnnotations;
-
-namespace Web.Areas.Admin.Models.Users
+﻿namespace Web.Areas.Admin.Models.Users
 {
     public class ActivateUserViewModel
     {

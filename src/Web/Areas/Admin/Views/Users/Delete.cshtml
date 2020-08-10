@@ -16,11 +16,6 @@
                         @Html.ValidationSummary(true, "", new { @class = "text-danger" })
                         @Html.HiddenFor(f => f.Model.Id)
                         <div class="form-group">
-                            @Html.LabelFor(m => m.Model.Email)
-                            @Html.TextBoxFor(m => m.Model.Email, new { @class = "form-control", disabled = true })
-                            @Html.ValidationMessageFor(m => m.Model.Email, "", new { @class = "text-danger" })
-                        </div>
-                        <div class="form-group">
                             <div class="col-md-offset-2 col-md-10">
                                 <input type="submit" value="Удалить" class="btn btn-danger" />
                             </div>

@@ -1,5 +1,5 @@
 ﻿@using Web.Areas.Admin.Models.Sensors
-@model ActivateSensorViewModel
+@model ChangeActivationSensorViewModel
 @{
     ViewBag.Title = "Активация/Деактивация дачтика";
     Layout = "~/Areas/Admin/Views/Shared/_Layout.cshtml";
@@ -16,11 +16,11 @@
                     @using (Html.BeginForm("ChangeActivation", "Sensors", new { area = "Admin", ReturnUrl = ViewBag.ReturnUrl }, FormMethod.Post, null, new { @class = "form-horizontal", role = "form" }))
                     {
                         @Html.ValidationSummary(true, "", new { @class = "text-danger" })
-                        @Html.HiddenFor(f => f.Id)
+                        @Html.HiddenFor(f => f.Model.Id)
                         <div class="form-group">
-                            @Html.LabelFor(m => m.IsActive)
-                            @Html.CheckBoxFor(m => m.IsActive, new { @class = "form-control" })
-                            @Html.ValidationMessageFor(m => m.IsActive, "", new { @class = "text-danger" })
+                            @Html.LabelFor(m => m.Model.IsActive)
+                            @Html.CheckBoxFor(m => m.Model.IsActive, new { @class = "form-control" })
+                            @Html.ValidationMessageFor(m => m.Model.IsActive, "", new { @class = "text-danger" })
                         </div>
                         <div class="form-group">
                             <div class="col-md-offset-2 col-md-10">

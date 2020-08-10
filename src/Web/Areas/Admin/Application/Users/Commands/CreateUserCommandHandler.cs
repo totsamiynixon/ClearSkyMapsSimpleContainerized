@@ -35,6 +35,8 @@ namespace Web.Areas.Admin.Application.Users.Commands
             {
                 await _userManager.AddToRoleAsync(newUser, "Admin");
             }
+
+            return true;
         }
     }
 }

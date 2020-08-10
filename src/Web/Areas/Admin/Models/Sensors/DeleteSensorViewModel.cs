@@ -2,8 +2,14 @@
 {
     public class DeleteSensorViewModel
     {
-        public int Id { get; set; }
+        public DeleteSensorViewModel(DeleteSensorModel model, SensorDetailsViewModel details)
+        {
+            Model = model;
+            Details = details;
+        }
 
-        public SensorDetailsViewModel Details { get; set; }
+        public DeleteSensorModel Model { get; }
+
+        public SensorDetailsViewModel Details { get; }
     }
 }

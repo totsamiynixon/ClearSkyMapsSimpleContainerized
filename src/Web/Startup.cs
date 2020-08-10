@@ -13,6 +13,7 @@ using Microsoft.Extensions.Logging;
 using Web.Areas.Admin;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Web.Areas.Admin.Application.Readings.Queries;
+using Web.Areas.Admin.Application.Users.Queries;
 using Web.Areas.PWA.Helpers.Interfaces;
 using Web.Areas.PWA.Helpers.Implementations;
 using Web.Areas.Admin.Helpers.Interfaces;
@@ -55,6 +56,8 @@ namespace Web
 
             services.AddSingleton<Emulator>();
             services.AddTransient<IReadingsQueries, ReadingsQueries>();
+            //TODO: Thisnk about how to split area realted services to another module
+            services.AddTransient<IUserQueries, UserQueries>();
             services.AddTransient<IPollutionCalculator, PollutionCalculator>();
             services.AddTransient<ISensorCacheHelper, SensorCacheHelper>();
             services.AddTransient<IPWADispatchHelper, PWASignalrDispatchHelper>();
@@ -130,6 +133,7 @@ namespace Web
             app.UseStaticFiles();
             app.UseCookiePolicy();
             
+            //TODO: think about MapWhen usage to specify auth only for Admin area
             app.UseAuthentication();
             app.UseAuthorization();
 

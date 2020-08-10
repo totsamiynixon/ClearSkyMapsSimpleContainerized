@@ -16,7 +16,7 @@
                     @using (Html.BeginForm("Delete", "Sensors", new { area = "Admin", ReturnUrl = ViewBag.ReturnUrl }, FormMethod.Post, null, new { @class = "form-horizontal", role = "form" }))
                     {
                         @Html.ValidationSummary(true, "", new { @class = "text-danger" })
-                        @Html.HiddenFor(f => f.Id)
+                        @Html.HiddenFor(f => f.Model.Id)
                         <div class="form-group">
                             <div class="col-md-offset-2 col-md-10">
                                 <label>Удалить совсем?</label>

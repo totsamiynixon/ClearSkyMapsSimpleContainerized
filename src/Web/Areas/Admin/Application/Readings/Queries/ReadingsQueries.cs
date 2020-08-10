@@ -1,7 +1,9 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using AutoMapper;
 using Microsoft.EntityFrameworkCore;
+using Web.Areas.Admin.Application.Readings.Queries.DTO;
 using Web.Domain.Entities;
 using Web.Infrastructure.Data;
 using Web.Infrastructure.Data.Factory;
@@ -10,6 +12,15 @@ namespace Web.Areas.Admin.Application.Readings.Queries
 {
     public class ReadingsQueries : IReadingsQueries
     {
+        private static IMapper _mapper = new Mapper(new MapperConfiguration(x =>
+        {
+            x.CreateMap<Sensor, SensorDTO>();
+            x.CreateMap<StaticSensor, StaticSensorDTO>()
+                .IncludeBase<Sensor, SensorDTO>();
+            x.CreateMap<PortableSensor, PortableSensorDTO>()
+                .IncludeBase<Sensor, SensorDTO>();
+        }));
+        
         private readonly IDataContextFactory<DataContext> _dataContextFactory;
 
         public ReadingsQueries(
@@ -18,37 +29,16 @@ namespace Web.Areas.Admin.Application.Readings.Queries
             _dataContextFactory = dataContextFactory;
         }
 
-        public async Task<List<Sensor>> GetSensorsAsync()
+        public async Task<List<SensorDTO>> GetSensorsAsync()
         {
             await using var context = _dataContextFactory.Create();
             var query = context
                 .Set<Sensor>().AsNoTracking().Where(f => !f.IsDeleted);
             var sensors = await query.ToListAsync();
-            return sensors;
+            return _mapper.Map<List<Sensor>, List<SensorDTO>>(sensors);
         }
 
-        public async Task<List<StaticSensor>> GetStaticSensorsForCacheAsync()
-        {
-            await using var context = _dataContextFactory.Create();
-            var sensors = await context
-                .StaticSensors.AsNoTracking().Where(f => f.IsActive && f.IsVisible && !f.IsDeleted).Select(f =>
-                    new StaticSensor
-                    {
-                        Id = f.Id,
-                        ApiKey = f.ApiKey,
-                        IsActive = f.IsActive,
-                        IsDeleted = f.IsDeleted,
-                        IsVisible = f.IsVisible,
-                        Latitude = f.Latitude,
-                        Longitude = f.Longitude,
-                        Readings = f.Readings
-                            .OrderByDescending(s => s.Created)
-                            .Take(10).ToList()
-                    }).ToListAsync();
-            return sensors;
-        }
-
-        public async Task<List<StaticSensor>> GetStaticSensorsAsync(bool withReadings)
+        public async Task<List<StaticSensorDTO>> GetStaticSensorsAsync(bool withReadings)
         {
             await using var context = _dataContextFactory.Create();
             var query = context
@@ -71,13 +61,14 @@ namespace Web.Areas.Admin.Application.Readings.Queries
             }
 
             var sensors = await query.ToListAsync();
-            return sensors;
+            
+            return _mapper.Map<List<StaticSensor>, List<StaticSensorDTO>>(sensors);
         }
 
-        public async Task<Sensor> GetSensorByIdAsync(int id)
+        public async Task<SensorDTO> GetSensorByIdAsync(int id)
         {
             await using var context = _dataContextFactory.Create();
-            return await context.Sensors.AsNoTracking().FirstOrDefaultAsync(f => f.Id == id);
+            return _mapper.Map<Sensor, SensorDTO>(await context.Sensors.AsNoTracking().FirstOrDefaultAsync(f => f.Id == id));
         }
 
         public async Task<Sensor> GetSensorByApiKeyAsync(string apiKey)

@@ -4,11 +4,13 @@ namespace Web.Areas.Admin.Models.Sensors
 {
     public class ChangeVisibilityStaticSensorViewModel
     {
-        public int Id { get; set; }
+        public ChangeVisibilityStaticSensorViewModel(ChangeVisibilityStaticSensorModel model, SensorDetailsViewModel details)
+        {
+            Model = model;
+            Details = details;
+        }
 
-        [Display(Name = "Видимый")]
-        public bool IsVisible { get; set; }
-
-        public SensorDetailsViewModel Details { get; set; }
+        public ChangeVisibilityStaticSensorModel Model { get; }
+        public SensorDetailsViewModel Details { get; }
     }
 }

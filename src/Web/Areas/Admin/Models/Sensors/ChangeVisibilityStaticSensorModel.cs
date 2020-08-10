@@ -6,7 +6,8 @@ namespace Web.Areas.Admin.Models.Sensors
     {
         [Required]
         public int? Id { get; set; }
-        
+
+        [Display(Name = "Видимый")]
         public bool IsVisible { get; set; }
     }
 }

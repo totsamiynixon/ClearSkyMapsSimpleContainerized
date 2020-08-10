@@ -9,6 +9,7 @@ using Microsoft.AspNetCore.Authorization;
 using Web.Application.Readings.Exceptions;
 using Web.Areas.Admin.Application.Readings.Commands;
 using Web.Areas.Admin.Application.Readings.Queries;
+using Web.Areas.Admin.Application.Readings.Queries.DTO;
 using Web.Areas.Admin.Infrastructure.Filters;
 using Web.Domain.Entities;
 using Web.Helpers;
@@ -21,17 +22,12 @@ namespace Web.Areas.Admin.Controllers
     {
         private static IMapper _mapper = new Mapper(new MapperConfiguration(x =>
         {
-            x.CreateMap<Sensor, SensorListItemViewModel>();
-            x.CreateMap<StaticSensor, StaticSensorListItemViewModel>()
-                .IncludeBase<Sensor, SensorListItemViewModel>();
-            x.CreateMap<Sensor, SensorDetailsViewModel>();
-            x.CreateMap<StaticSensor, StaticSensorDetailsViewModel>()
-                .IncludeBase<Sensor, SensorDetailsViewModel>();
-            x.CreateMap<Sensor, ActivateSensorViewModel>().ForMember(f => f.Details, m => m.MapFrom(f => f));
-            x.CreateMap<Sensor, ChangeVisibilityStaticSensorViewModel>()
-                .ForMember(f => f.Details, m => m.MapFrom(f => f));
-            x.CreateMap<Sensor, DeleteSensorViewModel>().ForMember(f => f.Details, m => m.MapFrom(f => f));
-            x.CreateMap<CreateStaticSensorModel, Sensor>();
+            x.CreateMap<SensorDTO, SensorListItemViewModel>();
+            x.CreateMap<StaticSensorDTO, StaticSensorListItemViewModel>()
+                .IncludeBase<SensorDTO, SensorListItemViewModel>();
+            x.CreateMap<SensorDTO, SensorDetailsViewModel>();
+            x.CreateMap<StaticSensorDTO, StaticSensorDetailsViewModel>()
+                .IncludeBase<SensorDTO, SensorDetailsViewModel>();
 
             x.CreateMap<CreateStaticSensorModel, CreateStaticSensorCommand>()
                 .ConstructUsing(z => new CreateStaticSensorCommand(z.ApiKey, z.Latitude, z.Longitude));
@@ -61,36 +57,40 @@ namespace Web.Areas.Admin.Controllers
             var model = new SensorsIndexViewModel
             {
                 PortableSensors =
-                    _mapper.Map<List<PortableSensor>, List<SensorListItemViewModel>>(sensors.OfType<PortableSensor>()
+                    _mapper.Map<List<PortableSensorDTO>, List<SensorListItemViewModel>>(sensors
+                        .OfType<PortableSensorDTO>()
                         .ToList()),
                 StaticSensors =
-                    _mapper.Map<List<StaticSensor>, List<StaticSensorListItemViewModel>>(sensors.OfType<StaticSensor>()
+                    _mapper.Map<List<StaticSensorDTO>, List<StaticSensorListItemViewModel>>(sensors
+                        .OfType<StaticSensorDTO>()
                         .ToList()),
             };
             return View(model);
         }
-
+    
+        #region Create
 
         [HttpGet]
         [RestoreModelStateFromTempData]
         public ActionResult CreateStaticSensor()
         {
-            return View(new CreateStaticSensorModel
+            return View(new CreateStaticSensorViewModel(new CreateStaticSensorModel
             {
                 ApiKey = CryptoHelper.GenerateApiKey()
-            });
+            }));
         }
 
 
         [HttpPost]
         [SetTempDataModelState]
-        public async Task<ActionResult> CreateStaticSensor(CreateStaticSensorModel model)
+        public async Task<ActionResult> CreateStaticSensor([Bind(nameof(CreateStaticSensorViewModel.Model))]
+            CreateStaticSensorModel model)
         {
             if (!ModelState.IsValid)
             {
-                return RedirectToAction("CreateStaticSensor");
+                return View(new CreateStaticSensorViewModel(model));
             }
-            
+
             var command = _mapper.Map<CreateStaticSensorModel, CreateStaticSensorCommand>(model);
             await _mediator.Send(command);
 
@@ -98,34 +98,59 @@ namespace Web.Areas.Admin.Controllers
         }
 
         [HttpGet]
-        [RestoreModelStateFromTempData]
         public ActionResult CreatePortableSensor()
         {
-            return View(new CreatePortableSensorModel
+            return View(new CreatePortableSensorViewModel(new CreatePortableSensorModel
             {
                 ApiKey = CryptoHelper.GenerateApiKey()
-            });
+            }));
         }
 
 
         [HttpPost]
-        [SetTempDataModelState]
-        public async Task<ActionResult> CreatePortableSensor(CreatePortableSensorModel model)
+        public async Task<ActionResult> CreatePortableSensor([Bind(nameof(CreatePortableSensorViewModel.Model))]
+            CreatePortableSensorModel model)
         {
             if (!ModelState.IsValid)
             {
-                return RedirectToAction("Create");
+                return View(new CreatePortableSensorViewModel(model));
             }
 
             var command = _mapper.Map<CreatePortableSensorModel, CreatePortableSensorCommand>(model);
             await _mediator.Send(command);
-            
+
             return RedirectToAction("Index");
         }
+
+        #endregion
+        
+        #region Delete
 
         [HttpGet]
         [Authorize(Roles = "Supervisor")]
         public async Task<ActionResult> Delete(int? sensorId)
+        {
+            return await BuildDeleteResultAsync(sensorId);
+        }
+
+
+        [HttpPost]
+        [Authorize(Roles = "Supervisor")]
+        public async Task<ActionResult> Delete([Bind(nameof(DeleteSensorViewModel.Model))]
+            DeleteSensorModel model)
+        {
+            if (!ModelState.IsValid)
+            {
+                return await BuildDeleteResultAsync(model.Id, model);
+            }
+
+            var command = _mapper.Map<DeleteSensorModel, DeleteSensorCommand>(model);
+            await _mediator.Send(command);
+
+            return RedirectToAction("Index");
+        }
+
+        private async Task<ActionResult> BuildDeleteResultAsync(int? sensorId, DeleteSensorModel model = null)
         {
             if (!sensorId.HasValue)
             {
@@ -140,33 +165,46 @@ namespace Web.Areas.Admin.Controllers
 
             if (sensor.IsActive)
             {
-                return RedirectToAction("Index");
+                return Forbid("Unable to delete active sensor");
             }
 
-            var mappedSensor = _mapper.Map<Sensor, DeleteSensorViewModel>(sensor);
-            return View(mappedSensor);
+            var detailsVM = _mapper.Map<SensorDTO, SensorDetailsViewModel>(sensor);
+            var vm = new DeleteSensorViewModel(model ?? new DeleteSensorModel
+            {
+                Id = sensor.Id
+            }, detailsVM);
+
+            return View(vm);
         }
 
+        #endregion
+
+        #region Activation
+
+        [HttpGet]
+        public async Task<ActionResult> ChangeActivation(int? sensorId)
+        {
+            return await BuildChangeActivationResultAsync(sensorId);
+        }
 
         [HttpPost]
-        [Authorize(Roles = "Supervisor")]
-        public async Task<ActionResult> Delete(DeleteSensorModel model)
+        public async Task<ActionResult> ChangeActivation([Bind(nameof(ChangeActivationSensorViewModel.Model))]
+            ChangeActivationSensorModel model)
         {
             if (!ModelState.IsValid)
             {
-                return RedirectToAction("Delete", new {sensorId = model.Id});
+                return await BuildChangeActivationResultAsync(model.Id, model);
             }
 
-            var command = _mapper.Map<DeleteSensorModel, DeleteSensorCommand>(model);
+            var command = _mapper.Map<ChangeActivationSensorModel, ChangeSensorActivationStateCommand>(model);
             await _mediator.Send(command);
-            
+
             return RedirectToAction("Index");
         }
 
 
-        [HttpGet]
-        [RestoreModelStateFromTempData]
-        public async Task<ActionResult> ChangeActivation(int? sensorId)
+        private async Task<ActionResult> BuildChangeActivationResultAsync(int? sensorId,
+            ChangeActivationSensorModel model = null)
         {
             if (!sensorId.HasValue)
             {
@@ -179,53 +217,35 @@ namespace Web.Areas.Admin.Controllers
                 return NotFound($"Sensor with id: {sensorId} not found");
             }
 
-            var mappedSensor = _mapper.Map<Sensor, ActivateSensorViewModel>(sensor);
-            return View(mappedSensor);
-        }
-
-
-        [HttpPost]
-        [SetTempDataModelState]
-        public async Task<ActionResult> ChangeActivation(ChangeActivationSensorModel model)
-        {
-            if (!ModelState.IsValid)
+            var detailsVM = _mapper.Map<SensorDTO, SensorDetailsViewModel>(sensor);
+            var vm = new ChangeActivationSensorViewModel(model ?? new ChangeActivationSensorModel
             {
-                return RedirectToAction("ChangeActivation", new {sensorId = model.Id});
-                ;
-            }
+                Id = sensor.Id,
+                IsActive = sensor.IsActive
+            }, detailsVM);
 
-            var command = _mapper.Map<ChangeActivationSensorModel, ChangeSensorActivationStateCommand>(model);
-            await _mediator.Send(command);
-
-            return RedirectToAction("Index");
+            return View(vm);
         }
+
+        #endregion Activation
+        
+        #region Visibility
 
         [HttpGet]
-        [RestoreModelStateFromTempData]
         public async Task<ActionResult> ChangeVisibilityStaticSensor(int? sensorId)
         {
-            if (!sensorId.HasValue)
-            {
-                return NotFound("Id is required");
-            }
-
-            var sensor = await _readingsQueries.GetSensorByIdAsync(sensorId.Value);
-            if (sensor == null)
-            {
-                return NotFound("Sensor not found");
-            }
-            var mappedSensor = _mapper.Map<Sensor, ChangeVisibilityStaticSensorViewModel>(sensor);
-            return View(mappedSensor);
+            return await BuildChangeVisibilityStaticSensorResultAsync(sensorId);
         }
 
 
         [HttpPost]
-        [SetTempDataModelState]
-        public async Task<ActionResult> ChangeVisibilityStaticSensor(ChangeVisibilityStaticSensorModel model)
+        public async Task<ActionResult> ChangeVisibilityStaticSensor(
+            [Bind(nameof(ChangeVisibilityStaticSensorViewModel.Model))]
+            ChangeVisibilityStaticSensorModel model)
         {
             if (!ModelState.IsValid)
             {
-                return RedirectToAction("ChangeVisibility", new {sensorId = model.Id});
+                return await BuildChangeVisibilityStaticSensorResultAsync(model.Id, model);
             }
 
             try
@@ -241,6 +261,31 @@ namespace Web.Areas.Admin.Controllers
 
             return RedirectToAction("Index");
         }
+
+        private async Task<ActionResult> BuildChangeVisibilityStaticSensorResultAsync(int? sensorId, ChangeVisibilityStaticSensorModel model = null)
+        {
+            if (!sensorId.HasValue)
+            {
+                return NotFound("Id is required");
+            }
+
+            var sensor = await _readingsQueries.GetSensorByIdAsync(sensorId.Value);
+            if (sensor == null)
+            {
+                return NotFound("Sensor not found");
+            }
+
+            var detailsVM = _mapper.Map<SensorDTO, SensorDetailsViewModel>(sensor);
+            var vm = new ChangeVisibilityStaticSensorViewModel(model ?? new ChangeVisibilityStaticSensorModel
+            {
+                Id = sensor.Id,
+                IsVisible = sensor.IsActive
+            }, detailsVM);
+
+            return View(vm);
+        }
+        
+        #endregion
 
         public async Task<ActionResult> PortableSensorDetails(int? sensorId)
         {
