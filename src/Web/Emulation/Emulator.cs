@@ -19,7 +19,7 @@ namespace Web.Emulation
         
         public Emulator(AppSettings appSettings)
         {
-            _appSettings = appSettings;
+            _appSettings = appSettings ?? throw new ArgumentNullException(nameof(appSettings));
         }
         
         public async Task RunEmulationAsync()

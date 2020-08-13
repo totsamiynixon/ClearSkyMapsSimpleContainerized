@@ -21,8 +21,8 @@ namespace Web.Helpers.Implementations
 
         public SensorCacheHelper(IMemoryCache cache, IPollutionCalculator pollutionCalculator)
         {
-            _memCache = cache;
-            _pollutionCalculator = pollutionCalculator;
+            _memCache = cache ?? throw new ArgumentNullException(nameof(cache));
+            _pollutionCalculator = pollutionCalculator ?? throw new ArgumentNullException(nameof(pollutionCalculator));
         }
 
         public async Task<PollutionLevel> GetPollutionLevelAsync(int sensorId)

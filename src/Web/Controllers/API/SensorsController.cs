@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
@@ -17,12 +18,12 @@ namespace Web.Controllers.API
             x.CreateMap<StaticSensorDTO, StaticSensorModel>();
             x.CreateMap<StaticSensorReadingDTO, StaticSensorReadingModel>();
         }));
-        
+
         private readonly IReadingsQueries _readingsQueries;
 
         public SensorsController(IReadingsQueries readingsQueries)
         {
-            _readingsQueries = readingsQueries;
+            _readingsQueries = readingsQueries ?? throw new ArgumentNullException(nameof(readingsQueries));
         }
 
         [HttpGet]

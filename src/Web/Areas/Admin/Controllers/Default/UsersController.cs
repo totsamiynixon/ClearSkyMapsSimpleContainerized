@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
@@ -44,8 +45,8 @@ namespace Web.Areas.Admin.Controllers.Default
 
         public UsersController(IMediator mediator, IUserQueries userQueries)
         {
-            _mediator = mediator;
-            _userQueries = userQueries;
+            _mediator = mediator ?? throw new ArgumentNullException(nameof(mediator));
+            _userQueries = userQueries ?? throw new ArgumentNullException(nameof(userQueries));
         }
 
         [HttpGet]

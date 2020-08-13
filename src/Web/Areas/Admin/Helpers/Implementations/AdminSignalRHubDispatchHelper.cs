@@ -1,4 +1,5 @@
-﻿using System.Threading.Tasks;
+﻿using System;
+using System.Threading.Tasks;
 using AutoMapper;
 using Microsoft.AspNetCore.SignalR;
 using Web.Areas.Admin.Helpers.Interfaces;
@@ -23,8 +24,8 @@ namespace Web.Areas.Admin.Helpers.Implementations
             IHubContext<AdminPortableSensorHub, IAdminPortableSensorClient> portableSensorHubContext,
             IHubContext<AdminStaticSensorHub, IAdminStaticSensorClient> staticSensorHubContext)
         {
-            _portableSensorHubContext = portableSensorHubContext;
-            _staticSensorHubContext = staticSensorHubContext;
+            _portableSensorHubContext = portableSensorHubContext ?? throw new ArgumentNullException(nameof(portableSensorHubContext));
+            _staticSensorHubContext = staticSensorHubContext ?? throw new ArgumentNullException(nameof(staticSensorHubContext));
         }
 
         public async Task DispatchCoordinatesForPortableSensorAsync(int sensorId, double latitude, double longitude)

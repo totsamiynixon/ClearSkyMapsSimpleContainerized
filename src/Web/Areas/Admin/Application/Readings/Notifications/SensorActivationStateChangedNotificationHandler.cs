@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using MediatR;
@@ -18,8 +19,8 @@ namespace Web.Areas.Admin.Application.Readings.Notifications
 
         public SensorActivationStateChangedNotificationHandler(ISensorCacheHelper sensorCacheHelper, IDataContextFactory<DataContext> dataContextFactory)
         {
-            _sensorCacheHelper = sensorCacheHelper;
-            _dataContextFactory = dataContextFactory;
+            _sensorCacheHelper = sensorCacheHelper ?? throw new ArgumentNullException(nameof(sensorCacheHelper));
+            _dataContextFactory = dataContextFactory ?? throw new ArgumentNullException(nameof(dataContextFactory));
         }
 
         public async Task Handle(SensorActivationStateChangedNotification notification,

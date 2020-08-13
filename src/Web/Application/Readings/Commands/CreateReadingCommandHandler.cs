@@ -1,4 +1,5 @@
-﻿using System.Threading;
+﻿using System;
+using System.Threading;
 using System.Threading.Tasks;
 using AutoMapper;
 using MediatR;
@@ -25,8 +26,8 @@ namespace Web.Application.Readings.Commands
 
         public CreateReadingCommandHandler(IMediator mediator, IDataContextFactory<DataContext> dataContextFactory)
         {
-            _mediator = mediator;
-            _dataContextFactory = dataContextFactory;
+            _mediator = mediator ?? throw new ArgumentNullException(nameof(mediator));
+            _dataContextFactory = dataContextFactory ?? throw new ArgumentNullException(nameof(dataContextFactory));
         }
 
         public async Task<bool> Handle(CreateReadingCommand request, CancellationToken cancellationToken)

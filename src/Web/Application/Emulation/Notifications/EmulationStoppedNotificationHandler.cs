@@ -1,4 +1,5 @@
-﻿using System.Threading;
+﻿using System;
+using System.Threading;
 using System.Threading.Tasks;
 using MediatR;
 using Web.Helpers.Interfaces;
@@ -14,8 +15,8 @@ namespace Web.Application.Emulation.Notifications
 
         public EmulationStoppedNotificationHandler(ISensorCacheHelper sensorCacheHelper, IEmulationDataContextFactory<DataContext> emulationDataContextFactory)
         {
-            _sensorCacheHelper = sensorCacheHelper;
-            _emulationDataContextFactory = emulationDataContextFactory;
+            _sensorCacheHelper = sensorCacheHelper ?? throw new ArgumentNullException(nameof(sensorCacheHelper));
+            _emulationDataContextFactory = emulationDataContextFactory ?? throw new ArgumentNullException(nameof(emulationDataContextFactory));
         }
 
         public async Task Handle(EmulationStoppedNotification notification, CancellationToken cancellationToken)

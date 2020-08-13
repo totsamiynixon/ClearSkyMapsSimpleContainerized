@@ -1,4 +1,5 @@
-﻿using System.Threading;
+﻿using System;
+using System.Threading;
 using System.Threading.Tasks;
 using MediatR;
 using Web.Domain.Entities;
@@ -17,9 +18,9 @@ namespace Web.Application.Emulation.Notifications
 
         public EmulationStartedNotificationHandler(IApplicationDatabaseInitializer applicationDatabaseInitializer, IDataContextFactory<DataContext> dataContextFactory, ISensorCacheHelper sensorCacheHelper)
         {
-            _applicationDatabaseInitializer = applicationDatabaseInitializer;
-            _dataContextFactory = dataContextFactory;
-            _sensorCacheHelper = sensorCacheHelper;
+            _applicationDatabaseInitializer = applicationDatabaseInitializer ?? throw new ArgumentNullException(nameof(applicationDatabaseInitializer));
+            _dataContextFactory = dataContextFactory ?? throw new ArgumentNullException(nameof(dataContextFactory));
+            _sensorCacheHelper = sensorCacheHelper ?? throw new ArgumentNullException(nameof(sensorCacheHelper));
         }
 
         //TODO: check this code

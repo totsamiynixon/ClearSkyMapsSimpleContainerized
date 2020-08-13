@@ -1,4 +1,5 @@
-﻿using System.Threading;
+﻿using System;
+using System.Threading;
 using System.Threading.Tasks;
 using AutoMapper;
 using MediatR;
@@ -22,7 +23,7 @@ namespace Web.Areas.Admin.Application.Readings.Commands
         
         public CreatePortableSensorCommandHandler(IDataContextFactory<DataContext> dataContextFactory)
         {
-            _dataContextFactory = dataContextFactory;
+            _dataContextFactory = dataContextFactory ?? throw new ArgumentNullException(nameof(dataContextFactory));
         }
 
         public async Task<PortableSensorDTO> Handle(CreatePortableSensorCommand request, CancellationToken cancellationToken)

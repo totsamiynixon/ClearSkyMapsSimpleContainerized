@@ -1,4 +1,5 @@
-﻿using System.Threading;
+﻿using System;
+using System.Threading;
 using System.Threading.Tasks;
 using MediatR;
 using Web.Application.Emulation.Exceptions;
@@ -16,9 +17,9 @@ namespace Web.Application.Emulation.Commands
 
         public BeginEmulationCommandHandler(Emulator emulator, AppSettings appSettings, IMediator mediator)
         {
-            _emulator = emulator;
-            _appSettings = appSettings;
-            _mediator = mediator;
+            _emulator = emulator ?? throw new ArgumentNullException(nameof(emulator));
+            _appSettings = appSettings ?? throw new ArgumentNullException(nameof(appSettings));
+            _mediator = mediator ?? throw new ArgumentNullException(nameof(mediator));
         }
 
         public async Task<bool> Handle(BeginEmulationCommand request, CancellationToken cancellationToken)

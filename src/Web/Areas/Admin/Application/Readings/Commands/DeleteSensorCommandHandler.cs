@@ -1,4 +1,5 @@
-﻿using System.Threading;
+﻿using System;
+using System.Threading;
 using System.Threading.Tasks;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
@@ -15,8 +16,8 @@ namespace Web.Areas.Admin.Application.Readings.Commands
         private readonly IMediator _mediator;
         public DeleteSensorCommandHandler(IDataContextFactory<DataContext> dataContextFactory, IMediator mediator)
         {
-            _dataContextFactory = dataContextFactory;
-            _mediator = mediator;
+            _dataContextFactory = dataContextFactory ?? throw new ArgumentNullException(nameof(dataContextFactory));
+            _mediator = mediator ?? throw new ArgumentNullException(nameof(dataContextFactory));
         }
 
         public async Task<bool> Handle(DeleteSensorCommand request, CancellationToken cancellationToken)

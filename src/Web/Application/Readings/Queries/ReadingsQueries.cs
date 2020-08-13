@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using AutoMapper;
@@ -19,7 +20,7 @@ namespace Web.Application.Readings.Queries
 
         public ReadingsQueries(ISensorCacheHelper sensorCacheHelper)
         {
-            _sensorCacheHelper = sensorCacheHelper;
+            _sensorCacheHelper = sensorCacheHelper ?? throw new ArgumentNullException(nameof(sensorCacheHelper));
         }
 
         public async Task<List<StaticSensorDTO>> GetStaticSensorsAsync()

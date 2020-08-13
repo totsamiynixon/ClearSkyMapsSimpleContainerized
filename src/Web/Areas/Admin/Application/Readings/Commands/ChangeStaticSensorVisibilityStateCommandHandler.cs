@@ -1,4 +1,5 @@
-﻿using System.Threading;
+﻿using System;
+using System.Threading;
 using System.Threading.Tasks;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
@@ -16,8 +17,8 @@ namespace Web.Areas.Admin.Application.Readings.Commands
 
         public ChangeStaticSensorVisibilityStateCommandHandler(IDataContextFactory<DataContext> dataContextFactory, IMediator mediator)
         {
-            _dataContextFactory = dataContextFactory;
-            _mediator = mediator;
+            _dataContextFactory = dataContextFactory ?? throw new ArgumentNullException(nameof(dataContextFactory));
+            _mediator = mediator ?? throw new ArgumentNullException(nameof(mediator));
         }
 
         public async Task<bool> Handle(ChangeStaticSensorVisibilityStateCommand request, CancellationToken cancellationToken)

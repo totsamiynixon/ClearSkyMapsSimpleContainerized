@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Net;
 using System.Threading.Tasks;
 using AutoMapper;
@@ -36,8 +37,8 @@ namespace Web.Areas.Admin.Controllers.Default
 
         public EmulatorController(Emulator emulator, IMediator mediator)
         {
-            _emulator = emulator;
-            _mediator = mediator;
+            _emulator = emulator ?? throw new ArgumentNullException(nameof(emulator));
+            _mediator = mediator ?? throw new ArgumentNullException(nameof(mediator));
         }
 
         [HttpGet]

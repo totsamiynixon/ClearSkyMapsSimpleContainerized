@@ -1,4 +1,5 @@
-﻿using AutoMapper;
+﻿using System;
+using AutoMapper;
 using Microsoft.AspNetCore.SignalR;
 using Web.Areas.PWA.Helpers.Interfaces;
 using Web.Areas.PWA.Hubs;
@@ -20,7 +21,7 @@ namespace Web.Areas.PWA.Helpers.Implementations
         public PWASignalrDispatchHelper(
             IHubContext<PWAStaticSensorHub, IPWAStaticSensorClient> staticSensorHubContext)
         {
-            _staticSensorHubContext = staticSensorHubContext;
+            _staticSensorHubContext = staticSensorHubContext ?? throw new ArgumentNullException(nameof(staticSensorHubContext));
         }
 
         public void DispatchReadingsForStaticSensor(int sensorId, PollutionLevel pollutionLevel, Reading reading)

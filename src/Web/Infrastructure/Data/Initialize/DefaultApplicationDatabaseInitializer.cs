@@ -1,4 +1,5 @@
-﻿using System.Threading.Tasks;
+﻿using System;
+using System.Threading.Tasks;
 using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using Web.Infrastructure.Data.Factory;
@@ -19,10 +20,10 @@ namespace Web.Infrastructure.Data.Initialize
             IDataContextFactory<IdentityDataContext> identityDataContextFactory,
             IDatabaseSeeder<DataContext> databaseSeeder, IDatabaseSeeder<IdentityDataContext> identityDatabaseSeeder)
         {
-            _dataContextFactory = dataContextFactory;
-            _identityDataContextFactory = identityDataContextFactory;
-            _databaseSeeder = databaseSeeder;
-            _identityDatabaseSeeder = identityDatabaseSeeder;
+            _dataContextFactory = dataContextFactory ?? throw new ArgumentNullException(nameof(dataContextFactory));
+            _identityDataContextFactory = identityDataContextFactory ?? throw new ArgumentNullException(nameof(identityDataContextFactory));
+            _databaseSeeder = databaseSeeder ?? throw new ArgumentNullException(nameof(databaseSeeder));
+            _identityDatabaseSeeder = identityDatabaseSeeder ?? throw new ArgumentNullException(nameof(identityDatabaseSeeder));
         }
 
 

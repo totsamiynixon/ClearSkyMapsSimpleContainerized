@@ -1,4 +1,5 @@
-﻿using System.Net;
+﻿using System;
+using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Text;
@@ -14,9 +15,10 @@ namespace Web.Controllers.API
     public class NotificationsController : ControllerBase
     {
         private readonly AppSettings _appSettings;
-        public NotificationsController( AppSettings appSettings)
+
+        public NotificationsController(AppSettings appSettings)
         {
-            _appSettings = appSettings;
+            _appSettings = appSettings ?? throw new ArgumentNullException(nameof(appSettings));
         }
 
         [HttpPost]
@@ -24,8 +26,10 @@ namespace Web.Controllers.API
         {
             using var client = new HttpClient();
             client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
-            client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("key", "=" + _appSettings.FirebaseCloudMessaging.ServerKey);
-            var request = new HttpRequestMessage(HttpMethod.Post, $"https://iid.googleapis.com/iid/v1/{model.RegistrationToken}/rel/topics/sensor_{model.SensorId}");
+            client.DefaultRequestHeaders.Authorization =
+                new AuthenticationHeaderValue("key", "=" + _appSettings.FirebaseCloudMessaging.ServerKey);
+            var request = new HttpRequestMessage(HttpMethod.Post,
+                $"https://iid.googleapis.com/iid/v1/{model.RegistrationToken}/rel/topics/sensor_{model.SensorId}");
             request.Content = new StringContent("",
                 Encoding.UTF8,
                 "application/json");
@@ -43,8 +47,10 @@ namespace Web.Controllers.API
         {
             using var client = new HttpClient();
             client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
-            client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("key", "=" + _appSettings.FirebaseCloudMessaging.ServerKey);
-            var request = new HttpRequestMessage(HttpMethod.Delete, $"https://iid.googleapis.com/iid/v1/{model.RegistrationToken}/rel/topics/sensor_{model.SensorId}");
+            client.DefaultRequestHeaders.Authorization =
+                new AuthenticationHeaderValue("key", "=" + _appSettings.FirebaseCloudMessaging.ServerKey);
+            var request = new HttpRequestMessage(HttpMethod.Delete,
+                $"https://iid.googleapis.com/iid/v1/{model.RegistrationToken}/rel/topics/sensor_{model.SensorId}");
             request.Content = new StringContent("",
                 Encoding.UTF8,
                 "application/json");

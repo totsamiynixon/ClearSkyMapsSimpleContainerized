@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using AutoMapper;
@@ -26,7 +27,7 @@ namespace Web.Areas.Admin.Application.Readings.Queries
         public ReadingsQueries(
             IDataContextFactory<DataContext> dataContextFactory)
         {
-            _dataContextFactory = dataContextFactory;
+            _dataContextFactory = dataContextFactory ?? throw new ArgumentNullException(nameof(dataContextFactory));
         }
 
         public async Task<List<SensorDTO>> GetSensorsAsync()

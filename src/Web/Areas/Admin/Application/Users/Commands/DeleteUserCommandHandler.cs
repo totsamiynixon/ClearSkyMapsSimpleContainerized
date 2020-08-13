@@ -1,4 +1,5 @@
-﻿using System.Threading;
+﻿using System;
+using System.Threading;
 using System.Threading.Tasks;
 using MediatR;
 using Microsoft.AspNetCore.Identity;
@@ -15,7 +16,7 @@ namespace Web.Areas.Admin.Application.Users.Commands
 
         public DeleteUserCommandHandler(UserManager<User> userManager)
         {
-            _userManager = userManager;
+            _userManager = userManager ?? throw new ArgumentNullException(nameof(userManager));
         }
 
         public async Task<bool> Handle(DeleteUserCommand request, CancellationToken cancellationToken)

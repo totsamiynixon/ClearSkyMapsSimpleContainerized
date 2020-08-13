@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using MediatR;
@@ -15,7 +16,7 @@ namespace Web.Areas.Admin.Application.Users.Commands
 
         public CreateUserCommandHandler(UserManager<User> userManager)
         {
-            _userManager = userManager;
+            _userManager = userManager ?? throw new ArgumentNullException(nameof(userManager));
         }
 
         public async Task<bool> Handle(CreateUserCommand request, CancellationToken cancellationToken)

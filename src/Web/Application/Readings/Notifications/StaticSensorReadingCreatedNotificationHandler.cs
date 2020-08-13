@@ -1,4 +1,5 @@
-﻿using System.Threading;
+﻿using System;
+using System.Threading;
 using System.Threading.Tasks;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
@@ -16,8 +17,8 @@ namespace Web.Application.Readings.Notifications
 
         public StaticSensorReadingCreatedNotificationHandler(IDataContextFactory<DataContext> dataContextFactory, ISensorCacheHelper sensorCacheHelper)
         {
-            _dataContextFactory = dataContextFactory;
-            _sensorCacheHelper = sensorCacheHelper;
+            _dataContextFactory = dataContextFactory ?? throw new ArgumentNullException(nameof(dataContextFactory));
+            _sensorCacheHelper = sensorCacheHelper ??  throw new ArgumentNullException(nameof(sensorCacheHelper));
         }
 
         public async Task Handle(StaticSensorReadingCreatedNotification notification, CancellationToken cancellationToken)

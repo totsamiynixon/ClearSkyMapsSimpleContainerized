@@ -10,6 +10,11 @@ namespace Web.Infrastructure.Data.Factory
 
         public DefaultDataContextFactory(string connectionString)
         {
+            if (string.IsNullOrEmpty(connectionString))
+            {
+                throw new ArgumentException(nameof(connectionString));
+            }
+            
             _connectionString = connectionString;
         }
 
@@ -18,8 +23,6 @@ namespace Web.Infrastructure.Data.Factory
         {
             var optionsBuilder = new DbContextOptionsBuilder<TContext>();
             optionsBuilder.UseSqlServer(_connectionString);
-            /*var optionsType = typeof(DbContextOptions<>).MakeGenericType(typeof(TContext));
-            var options = (DbContextOptions)Activator.CreateInstance(optionsType);*/
             return (TContext) Activator.CreateInstance(typeof(TContext), optionsBuilder.Options);
         }
     }

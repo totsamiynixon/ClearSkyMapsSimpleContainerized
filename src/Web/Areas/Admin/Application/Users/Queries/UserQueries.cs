@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using AutoMapper;
@@ -22,7 +23,7 @@ namespace Web.Areas.Admin.Application.Users.Queries
         
         public UserQueries(UserManager<User> userManager)
         {
-            _userManager = userManager;
+            _userManager = userManager ?? throw new ArgumentNullException(nameof(userManager));
         }
 
         public async Task<IEnumerable<UserListItemDTO>> GetUsersAsync()

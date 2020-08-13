@@ -1,4 +1,5 @@
-﻿using System.Threading;
+﻿using System;
+using System.Threading;
 using System.Threading.Tasks;
 using MediatR;
 using Web.Helpers.Interfaces;
@@ -11,7 +12,7 @@ namespace Web.Areas.Admin.Application.Readings.Notifications
 
         public SensorDeletedNotificationHandler(ISensorCacheHelper sensorCacheHelper)
         {
-            _sensorCacheHelper = sensorCacheHelper;
+            _sensorCacheHelper = sensorCacheHelper ?? throw new ArgumentNullException(nameof(sensorCacheHelper));
         }
 
         public async Task Handle(SensorDeletedNotification notification, CancellationToken cancellationToken)

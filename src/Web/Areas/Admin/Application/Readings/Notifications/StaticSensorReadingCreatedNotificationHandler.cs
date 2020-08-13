@@ -1,4 +1,5 @@
-﻿using System.Threading;
+﻿using System;
+using System.Threading;
 using System.Threading.Tasks;
 using MediatR;
 using Web.Application.Readings.Notifications;
@@ -13,7 +14,7 @@ namespace Web.Areas.Admin.Application.Readings.Notifications
 
         public StaticSensorReadingCreatedNotificationHandler(IAdminDispatchHelper adminDispatchHelper)
         {
-            _adminDispatchHelper = adminDispatchHelper;
+            _adminDispatchHelper = adminDispatchHelper ?? throw new ArgumentNullException(nameof(adminDispatchHelper));
         }
 
         public async Task Handle(StaticSensorReadingCreatedNotification notification,

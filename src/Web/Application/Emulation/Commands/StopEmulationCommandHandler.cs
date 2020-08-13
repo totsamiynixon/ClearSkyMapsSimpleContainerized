@@ -1,7 +1,9 @@
-﻿using System.Threading;
+﻿using System;
+using System.Threading;
 using System.Threading.Tasks;
 using MediatR;
 using Web.Application.Emulation.Exceptions;
+using Web.Application.Emulation.Notifications;
 using Web.Emulation;
 using Web.Infrastructure;
 
@@ -11,14 +13,16 @@ namespace Web.Application.Emulation.Commands
     {
         private readonly AppSettings _appSettings;
         private readonly Emulator _emulator;
+        private readonly IMediator _mediator;
 
-        public StopEmulationCommandHandler(AppSettings appSettings, Emulator emulator)
+        public StopEmulationCommandHandler(AppSettings appSettings, Emulator emulator, IMediator mediator)
         {
-            _appSettings = appSettings;
-            _emulator = emulator;
+            _appSettings = appSettings ?? throw new ArgumentNullException(nameof(appSettings));
+            _emulator = emulator ?? throw new ArgumentNullException(nameof(emulator));
+            _mediator = mediator ?? throw new ArgumentNullException(nameof(mediator));
         }
 
-        public Task<bool> Handle(StopEmulationCommand request, CancellationToken cancellationToken)
+        public async Task<bool> Handle(StopEmulationCommand request, CancellationToken cancellationToken)
         {
             //TODO: add validator for request
 
@@ -26,10 +30,12 @@ namespace Web.Application.Emulation.Commands
             {
                 throw new EmulationIsNotAvailableException();
             }
-            
+
             _emulator.StopEmulation();
 
-            return Task.FromResult(true);
+            await _mediator.Publish(new EmulationStoppedNotification(_emulator), cancellationToken);
+
+            return true;
         }
     }
 }

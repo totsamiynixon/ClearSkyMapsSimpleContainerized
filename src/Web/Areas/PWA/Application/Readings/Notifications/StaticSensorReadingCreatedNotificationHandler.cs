@@ -1,4 +1,5 @@
-﻿using System.Threading;
+﻿using System;
+using System.Threading;
 using System.Threading.Tasks;
 using AutoMapper;
 using MediatR;
@@ -28,9 +29,9 @@ namespace Web.Areas.PWA.Application.Readings.Notifications
         public StaticSensorReadingCreatedNotificationHandler(IPWADispatchHelper pwaDispatchHelper,
             ISensorCacheHelper sensorCacheHelper, IDataContextFactory<DataContext> dataContextFactory)
         {
-            _pwaDispatchHelper = pwaDispatchHelper;
-            _sensorCacheHelper = sensorCacheHelper;
-            _dataContextFactory = dataContextFactory;
+            _pwaDispatchHelper = pwaDispatchHelper ?? throw new ArgumentNullException(nameof(pwaDispatchHelper));
+            _sensorCacheHelper = sensorCacheHelper ?? throw new ArgumentNullException(nameof(sensorCacheHelper));
+            _dataContextFactory = dataContextFactory ?? throw new ArgumentNullException(nameof(dataContextFactory));
         }
 
         public async Task Handle(StaticSensorReadingCreatedNotification notification,

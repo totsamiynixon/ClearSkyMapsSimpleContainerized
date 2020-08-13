@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using AutoMapper;
 using MediatR;
@@ -38,8 +39,8 @@ namespace Web.Areas.Admin.Controllers.API
 
         public APIEmulatorController(Emulator emulator, IMediator mediator)
         {
-            _emulator = emulator;
-            _mediator = mediator;
+            _emulator = emulator ?? throw new ArgumentNullException(nameof(emulator));
+            _mediator = mediator ?? throw new ArgumentNullException(nameof(mediator));
         }
 
         [HttpGet]

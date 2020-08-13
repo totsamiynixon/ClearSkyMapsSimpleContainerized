@@ -44,9 +44,6 @@ namespace Web
             //TODO: Check how it works
             services.AddTransient<AppSettings>((_) => appSettings);
             services.AddMediatR(typeof(Startup));
-            
-            /*services.AddTransient<UserManager<User>>();
-            services.AddTransient<RoleManager<User>>();*/
 
             services.AddSingleton<Emulator>();
             services.AddTransient<IReadingsQueries, ReadingsQueries>();

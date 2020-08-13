@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using AutoMapper;
@@ -53,8 +54,8 @@ namespace Web.Areas.Admin.Controllers.API
 
         public APISensorsController(IReadingsQueries readingsQueries, IMediator mediator)
         {
-            _readingsQueries = readingsQueries;
-            _mediator = mediator;
+            _readingsQueries = readingsQueries ?? throw new ArgumentNullException(nameof(readingsQueries));
+            _mediator = mediator ?? throw new ArgumentNullException(nameof(mediator));
         }
 
         public async Task<ActionResult> Index()

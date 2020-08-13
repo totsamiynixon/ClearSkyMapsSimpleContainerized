@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using MediatR;
@@ -15,8 +16,8 @@ namespace Web.Application.Emulation.Commands
 
         public DevicePowerOnCommandHandler(AppSettings appSettings, Emulator emulator)
         {
-            _appSettings = appSettings;
-            _emulator = emulator;
+            _appSettings = appSettings ?? throw new ArgumentNullException(nameof(appSettings));
+            _emulator = emulator ?? throw new ArgumentNullException(nameof(emulator));
         }
 
         public Task<bool> Handle(DevicePowerOnCommand request, CancellationToken cancellationToken)

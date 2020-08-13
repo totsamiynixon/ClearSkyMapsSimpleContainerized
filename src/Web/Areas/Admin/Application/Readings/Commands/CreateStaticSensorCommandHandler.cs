@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using AutoMapper;
@@ -23,7 +24,7 @@ namespace Web.Areas.Admin.Application.Readings.Commands
 
         public CreateStaticSensorCommandHandler(IDataContextFactory<DataContext> dataContextFactory)
         {
-            _dataContextFactory = dataContextFactory;
+            _dataContextFactory = dataContextFactory ?? throw new ArgumentNullException(nameof(dataContextFactory));
         }
 
         public async Task<StaticSensorDTO> Handle(CreateStaticSensorCommand request,

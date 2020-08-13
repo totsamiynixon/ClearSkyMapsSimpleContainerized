@@ -17,7 +17,7 @@ namespace Web.Controllers.API
 
         public IntegrationController(IMediator mediator)
         {
-            _mediator = mediator;
+            _mediator = mediator ?? throw new ArgumentNullException(nameof(mediator));
         }
 
         [HttpGet("getaspost")]

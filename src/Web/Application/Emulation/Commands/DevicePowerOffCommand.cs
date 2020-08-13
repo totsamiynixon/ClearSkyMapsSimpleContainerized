@@ -9,6 +9,11 @@ namespace Web.Application.Emulation.Commands
 
         public DevicePowerOffCommand(string deviceId)
         {
+            if (string.IsNullOrEmpty(deviceId))
+            {
+                throw new ArgumentException(nameof(deviceId));
+            }
+            
             DeviceId = Guid.Parse(deviceId);
         }
     }

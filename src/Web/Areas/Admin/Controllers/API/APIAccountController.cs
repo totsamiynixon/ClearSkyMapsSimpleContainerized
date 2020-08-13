@@ -30,9 +30,9 @@ namespace Web.Areas.Admin.Controllers.API
         public APIAccountController(UserManager<User> userManager, JWTAppSettings jwtAppSettings,
             SignInManager<User> signInManager)
         {
-            _userManager = userManager;
-            _jwtAppSettings = jwtAppSettings;
-            _signInManager = signInManager;
+            _userManager = userManager ?? throw new ArgumentNullException(nameof(userManager));
+            _jwtAppSettings = jwtAppSettings ?? throw new ArgumentNullException(nameof(jwtAppSettings));
+            _signInManager = signInManager ?? throw new ArgumentNullException(nameof(signInManager));
         }
 
         [HttpPost("login")]

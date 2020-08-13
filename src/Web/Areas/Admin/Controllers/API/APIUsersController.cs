@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using AutoMapper;
 using MediatR;
@@ -44,8 +45,8 @@ namespace Web.Areas.Admin.Controllers.API
 
         public APIUsersController(IMediator mediator, IUserQueries userQueries)
         {
-            _mediator = mediator;
-            _userQueries = userQueries;
+            _mediator = mediator ?? throw new ArgumentNullException(nameof(mediator));
+            _userQueries = userQueries ?? throw new ArgumentNullException(nameof(userQueries));
         }
 
         [HttpGet]
