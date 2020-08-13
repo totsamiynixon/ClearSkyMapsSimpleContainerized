@@ -1,6 +1,6 @@
-﻿namespace Web.Areas.Admin.Application.Readings.Queries.DTO
+﻿namespace Web.Areas.Admin.Models.API.Sensors
 {
-    public class StaticSensorDTO : SensorDTO
+    public class StaticSensorModel : SensorModel
     {
         public double Latitude { get; set; }
         

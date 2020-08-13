@@ -3,7 +3,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using AutoMapper;
 using Microsoft.EntityFrameworkCore;
-using Web.Areas.Admin.Application.Readings.Queries.DTO;
+using Web.Areas.Admin.Application.Readings.DTO;
 using Web.Domain.Entities;
 using Web.Infrastructure.Data;
 using Web.Infrastructure.Data.Factory;

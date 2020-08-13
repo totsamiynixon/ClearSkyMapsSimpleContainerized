@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Threading.Tasks;
-using Web.Areas.Admin.Application.Readings.Queries.DTO;
+using Web.Areas.Admin.Application.Readings.DTO;
 
 namespace Web.Areas.Admin.Application.Readings.Queries
 {

@@ -8,8 +8,8 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Web.Application.Readings.Exceptions;
 using Web.Areas.Admin.Application.Readings.Commands;
+using Web.Areas.Admin.Application.Readings.DTO;
 using Web.Areas.Admin.Application.Readings.Queries;
-using Web.Areas.Admin.Application.Readings.Queries.DTO;
 using Web.Areas.Admin.Infrastructure.Auth;
 using Web.Areas.Admin.Models.API.Sensors;
 
@@ -39,6 +39,12 @@ namespace Web.Areas.Admin.Controllers.API
                 .ConstructUsing(z => new ChangeSensorActivationStateCommand(z.Id.Value, z.IsActive));
             x.CreateMap<ChangeVisibilityStaticSensorModel, ChangeStaticSensorVisibilityStateCommand>()
                 .ConstructUsing(z => new ChangeStaticSensorVisibilityStateCommand(z.Id.Value, z.IsVisible));
+            
+            x.CreateMap<SensorDTO, SensorModel>();
+            x.CreateMap<StaticSensorDTO, StaticSensorModel>()
+                .IncludeBase<SensorDTO, SensorModel>();
+            x.CreateMap<PortableSensorDTO, PortableSensorModel>()
+                .IncludeBase<SensorDTO, SensorModel>();
         }));
 
 
@@ -80,9 +86,9 @@ namespace Web.Areas.Admin.Controllers.API
             }
 
             var command = _mapper.Map<CreateStaticSensorModel, CreateStaticSensorCommand>(model);
-            await _mediator.Send(command);
+            var sensorDto = await _mediator.Send(command);
 
-            return RedirectToAction("Index");
+            return Ok(_mapper.Map<StaticSensorDTO, StaticSensorModel>(sensorDto));
         }
 
         [HttpPost]
@@ -96,9 +102,9 @@ namespace Web.Areas.Admin.Controllers.API
             }
 
             var command = _mapper.Map<CreatePortableSensorModel, CreatePortableSensorCommand>(model);
-            await _mediator.Send(command);
+            var portableSensorDto = await _mediator.Send(command);
 
-            return RedirectToAction("Index");
+            return Ok(_mapper.Map<PortableSensorDTO, PortableSensorModel>(portableSensorDto));
         }
 
 

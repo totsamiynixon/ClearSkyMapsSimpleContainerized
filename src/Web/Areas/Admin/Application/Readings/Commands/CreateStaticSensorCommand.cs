@@ -1,8 +1,9 @@
 ﻿using MediatR;
+using Web.Areas.Admin.Application.Readings.DTO;
 
 namespace Web.Areas.Admin.Application.Readings.Commands
 {
-    public class CreateStaticSensorCommand : IRequest<bool>
+    public class CreateStaticSensorCommand : IRequest<StaticSensorDTO>
     {
         public CreateStaticSensorCommand(string apiKey, double latitude, double longitude)
         {
