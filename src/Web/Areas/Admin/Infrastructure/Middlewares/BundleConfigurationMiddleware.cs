@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Builder;
 
-namespace Web.Areas.Admin.Infrastructure.MIddlewares
+namespace Web.Areas.Admin.Infrastructure.Middlewares
 {
     public static class BundleConfigurationMiddleware
     {

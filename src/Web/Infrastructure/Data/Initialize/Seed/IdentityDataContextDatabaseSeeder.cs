@@ -15,12 +15,14 @@ namespace Web.Infrastructure.Data.Initialize.Seed
             {
                 context.Roles.Add(new IdentityRole
                 {
-                    Name = "Admin"
+                    Name = "Admin",
+                    NormalizedName = "ADMIN"
                 });
 
                 var supervisorRole = new IdentityRole
                 {
-                    Name = "Supervisor"
+                    Name = "Supervisor",
+                    NormalizedName = "SUPERVISOR"
                 };
                 context.Roles.Add(supervisorRole);
 

@@ -2,11 +2,11 @@
 using System.Linq;
 using System.Threading.Tasks;
 using AutoMapper;
-using Web.Areas.PWA.Application.Readings.Queries.DTO;
+using Web.Application.Readings.Queries.DTO;
 using Web.Domain.Entities;
 using Web.Helpers.Interfaces;
 
-namespace Web.Areas.PWA.Application.Readings.Queries
+namespace Web.Application.Readings.Queries
 {
     public class ReadingsQueries : IReadingsQueries
     {
@@ -26,7 +26,7 @@ namespace Web.Areas.PWA.Application.Readings.Queries
         {
             var sensors = await _sensorCacheHelper.GetStaticSensorsAsync();
             
-            var model = sensors.Select(f => new StaticSensorDTO
+            var model = sensors?.Select(f => new StaticSensorDTO
             {
                 Id = f.Sensor.Id,
                 Latitude = f.Sensor.Latitude,

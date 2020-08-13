@@ -11,12 +11,12 @@ using Newtonsoft.Json;
 
 namespace Web.Infrastructure.Middlewares
 {
-    public class ExceptionHandlerMiddleware
+    public class ExceptionLoggerMiddleware
     {
         private readonly RequestDelegate _next;
-        private readonly ILogger<ExceptionHandlerMiddleware> _logger;
+        private readonly ILogger<ExceptionLoggerMiddleware> _logger;
 
-        public ExceptionHandlerMiddleware(RequestDelegate next, ILogger<ExceptionHandlerMiddleware> logger)
+        public ExceptionLoggerMiddleware(RequestDelegate next, ILogger<ExceptionLoggerMiddleware> logger)
         {
             _next = next;
             _logger = logger;
@@ -30,14 +30,9 @@ namespace Web.Infrastructure.Middlewares
             }
             catch (Exception ex)
             {
-                context.Response.Clear();
-                context.Response.Headers.Clear();
-                context.Response.StatusCode = 500;
+                _logger.LogError(ex, "An unhandled exception has occurred: " + ex.Message);
                 
-                if (context.Response.HasStarted)
-                {
-                    _logger.LogWarning("The response has already started, the error handler will not be executed.");
-                }
+                throw;
             }
         }
     }

@@ -2,11 +2,11 @@
 using System.Threading.Tasks;
 using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
-using Web.Areas.PWA.Application.Readings.Queries;
-using Web.Areas.PWA.Application.Readings.Queries.DTO;
+using Web.Application.Readings.Queries;
+using Web.Application.Readings.Queries.DTO;
 using Web.Areas.PWA.Models.API.Sensors;
 
-namespace Web.Areas.PWA.Controllers.API
+namespace Web.Controllers.API
 {
     [Route("api/[controller]")]
     [ApiController]

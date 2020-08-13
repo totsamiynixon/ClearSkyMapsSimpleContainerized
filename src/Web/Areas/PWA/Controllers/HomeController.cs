@@ -3,7 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace Web.Areas.PWA.Controllers
 {
-    [Area("PWA")]
+    [Area(PWAArea.Name)]
     public class HomeController : Controller
     {
 

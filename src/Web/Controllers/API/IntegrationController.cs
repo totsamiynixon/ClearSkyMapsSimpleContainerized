@@ -7,7 +7,7 @@ using Web.Application.Readings.Commands;
 using Web.Application.Readings.DTO;
 using Web.Application.Readings.Exceptions;
 
-namespace Web.Controllers
+namespace Web.Controllers.API
 {
     [Route("api/[controller]")]
     [ApiController]

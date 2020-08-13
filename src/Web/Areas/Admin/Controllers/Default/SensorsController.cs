@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using System.Net;
 using System.Threading.Tasks;
 using AutoMapper;
 using MediatR;
@@ -9,13 +10,13 @@ using Web.Application.Readings.Exceptions;
 using Web.Areas.Admin.Application.Readings.Commands;
 using Web.Areas.Admin.Application.Readings.Queries;
 using Web.Areas.Admin.Application.Readings.Queries.DTO;
-using Web.Areas.Admin.Infrastructure.Filters;
+using Web.Areas.Admin.Extensions;
 using Web.Areas.Admin.Models.Default.Sensors;
 using Web.Helpers;
 
 namespace Web.Areas.Admin.Controllers.Default
 {
-    [Area("Admin")]
+    [Area(AdminArea.Name)]
     [Authorize]
     public class SensorsController : Controller
     {
@@ -70,7 +71,6 @@ namespace Web.Areas.Admin.Controllers.Default
         #region Create
 
         [HttpGet]
-        [RestoreModelStateFromTempData]
         public ActionResult CreateStaticSensor()
         {
             return View(new CreateStaticSensorViewModel(new CreateStaticSensorModel
@@ -81,8 +81,7 @@ namespace Web.Areas.Admin.Controllers.Default
 
 
         [HttpPost]
-        [SetTempDataModelState]
-        public async Task<ActionResult> CreateStaticSensor([Bind(nameof(CreateStaticSensorViewModel.Model))]
+        public async Task<ActionResult> CreateStaticSensor([Bind(Prefix = nameof(CreateStaticSensorViewModel.Model))]
             CreateStaticSensorModel model)
         {
             if (!ModelState.IsValid)
@@ -107,7 +106,7 @@ namespace Web.Areas.Admin.Controllers.Default
 
 
         [HttpPost]
-        public async Task<ActionResult> CreatePortableSensor([Bind(nameof(CreatePortableSensorViewModel.Model))]
+        public async Task<ActionResult> CreatePortableSensor([Bind(Prefix = nameof(CreatePortableSensorViewModel.Model))]
             CreatePortableSensorModel model)
         {
             if (!ModelState.IsValid)
@@ -135,7 +134,7 @@ namespace Web.Areas.Admin.Controllers.Default
 
         [HttpPost]
         [Authorize(Roles = "Supervisor")]
-        public async Task<ActionResult> Delete([Bind(nameof(DeleteSensorViewModel.Model))]
+        public async Task<ActionResult> Delete([Bind(Prefix = nameof(DeleteSensorViewModel.Model))]
             DeleteSensorModel model)
         {
             if (!ModelState.IsValid)
@@ -153,18 +152,18 @@ namespace Web.Areas.Admin.Controllers.Default
         {
             if (!sensorId.HasValue)
             {
-                return BadRequest("Sensor id is required!");
+                return this.StatusCodeView(HttpStatusCode.NotFound, "Sensor id is required!");
             }
 
             var sensor = await _readingsQueries.GetSensorByIdAsync(sensorId.Value);
             if (sensor == null)
             {
-                return NotFound($"Sensor with id: {sensorId} not found");
+                return this.StatusCodeView(HttpStatusCode.NotFound, $"Sensor with id: {sensorId} not found");
             }
 
             if (sensor.IsActive)
             {
-                return Forbid("Unable to delete active sensor");
+                return this.StatusCodeView(HttpStatusCode.Forbidden, "Unable to delete active sensor");
             }
 
             var detailsVM = _mapper.Map<SensorDTO, SensorDetailsViewModel>(sensor);
@@ -187,7 +186,7 @@ namespace Web.Areas.Admin.Controllers.Default
         }
 
         [HttpPost]
-        public async Task<ActionResult> ChangeActivation([Bind(nameof(ChangeActivationSensorViewModel.Model))]
+        public async Task<ActionResult> ChangeActivation([Bind(Prefix = nameof(ChangeActivationSensorViewModel.Model))]
             ChangeActivationSensorModel model)
         {
             if (!ModelState.IsValid)
@@ -207,13 +206,13 @@ namespace Web.Areas.Admin.Controllers.Default
         {
             if (!sensorId.HasValue)
             {
-                return BadRequest("Sensor id is required!");
+                return this.StatusCodeView(HttpStatusCode.BadRequest, "Sensor id is required!");
             }
 
             var sensor = await _readingsQueries.GetSensorByIdAsync(sensorId.Value);
             if (sensor == null)
             {
-                return NotFound($"Sensor with id: {sensorId} not found");
+                return this.StatusCodeView(HttpStatusCode.NotFound, $"Sensor with id: {sensorId} not found");
             }
 
             var detailsVM = _mapper.Map<SensorDTO, SensorDetailsViewModel>(sensor);
@@ -239,7 +238,7 @@ namespace Web.Areas.Admin.Controllers.Default
 
         [HttpPost]
         public async Task<ActionResult> ChangeVisibilityStaticSensor(
-            [Bind(nameof(ChangeVisibilityStaticSensorViewModel.Model))]
+            [Bind(Prefix = nameof(ChangeVisibilityStaticSensorViewModel.Model))]
             ChangeVisibilityStaticSensorModel model)
         {
             if (!ModelState.IsValid)
@@ -265,20 +264,20 @@ namespace Web.Areas.Admin.Controllers.Default
         {
             if (!sensorId.HasValue)
             {
-                return NotFound("Id is required");
+                return this.StatusCodeView(HttpStatusCode.BadRequest, "Id is required");
             }
 
-            var sensor = await _readingsQueries.GetSensorByIdAsync(sensorId.Value);
+            var sensor = await _readingsQueries.GetStaticSensorByIdAsync(sensorId.Value);
             if (sensor == null)
             {
-                return NotFound("Sensor not found");
+                return this.StatusCodeView(HttpStatusCode.NotFound,"Static Sensor not found");
             }
 
             var detailsVM = _mapper.Map<SensorDTO, SensorDetailsViewModel>(sensor);
             var vm = new ChangeVisibilityStaticSensorViewModel(model ?? new ChangeVisibilityStaticSensorModel
             {
                 Id = sensor.Id,
-                IsVisible = sensor.IsActive
+                IsVisible = sensor.IsVisible
             }, detailsVM);
 
             return View(vm);
@@ -290,13 +289,13 @@ namespace Web.Areas.Admin.Controllers.Default
         {
             if (!sensorId.HasValue)
             {
-                return BadRequest("Sensor id is required!");
+                return this.StatusCodeView(HttpStatusCode.BadRequest, "Sensor id is required!");
             }
 
             var sensor = await _readingsQueries.GetSensorByIdAsync(sensorId.Value);
             if (sensor == null)
             {
-                return NotFound($"Sensor with id: {sensorId} not found");
+                return this.StatusCodeView(HttpStatusCode.NotFound, "Sensor with id: {sensorId} not found");
             }
 
             return View(sensorId.Value);

@@ -39,7 +39,7 @@ namespace Web.Helpers.Implementations
         public Task<List<SensorCacheItemModel>> GetStaticSensorsAsync()
         {
             //TODO: Investigate that moment
-            return Task.FromResult(_memCache.Get<List<SensorCacheItemModel>>(SensorCacheKey));
+            return Task.FromResult(_memCache.Get<List<SensorCacheItemModel>>(SensorCacheKey) ?? new List<SensorCacheItemModel>());
         }
 
         public void ClearCache()

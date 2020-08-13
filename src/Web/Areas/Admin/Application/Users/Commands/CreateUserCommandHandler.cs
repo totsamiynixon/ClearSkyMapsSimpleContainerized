@@ -1,4 +1,5 @@
-﻿using System.Threading;
+﻿using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using MediatR;
 using Microsoft.AspNetCore.Identity;
@@ -24,6 +25,7 @@ namespace Web.Areas.Admin.Application.Users.Commands
             {
                 throw new UserEmailAddressIsAlreadyTakenException();
             }
+
             var newUser = new User
             {
                 UserName = request.Email,
@@ -31,10 +33,13 @@ namespace Web.Areas.Admin.Application.Users.Commands
             };
 
             var result = await _userManager.CreateAsync(newUser, request.Password);
-            if (result.Succeeded)
+
+            if (!result.Succeeded)
             {
-                await _userManager.AddToRoleAsync(newUser, "Admin");
+                throw new UserUnableToCreateException(result.Errors.First().Description);
             }
+
+            await _userManager.AddToRoleAsync(newUser, "Admin");
 
             return true;
         }

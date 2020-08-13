@@ -12,12 +12,8 @@ using Web.Helpers.Implementations;
 using Microsoft.Extensions.Logging;
 using Web.Areas.Admin;
 using Microsoft.AspNetCore.Authentication.Cookies;
-using Web.Areas.Admin.Application.Readings.Queries;
-using Web.Areas.Admin.Application.Users.Queries;
-using Web.Areas.PWA.Helpers.Interfaces;
-using Web.Areas.PWA.Helpers.Implementations;
-using Web.Areas.Admin.Helpers.Interfaces;
-using Web.Areas.Admin.Helpers.Implementations;
+using Microsoft.Extensions.Hosting;
+using Web.Application.Readings.Queries;
 using Web.Areas.PWA;
 using Web.Domain.Entities.Identity;
 using Web.Emulation;
@@ -56,12 +52,8 @@ namespace Web
 
             services.AddSingleton<Emulator>();
             services.AddTransient<IReadingsQueries, ReadingsQueries>();
-            //TODO: Thisnk about how to split area realted services to another module
-            services.AddTransient<IUserQueries, UserQueries>();
             services.AddTransient<IPollutionCalculator, PollutionCalculator>();
             services.AddTransient<ISensorCacheHelper, SensorCacheHelper>();
-            services.AddTransient<IPWADispatchHelper, PWASignalrDispatchHelper>();
-            services.AddTransient<IAdminDispatchHelper, AdminSignalRHubDispatchHelper>();
 
             services.AddSingleton<IEmulationDataContextFactory<DataContext>>(provider => new DefaultDataContextFactory<DataContext>(appSettings.Emulation.ConnectionString));
             services.AddSingleton<IEmulationDataContextFactory<IdentityDataContext>>(provider => new DefaultDataContextFactory<IdentityDataContext>(appSettings.Emulation.ConnectionString));
@@ -109,6 +101,7 @@ namespace Web
                 .AddEntityFrameworkStores<IdentityDataContext>();
 
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_3_0);
+            services.AddControllersWithViews().AddRazorRuntimeCompilation();
             services.AddMemoryCache();
 
             services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
@@ -121,26 +114,33 @@ namespace Web
             services.AddSignalR();
 
             services.AddAppBundling(_environment);
+
+            services.AddAdminAreaServices();
+            services.AddPWAAreaServices();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env, ILoggerFactory loggerFactory)
         {
-            app.UseMiddleware<ExceptionHandlerMiddleware>();
-
-            app.UseRouting();
-
-            app.UseStaticFiles();
-            app.UseCookiePolicy();
-            
-            //TODO: think about MapWhen usage to specify auth only for Admin area
-            app.UseAuthentication();
-            app.UseAuthorization();
-
 
             app.UseAdminArea(Configuration, env);
             app.UsePWAArea(env);
+
+            if (env.IsDevelopment())
+            {
+                app.UseDeveloperExceptionPage();
+            }
+            else
+            {
+                app.UseMiddleware<ExceptionHandlerMiddleware>();
+                app.UseMiddleware<ExceptionLoggerMiddleware>();
+            }
             
+            app.UseRouting();
+            
+            app.UseStaticFiles();
+            app.UseCookiePolicy();
+
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllers();

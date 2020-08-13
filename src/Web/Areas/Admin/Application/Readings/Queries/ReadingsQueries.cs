@@ -78,7 +78,7 @@ namespace Web.Areas.Admin.Application.Readings.Queries
                 .FirstOrDefaultAsync(f => f.ApiKey == apiKey && f.IsActive && !f.IsDeleted);
         }
 
-        public async Task<StaticSensor> GetStaticSensorByIdAsync(int id, bool withReadings = false)
+        public async Task<StaticSensorDTO> GetStaticSensorByIdAsync(int id, bool withReadings = false)
         {
             await using var context = _dataContextFactory.Create();
             var query = context
@@ -100,7 +100,8 @@ namespace Web.Areas.Admin.Application.Readings.Queries
                 });
             }
 
-            return await query.FirstOrDefaultAsync(f => f.Id == id);
+            var staticSensor = await query.FirstOrDefaultAsync(f => f.Id == id);
+            return _mapper.Map<StaticSensor, StaticSensorDTO>(staticSensor);
         }
     }
 }

@@ -11,11 +11,13 @@ using Web.Emulation;
 
 namespace Web.Areas.Admin.Controllers.API
 {
-    [Area("Admin")]
     [Authorize]
+    [Area(AdminArea.Name)]
     //TODO: check area based api routes
-    [Route("api/{area}/{controller}")]
-    public class EmulatorController : Controller
+    //TODO: check how to resolve naming conflict
+    [Route( AdminArea.APIRoutePrefix + "/emulator")]
+    [ApiController]
+    public class APIEmulatorController : Controller
     {
         private readonly Emulator _emulator;
         private readonly IMediator _mediator;
@@ -32,7 +34,7 @@ namespace Web.Areas.Admin.Controllers.API
                 ;
         }));
 
-        public EmulatorController(Emulator emulator, IMediator mediator)
+        public APIEmulatorController(Emulator emulator, IMediator mediator)
         {
             _emulator = emulator;
             _mediator = mediator;
@@ -51,7 +53,7 @@ namespace Web.Areas.Admin.Controllers.API
         }
 
 
-        [HttpPost]
+        [HttpPost("start")]
         public async Task<IActionResult> StartEmulation()
         {
             try
@@ -66,7 +68,7 @@ namespace Web.Areas.Admin.Controllers.API
             return Ok();
         }
 
-        [HttpPost]
+        [HttpPost("stop")]
         public async Task<IActionResult> StopEmulation()
         {
             try
@@ -81,8 +83,8 @@ namespace Web.Areas.Admin.Controllers.API
             return Ok();
         }
 
-        [HttpPost]
-        public ActionResult PowerOn(string guid)
+        [HttpPost("device/{guid}/powerOn")]
+        public ActionResult DevicePowerOn(string guid)
         {
             try
             {
@@ -100,7 +102,7 @@ namespace Web.Areas.Admin.Controllers.API
             return Ok("Emulator device has been successfully started");
         }
 
-        [HttpPost]
+        [HttpPost("device/{guid}/powerOff")]
         public ActionResult PowerOff(string guid)
         {
             try

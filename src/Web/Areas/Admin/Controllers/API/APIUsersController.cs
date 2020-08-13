@@ -13,10 +13,11 @@ using Web.Areas.Admin.Models.API.Users;
 namespace Web.Areas.Admin.Controllers.API
 {
     [Authorize(Roles = "Supervisor")]
-    [Area("Admin")]
+    [Area(AdminArea.Name)]
     //TODO: check area based api routes
-    [Route("api/{area}/{controller}")]
-    public class UsersController : Controller
+    [Route( AdminArea.APIRoutePrefix + "/users")]
+    [ApiController]
+    public class APIUsersController : Controller
     {
         private static readonly IMapper _mapper = new Mapper(new MapperConfiguration(x =>
         {
@@ -39,7 +40,7 @@ namespace Web.Areas.Admin.Controllers.API
         private readonly IMediator _mediator;
         private readonly IUserQueries _userQueries;
 
-        public UsersController(IMediator mediator, IUserQueries userQueries)
+        public APIUsersController(IMediator mediator, IUserQueries userQueries)
         {
             _mediator = mediator;
             _userQueries = userQueries;

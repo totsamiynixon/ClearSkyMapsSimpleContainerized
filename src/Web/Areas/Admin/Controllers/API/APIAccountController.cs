@@ -11,15 +11,17 @@ using Web.Domain.Entities.Identity;
 
 namespace Web.Areas.Admin.Controllers.API
 {
-    [Area("Admin")]
     [Authorize]
+    [Area(AdminArea.Name)]
     //TODO: check area based api routes
-    [Route("api/{area}/{controller}")]
-    public class AccountController : Controller
+    //TODO: check how to resolve naming conflicts
+    [Route( AdminArea.APIRoutePrefix + "/account")]
+    [ApiController]
+    public class APIAccountController : Controller
     {
         private UserManager<User> _userManager;
 
-        public AccountController(UserManager<User> userManager)
+        public APIAccountController(UserManager<User> userManager)
         {
             _userManager = userManager;
         }

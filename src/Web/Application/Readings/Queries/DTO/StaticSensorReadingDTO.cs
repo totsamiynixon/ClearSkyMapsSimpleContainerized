@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Web.Areas.PWA.Application.Readings.Queries.DTO
+namespace Web.Application.Readings.Queries.DTO
 {
     public class StaticSensorReadingDTO
     {

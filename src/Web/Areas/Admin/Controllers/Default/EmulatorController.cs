@@ -1,4 +1,6 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using System.Net;
 using System.Threading.Tasks;
 using AutoMapper;
 using MediatR;
@@ -6,12 +8,13 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Web.Application.Emulation.Commands;
 using Web.Application.Emulation.Exceptions;
+using Web.Areas.Admin.Extensions;
 using Web.Areas.Admin.Models.Default.Emulator;
 using Web.Emulation;
 
 namespace Web.Areas.Admin.Controllers.Default
 {
-    [Area("Admin")]
+    [Area(AdminArea.Name)]
     [Authorize]
     public class EmulatorController : Controller
     {
@@ -58,7 +61,7 @@ namespace Web.Areas.Admin.Controllers.Default
             }
             catch (EmulationIsNotAvailableException ex)
             {
-                return Forbid(ex.Message);
+                return this.StatusCodeView(HttpStatusCode.Forbidden, ex.Message);
             }
 
             return RedirectToAction("Index");
@@ -73,9 +76,9 @@ namespace Web.Areas.Admin.Controllers.Default
             }
             catch (EmulationIsNotAvailableException ex)
             {
-                return Forbid(ex.Message);
+                return this.StatusCodeView(HttpStatusCode.Forbidden, ex.Message);
             }
-            
+
             return RedirectToAction("Index");
         }
 
@@ -88,14 +91,14 @@ namespace Web.Areas.Admin.Controllers.Default
             }
             catch (EmulationIsNotAvailableException ex)
             {
-                return Forbid(ex.Message);
+                return this.StatusCodeView(HttpStatusCode.Forbidden, ex.Message);
             }
             catch (EmulationDeviceNotFoundException ex)
             {
-                return NotFound(ex.Message);
+                return this.StatusCodeView(HttpStatusCode.NotFound, ex.Message);
             }
-            
-            return Ok("Emulator device has been successfully started");
+
+            return this.StatusCodeView(HttpStatusCode.OK, "Emulator device has been successfully started");
         }
 
         [HttpPost]
@@ -107,14 +110,14 @@ namespace Web.Areas.Admin.Controllers.Default
             }
             catch (EmulationIsNotAvailableException ex)
             {
-                return Forbid(ex.Message);
+                return this.StatusCodeView(HttpStatusCode.Forbidden, ex.Message);
             }
             catch (EmulationDeviceNotFoundException ex)
             {
-                return NotFound(ex.Message);
+                return this.StatusCodeView(HttpStatusCode.NotFound, ex.Message);
             }
-            
-            return Ok("Emulator device has been successfully stopped");
+
+            return this.StatusCodeView(HttpStatusCode.OK, "Emulator device has been successfully stopped");
         }
     }
 }

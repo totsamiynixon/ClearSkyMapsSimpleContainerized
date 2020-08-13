@@ -16,6 +16,7 @@ namespace Web.Areas.Admin.Application.Users.Queries
         private static readonly IMapper _mapper = new Mapper(new MapperConfiguration(x =>
         {
             x.CreateMap<User, UserListItemDTO>();
+            x.CreateMap<User, UserDetailsDTO>();
         }));
 
         

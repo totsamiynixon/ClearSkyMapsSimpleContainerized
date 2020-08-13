@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using System.Net;
 using System.Threading.Tasks;
 using AutoMapper;
 using MediatR;
@@ -9,15 +10,15 @@ using Web.Areas.Admin.Application.Users.Commands;
 using Web.Areas.Admin.Application.Users.Exceptions;
 using Web.Areas.Admin.Application.Users.Queries;
 using Web.Areas.Admin.Application.Users.Queries.DTO;
+using Web.Areas.Admin.Extensions;
 using Web.Areas.Admin.Models.Default.Users;
 
 namespace Web.Areas.Admin.Controllers.Default
 {
     [Authorize(Roles = "Supervisor")]
-    [Area("Admin")]
+    [Area(AdminArea.Name)]
     public class UsersController : Controller
     {
-
         private static readonly IMapper _mapper = new Mapper(new MapperConfiguration(x =>
         {
             x.CreateMap<UserListItemDTO, UserListItemViewModel>();
@@ -35,8 +36,7 @@ namespace Web.Areas.Admin.Controllers.Default
                 .ConstructUsing(z => new ChangeUserActivationStateCommand(z.Id, z.IsActive));
         }));
 
-        
-        
+
         private readonly IMediator _mediator;
         private readonly IUserQueries _userQueries;
 
@@ -49,8 +49,9 @@ namespace Web.Areas.Admin.Controllers.Default
         [HttpGet]
         public async Task<ActionResult> Index()
         {
-            
-            return View(_mapper.Map<IEnumerable<UserListItemDTO>, List<UserListItemViewModel>>(await _userQueries.GetUsersAsync()));
+            return View(
+                _mapper.Map<IEnumerable<UserListItemDTO>, List<UserListItemViewModel>>(
+                    await _userQueries.GetUsersAsync()));
         }
 
 
@@ -77,10 +78,16 @@ namespace Web.Areas.Admin.Controllers.Default
             }
             catch (UserEmailAddressIsAlreadyTakenException ex)
             {
-                ModelState.AddModelError("EmailIsAlreadyTaken", ex.Message);
+                ModelState.AddModelError("", ex.Message);
                 return View(model);
             }
-            
+            catch (UserUnableToCreateException ex)
+            {
+                ModelState.AddModelError("", ex.Message);
+                return View(model);
+            }
+
+
             return RedirectToAction("Index");
         }
 
@@ -90,13 +97,15 @@ namespace Web.Areas.Admin.Controllers.Default
         {
             if (string.IsNullOrEmpty(userId))
             {
-                return BadRequest("User id is required");
+                return this.StatusCodeView(HttpStatusCode.NotFound, "User id is required");
             }
+
             var user = await _userQueries.GetUserAsync(userId);
             if (user == null)
             {
-                return NotFound($"User with id : {userId} not found");
+                return this.StatusCodeView(HttpStatusCode.NotFound, $"User with id : {userId} not found");
             }
+
             var mappedUser = _mapper.Map<UserDetailsDTO, UserChangePasswordModel>(user);
             return View(new UserChangePasswordViewModel(mappedUser));
         }
@@ -104,7 +113,8 @@ namespace Web.Areas.Admin.Controllers.Default
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<ActionResult> ChangePassword([Bind(nameof(UserChangePasswordViewModel.Model))]UserChangePasswordModel model)
+        public async Task<ActionResult> ChangePassword([Bind(Prefix = nameof(UserChangePasswordViewModel.Model))]
+            UserChangePasswordModel model)
         {
             if (!ModelState.IsValid)
             {
@@ -118,13 +128,13 @@ namespace Web.Areas.Admin.Controllers.Default
             }
             catch (UserNotFoundException ex)
             {
-                return NotFound(ex.Message);
+                return this.StatusCodeView(HttpStatusCode.NotFound, ex.Message);
             }
             catch (UserUnableToChangeStateException ex)
             {
-                return Forbid(ex.Message);
+                return this.StatusCodeView(HttpStatusCode.Forbidden, ex.Message);
             }
-            
+
             return RedirectToAction("Index");
         }
 
@@ -134,16 +144,18 @@ namespace Web.Areas.Admin.Controllers.Default
         {
             if (string.IsNullOrEmpty(userId))
             {
-                return BadRequest("Необходим id пользователя");
+                return this.StatusCodeView(HttpStatusCode.BadRequest, "User id is required");
             }
+
             var user = await _userQueries.GetUserAsync(userId);
             if (user == null)
             {
-                return NotFound($"User with id : {userId} not found");
+                return this.StatusCodeView(HttpStatusCode.NotFound, $"User with id : {userId} not found");
             }
-            if (user.Roles.Select(z=>z.Name).Contains("Supervisor"))
+
+            if (user.Roles.Select(z => z.Name).Contains("Supervisor"))
             {
-                return Forbid("Unable delete user with role: Supervisor");
+                return this.StatusCodeView(HttpStatusCode.Forbidden, "Unable delete user with role: Supervisor");
             }
 
             var mappedUser = _mapper.Map<UserDetailsDTO, DeleteUserModel>(user);
@@ -153,13 +165,14 @@ namespace Web.Areas.Admin.Controllers.Default
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<ActionResult> Delete([Bind(nameof(DeleteUserViewModel.Model))]DeleteUserModel model)
+        public async Task<ActionResult> Delete([Bind(Prefix = nameof(DeleteUserViewModel.Model))]
+            DeleteUserModel model)
         {
             if (!ModelState.IsValid)
             {
                 return View(new DeleteUserViewModel(model));
             }
-            
+
             try
             {
                 var command = _mapper.Map<DeleteUserModel, DeleteUserCommand>(model);
@@ -168,13 +181,13 @@ namespace Web.Areas.Admin.Controllers.Default
             //TODO: Create Exception Filter for command exceptions
             catch (UserNotFoundException ex)
             {
-                return NotFound(ex.Message);
+                return this.StatusCodeView(HttpStatusCode.NotFound, ex.Message);
             }
             catch (UserUnableToChangeStateException ex)
             {
-                return Forbid(ex.Message);
+                return this.StatusCodeView(HttpStatusCode.Forbidden, ex.Message);
             }
-            
+
             return RedirectToAction("Index");
         }
 
@@ -184,17 +197,21 @@ namespace Web.Areas.Admin.Controllers.Default
         {
             if (string.IsNullOrEmpty(userId))
             {
-                return BadRequest("User id is required");
+                return this.StatusCodeView(HttpStatusCode.BadRequest, "User id is required");
             }
+
             var user = await _userQueries.GetUserAsync(userId);
             if (user == null)
             {
-                return NotFound($"User with id : {userId} not found");
+                return this.StatusCodeView(HttpStatusCode.NotFound, $"User with id : {userId} not found");
             }
-            if (user.Roles.Select(z=>z.Name).Contains("Supervisor"))
+
+            if (user.Roles.Select(z => z.Name).Contains("Supervisor"))
             {
-                return Forbid("Unable activate/deactivate user with role: Supervisor");
+                return this.StatusCodeView(HttpStatusCode.Forbidden,
+                    "Unable activate/deactivate user with role: Supervisor");
             }
+
             var mappedUser = _mapper.Map<UserDetailsDTO, ActivateUserModel>(user);
             return View(new ActivateUserViewModel(mappedUser));
         }
@@ -202,13 +219,14 @@ namespace Web.Areas.Admin.Controllers.Default
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<ActionResult> ChangeActivation([Bind(nameof(ActivateUserViewModel.Model))]ActivateUserModel model)
+        public async Task<ActionResult> ChangeActivation([Bind(Prefix = nameof(ActivateUserViewModel.Model))]
+            ActivateUserModel model)
         {
             if (!ModelState.IsValid)
             {
                 return View(new ActivateUserViewModel(model));
             }
-            
+
             try
             {
                 var command = _mapper.Map<ActivateUserModel, ChangeUserActivationStateCommand>(model);
@@ -216,13 +234,13 @@ namespace Web.Areas.Admin.Controllers.Default
             }
             catch (UserNotFoundException ex)
             {
-                return NotFound(ex.Message);
+                return this.StatusCodeView(HttpStatusCode.NotFound, ex.Message);
             }
             catch (UserUnableToChangeStateException ex)
             {
-                return Forbid(ex.Message);
+                return this.StatusCodeView(HttpStatusCode.Forbidden, ex.Message);
             }
-            
+
             return RedirectToAction("Index");
         }
     }

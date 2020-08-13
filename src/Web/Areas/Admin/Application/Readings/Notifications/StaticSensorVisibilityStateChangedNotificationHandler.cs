@@ -1,7 +1,9 @@
-﻿using System.Threading;
+﻿using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
+using Web.Application.Readings.Exceptions;
 using Web.Helpers.Interfaces;
 using Web.Infrastructure.Data;
 using Web.Infrastructure.Data.Factory;
@@ -9,7 +11,8 @@ using Web.Infrastructure.Data.Factory;
 namespace Web.Areas.Admin.Application.Readings.Notifications
 {
     public class
-        StaticSensorVisibilityStateChangedNotificationHandler : INotificationHandler<StaticSensorVisibilityStateChangedNotification>
+        StaticSensorVisibilityStateChangedNotificationHandler : INotificationHandler<
+            StaticSensorVisibilityStateChangedNotification>
     {
         private readonly ISensorCacheHelper _sensorCacheHelper;
         private readonly IDataContextFactory<DataContext> _dataContextFactory;
@@ -21,14 +24,31 @@ namespace Web.Areas.Admin.Application.Readings.Notifications
             _dataContextFactory = dataContextFactory;
         }
 
-        public async Task Handle(StaticSensorVisibilityStateChangedNotification notification, CancellationToken cancellationToken)
+        public async Task Handle(StaticSensorVisibilityStateChangedNotification notification,
+            CancellationToken cancellationToken)
         {
             await using var context = _dataContextFactory.Create();
-            var sensor =
+            var sensorQuery =
                 await context.StaticSensors.AsNoTracking()
-                    .FirstOrDefaultAsync(f => f.Id == notification.SensorId, cancellationToken);
+                    .Where(z => z.Id == notification.SensorId)
+                    .Select(x => new
+                    {
+                        sensor = x,
+                        readings = x.Readings
+                            .OrderByDescending(z => z.Created)
+                            .Take(10)
+                            .ToList()
+                    })
+                    .FirstOrDefaultAsync(cancellationToken);
 
-            await _sensorCacheHelper.UpdateStaticSensorCacheAsync(sensor);
+            if (sensorQuery == null)
+            {
+                throw new SensorNotFoundException(notification.SensorId);
+            }
+
+            sensorQuery.sensor.Readings = sensorQuery.readings;
+
+            await _sensorCacheHelper.UpdateStaticSensorCacheAsync(sensorQuery.sensor);
         }
     }
 }

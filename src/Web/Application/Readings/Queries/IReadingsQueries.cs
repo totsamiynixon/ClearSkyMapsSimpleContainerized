@@ -1,8 +1,8 @@
 ﻿using System.Collections.Generic;
 using System.Threading.Tasks;
-using Web.Areas.PWA.Application.Readings.Queries.DTO;
+using Web.Application.Readings.Queries.DTO;
 
-namespace Web.Areas.PWA.Application.Readings.Queries
+namespace Web.Application.Readings.Queries
 {
     public interface IReadingsQueries
     {

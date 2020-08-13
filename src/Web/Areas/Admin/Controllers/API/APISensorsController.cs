@@ -13,11 +13,13 @@ using Web.Areas.Admin.Models.API.Sensors;
 
 namespace Web.Areas.Admin.Controllers.API
 {
-    [Area("Admin")]
     [Authorize]
+    [Area(AdminArea.Name)]
     //TODO: check area based api routes
-    [Route("api/{area}/{controller}")]
-    public class SensorsController : Controller
+    //TODO: check how to resolve naming conflict
+    [Route( AdminArea.APIRoutePrefix + "/sensors")]
+    [ApiController]
+    public class APISensorsController : Controller
     {
         private static IMapper _mapper = new Mapper(new MapperConfiguration(x =>
         {
@@ -41,7 +43,7 @@ namespace Web.Areas.Admin.Controllers.API
         private readonly IReadingsQueries _readingsQueries;
         private readonly IMediator _mediator;
 
-        public SensorsController(IReadingsQueries readingsQueries, IMediator mediator)
+        public APISensorsController(IReadingsQueries readingsQueries, IMediator mediator)
         {
             _readingsQueries = readingsQueries;
             _mediator = mediator;

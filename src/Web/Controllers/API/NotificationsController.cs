@@ -1,13 +1,13 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using System.Net;
+﻿using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Text;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Mvc;
 using Web.Areas.PWA.Models.API.Notifications;
 using Web.Infrastructure;
 
-namespace Web.Areas.PWA.Controllers.API
+namespace Web.Controllers.API
 {
     [Route("api/[controller]")]
     [ApiController]
@@ -34,10 +34,8 @@ namespace Web.Areas.PWA.Controllers.API
             {
                 return Ok();
             }
-            else
-            {
-                return BadRequest();
-            }
+
+            return BadRequest();
         }
 
         [HttpDelete]
@@ -55,10 +53,8 @@ namespace Web.Areas.PWA.Controllers.API
             {
                 return Ok();
             }
-            else
-            {
-                return BadRequest();
-            }
+
+            return BadRequest();
         }
     }
 }

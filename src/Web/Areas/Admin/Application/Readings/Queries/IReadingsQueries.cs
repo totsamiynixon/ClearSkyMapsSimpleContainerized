@@ -9,5 +9,6 @@ namespace Web.Areas.Admin.Application.Readings.Queries
         Task<List<SensorDTO>> GetSensorsAsync();
 
         Task<SensorDTO> GetSensorByIdAsync(int id);
+        Task<StaticSensorDTO> GetStaticSensorByIdAsync(int id, bool withReadings = false);
     }
 }

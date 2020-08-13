@@ -11,7 +11,7 @@ using Web.Domain.Entities.Identity;
 
 namespace Web.Areas.Admin.Controllers.Default
 {
-    [Area("Admin")]
+    [Area(AdminArea.Name)]
     [Authorize]
     public class AccountController : Controller
     {
@@ -62,7 +62,7 @@ namespace Web.Areas.Admin.Controllers.Default
         public async Task<IActionResult> Logoff()
         {
             await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
-            return RedirectToAction("Login", "Account");
+            return RedirectToAction("Login", "APIAccount");
         }
     }
 }

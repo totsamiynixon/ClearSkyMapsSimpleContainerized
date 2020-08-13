@@ -40,7 +40,7 @@ namespace Web.Application.Emulation.Notifications
                     {
                         ApiKey = device.ApiKey,
                         Latitude = device.Latitude,
-                        Longitude = device.Latitude
+                        Longitude = device.Longitude
                     });
                 }
 
