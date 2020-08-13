@@ -23,37 +23,48 @@ namespace Web.Areas.Admin.Controllers.API
     [ApiController]
     public class APIAccountController : Controller
     {
-        private UserManager<User> _userManager;
-        private JWTAppSettings _jwtAppSettings;
+        private readonly UserManager<User> _userManager;
+        private readonly JWTAppSettings _jwtAppSettings;
+        private readonly SignInManager<User> _signInManager;
 
-        public APIAccountController(UserManager<User> userManager, JWTAppSettings jwtAppSettings)
+        public APIAccountController(UserManager<User> userManager, JWTAppSettings jwtAppSettings,
+            SignInManager<User> signInManager)
         {
             _userManager = userManager;
             _jwtAppSettings = jwtAppSettings;
+            _signInManager = signInManager;
         }
 
-        [HttpPost]
+        [HttpPost("login")]
         [AllowAnonymous]
         public async Task<IActionResult> Login([FromBody] LoginModel model)
         {
-            IActionResult response = Unauthorized();
+            if (!ModelState.IsValid)
+                return BadRequest("Login failed: invalid data!");
+
             var user = await _userManager.FindByEmailAsync(model.Email);
-            if (user != null)
+            if (user == null)
             {
-                var tokenString = GenerateJWTToken(user, string.Join(",", await _userManager.GetRolesAsync(user)));
-                response = Ok(new
-                {
-                    token = tokenString,
-                    userDetails = new
-                    {
-                        id = user.Id,
-                        userName = user.UserName,
-                        email = user.Email
-                    },
-                });
+                return NotFound("Login failed: user with that email doesn't exist");
             }
 
-            return response;
+            //TODO: check how to manage that through SignInManager
+            if (!await _userManager.CheckPasswordAsync(user, model.Password))
+            {
+                return BadRequest("Login failed: wrong password!");
+            }
+
+            var tokenString = GenerateJWTToken(user, string.Join(",", await _userManager.GetRolesAsync(user)));
+            return Ok(new
+            {
+                token = tokenString,
+                userDetails = new
+                {
+                    id = user.Id,
+                    userName = user.UserName,
+                    email = user.Email
+                },
+            });
         }
 
         private string GenerateJWTToken(User user, string roles)
@@ -65,7 +76,7 @@ namespace Web.Areas.Admin.Controllers.API
                 new Claim(JwtRegisteredClaimNames.Sub, user.UserName),
                 new Claim(ClaimsIdentity.DefaultRoleClaimType, roles),
                 //TODO: investigate that
-                new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
+                //new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
             };
             var token = new JwtSecurityToken(
                 issuer: _jwtAppSettings.Issuer,

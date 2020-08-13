@@ -17,7 +17,6 @@ using Web.Areas.Admin.Infrastructure.Auth;
 using Web.Areas.Admin.Infrastructure.Auth.JWT;
 using Web.Areas.Admin.Infrastructure.Hubs;
 using Web.Areas.Admin.Infrastructure.Middlewares;
-using Web.Infrastructure;
 using Web.Infrastructure.Middlewares;
 
 namespace Web.Areas.Admin

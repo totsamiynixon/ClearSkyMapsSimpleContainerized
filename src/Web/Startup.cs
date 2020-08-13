@@ -2,7 +2,6 @@
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -11,7 +10,6 @@ using Web.Helpers.Interfaces;
 using Web.Helpers.Implementations;
 using Microsoft.Extensions.Logging;
 using Web.Areas.Admin;
-using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.Extensions.Hosting;
 using Web.Application.Readings.Queries;
 using Web.Areas.PWA;
@@ -47,8 +45,8 @@ namespace Web
             services.AddTransient<AppSettings>((_) => appSettings);
             services.AddMediatR(typeof(Startup));
             
-            services.AddTransient<UserManager<User>>();
-            services.AddTransient<RoleManager<User>>();
+            /*services.AddTransient<UserManager<User>>();
+            services.AddTransient<RoleManager<User>>();*/
 
             services.AddSingleton<Emulator>();
             services.AddTransient<IReadingsQueries, ReadingsQueries>();
@@ -91,6 +89,7 @@ namespace Web
                 .AddUserManager<UserManager<User>>()
                 .AddRoles<IdentityRole>()
                 .AddRoleManager<RoleManager<IdentityRole>>()
+                .AddSignInManager<SignInManager<User>>()
                 .AddEntityFrameworkStores<IdentityDataContext>();
 
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_3_0);

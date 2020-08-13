@@ -155,7 +155,7 @@ namespace Web.Areas.Admin.Controllers.Default
                 return this.StatusCodeView(HttpStatusCode.NotFound, $"User with id : {userId} not found");
             }
 
-            if (user.Roles.Select(z => z.Name).Contains("Supervisor"))
+            if (user.Roles.Select(z => z.Name).Contains(AuthSettings.Roles.Supervisor))
             {
                 return this.StatusCodeView(HttpStatusCode.Forbidden, "Unable delete user with role: Supervisor");
             }
@@ -208,7 +208,7 @@ namespace Web.Areas.Admin.Controllers.Default
                 return this.StatusCodeView(HttpStatusCode.NotFound, $"User with id : {userId} not found");
             }
 
-            if (user.Roles.Select(z => z.Name).Contains("Supervisor"))
+            if (user.Roles.Select(z => z.Name).Contains(AuthSettings.Roles.Supervisor))
             {
                 return this.StatusCodeView(HttpStatusCode.Forbidden,
                     "Unable activate/deactivate user with role: Supervisor");

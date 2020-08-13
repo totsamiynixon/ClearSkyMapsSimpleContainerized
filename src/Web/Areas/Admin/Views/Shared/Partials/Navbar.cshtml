@@ -22,7 +22,7 @@
                             </p>
                         </a>
                         <div class="dropdown-menu dropdown-menu-right" aria-labelledby="navbarDropdownMenuLink">
-                            @using (Html.BeginForm("LogOff", "APIAccount", new { area = "Admin", ReturnUrl = ViewBag.ReturnUrl }, FormMethod.Post, null, new { @class = "form-horizontal", role = "form" }))
+                            @using (Html.BeginForm("LogOff", "Account", new { area = "Admin", ReturnUrl = ViewBag.ReturnUrl }, FormMethod.Post, null, new { @class = "form-horizontal", role = "form" }))
                             {
                                 <button type="submit" class="dropdown-item">Выйти</button>
                             }

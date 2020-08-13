@@ -16,11 +16,13 @@ namespace Web.Areas.Admin.Controllers.Default
     [Authorize(AuthenticationSchemes = CookieAuthenticationDefaults.AuthenticationScheme, Policy = AuthPolicies.Admin)]
     public class AccountController : Controller
     {
-        private UserManager<User> _userManager;
+        private readonly UserManager<User> _userManager;
+        private readonly SignInManager<User> _signInManager;
 
-        public AccountController(UserManager<User> userManager)
+        public AccountController(UserManager<User> userManager, SignInManager<User> signInManager)
         {
             _userManager = userManager;
+            _signInManager = signInManager;
         }
 
         [AllowAnonymous]
@@ -35,6 +37,7 @@ namespace Web.Areas.Admin.Controllers.Default
         [ValidateAntiForgeryToken]
         public async Task<ActionResult> Login(LoginModel model, string returnUrl)
         {
+            ViewBag.ReturnUrl = returnUrl;
             if (!ModelState.IsValid)
             {
                 return View(model);
@@ -42,11 +45,18 @@ namespace Web.Areas.Admin.Controllers.Default
             var user = await _userManager.FindByEmailAsync(model.Email);
             if (user == null || !user.IsActive)
             {
-                ModelState.AddModelError("", "Ошибка при попытке входа");
+                ModelState.AddModelError("", "Login failed: user not found!");
                 return View(model);
             }
-            await Authenticate(model.Email, string.Join(",", await _userManager.GetRolesAsync(user)));
-            return Redirect(returnUrl ?? "admin");
+            //TODO: check how to manage that through SignInManager
+            if (await _userManager.CheckPasswordAsync(user, model.Password))
+            {
+                await Authenticate(model.Email, string.Join(",", await _userManager.GetRolesAsync(user)));
+                return Redirect(returnUrl ?? $"/{AdminArea.DefaultRoutePrefix}");
+            }
+
+            ModelState.AddModelError("", "Login failed: wrong password!");
+            return View(model);
         }
 
         private async Task Authenticate(string userName, string roles)
@@ -63,7 +73,7 @@ namespace Web.Areas.Admin.Controllers.Default
         public async Task<IActionResult> Logoff()
         {
             await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
-            return RedirectToAction("Login", "APIAccount");
+            return RedirectToAction("Login", "Account");
         }
     }
 }

@@ -4,6 +4,7 @@ using MediatR;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Web.Areas.Admin.Application.Users.Exceptions;
+using Web.Areas.Admin.Infrastructure.Auth;
 using Web.Domain.Entities.Identity;
 
 namespace Web.Areas.Admin.Application.Users.Commands
@@ -24,10 +25,10 @@ namespace Web.Areas.Admin.Application.Users.Commands
             {
                 throw new UserNotFoundException(request.UserId);
             }
-            if (await _userManager.IsInRoleAsync(user, "Supervisor"))
+            if (await _userManager.IsInRoleAsync(user, AuthSettings.Roles.Supervisor))
             {
                 throw new UserUnableToChangeStateException(
-                    "Unable to change password for user with role Supervisor");
+                    $"Unable to change password for user with role {AuthSettings.Roles.Supervisor}");
             }
             await _userManager.DeleteAsync(user);
 

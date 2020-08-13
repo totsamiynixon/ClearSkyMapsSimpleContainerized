@@ -8,6 +8,7 @@ namespace Web.Areas.Admin.Application.Users.Queries.DTO
         
         public string Email { get; set; }
         
+        public bool IsActive { get; set; }
         public IEnumerable<UserRoleDTO> Roles { get; set; }
     }
 }
