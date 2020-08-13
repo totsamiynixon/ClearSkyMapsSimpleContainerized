@@ -4,18 +4,20 @@ using System.Net;
 using System.Threading.Tasks;
 using AutoMapper;
 using MediatR;
+using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Web.Application.Emulation.Commands;
 using Web.Application.Emulation.Exceptions;
 using Web.Areas.Admin.Extensions;
+using Web.Areas.Admin.Infrastructure.Auth;
 using Web.Areas.Admin.Models.Default.Emulator;
 using Web.Emulation;
 
 namespace Web.Areas.Admin.Controllers.Default
 {
     [Area(AdminArea.Name)]
-    [Authorize]
+    [Authorize(AuthenticationSchemes = CookieAuthenticationDefaults.AuthenticationScheme, Policy = AuthPolicies.Admin)]
     public class EmulatorController : Controller
     {
         private readonly Emulator _emulator;

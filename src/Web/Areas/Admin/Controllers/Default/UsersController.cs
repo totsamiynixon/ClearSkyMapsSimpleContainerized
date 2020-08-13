@@ -4,6 +4,7 @@ using System.Net;
 using System.Threading.Tasks;
 using AutoMapper;
 using MediatR;
+using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Web.Areas.Admin.Application.Users.Commands;
@@ -11,12 +12,13 @@ using Web.Areas.Admin.Application.Users.Exceptions;
 using Web.Areas.Admin.Application.Users.Queries;
 using Web.Areas.Admin.Application.Users.Queries.DTO;
 using Web.Areas.Admin.Extensions;
+using Web.Areas.Admin.Infrastructure.Auth;
 using Web.Areas.Admin.Models.Default.Users;
 
 namespace Web.Areas.Admin.Controllers.Default
 {
-    [Authorize(Roles = "Supervisor")]
     [Area(AdminArea.Name)]
+    [Authorize(AuthenticationSchemes = CookieAuthenticationDefaults.AuthenticationScheme, Policy = AuthPolicies.Supervisor)]
     public class UsersController : Controller
     {
         private static readonly IMapper _mapper = new Mapper(new MapperConfiguration(x =>

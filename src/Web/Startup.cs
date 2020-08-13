@@ -87,13 +87,6 @@ namespace Web
             services.AddScoped<IdentityDataContext>(
                 (provider) => provider.GetService<IDataContextFactory<IdentityDataContext>>().Create());
 
-            services.Configure<CookiePolicyOptions>(options =>
-            {
-                // This lambda determines whether user consent for non-essential cookies is needed for a given request.
-                options.CheckConsentNeeded = context => true;
-                options.MinimumSameSitePolicy = SameSiteMode.None;
-            });
-            
             services.AddIdentityCore<User>()
                 .AddUserManager<UserManager<User>>()
                 .AddRoles<IdentityRole>()
@@ -104,18 +97,11 @@ namespace Web
             services.AddControllersWithViews().AddRazorRuntimeCompilation();
             services.AddMemoryCache();
 
-            services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
-                .AddCookie(options =>
-                {
-                    options.Cookie.Name = "CSM.Auth";
-                    options.LoginPath = new PathString("/Admin/Account/Login");
-                });
-
             services.AddSignalR();
 
             services.AddAppBundling(_environment);
 
-            services.AddAdminAreaServices();
+            services.AddAdminAreaServices(Configuration);
             services.AddPWAAreaServices();
         }
 

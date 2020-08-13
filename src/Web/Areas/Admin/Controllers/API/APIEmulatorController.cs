@@ -2,17 +2,19 @@
 using System.Threading.Tasks;
 using AutoMapper;
 using MediatR;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Web.Application.Emulation.Commands;
 using Web.Application.Emulation.Exceptions;
+using Web.Areas.Admin.Infrastructure.Auth;
 using Web.Areas.Admin.Models.API.Emulator;
 using Web.Emulation;
 
 namespace Web.Areas.Admin.Controllers.API
 {
-    [Authorize]
     [Area(AdminArea.Name)]
+    [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Policy = AuthPolicies.Admin)]
     //TODO: check area based api routes
     //TODO: check how to resolve naming conflict
     [Route( AdminArea.APIRoutePrefix + "/emulator")]

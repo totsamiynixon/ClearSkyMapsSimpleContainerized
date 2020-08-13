@@ -2,18 +2,20 @@
 using System.Threading.Tasks;
 using AutoMapper;
 using MediatR;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Web.Areas.Admin.Application.Users.Commands;
 using Web.Areas.Admin.Application.Users.Exceptions;
 using Web.Areas.Admin.Application.Users.Queries;
 using Web.Areas.Admin.Application.Users.Queries.DTO;
+using Web.Areas.Admin.Infrastructure.Auth;
 using Web.Areas.Admin.Models.API.Users;
 
 namespace Web.Areas.Admin.Controllers.API
 {
-    [Authorize(Roles = "Supervisor")]
     [Area(AdminArea.Name)]
+    [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Policy = AuthPolicies.Supervisor)]
     //TODO: check area based api routes
     [Route( AdminArea.APIRoutePrefix + "/users")]
     [ApiController]

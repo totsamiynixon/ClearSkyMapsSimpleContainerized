@@ -4,6 +4,7 @@ using System.Net;
 using System.Threading.Tasks;
 using AutoMapper;
 using MediatR;
+using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Web.Application.Readings.Exceptions;
@@ -11,13 +12,14 @@ using Web.Areas.Admin.Application.Readings.Commands;
 using Web.Areas.Admin.Application.Readings.Queries;
 using Web.Areas.Admin.Application.Readings.Queries.DTO;
 using Web.Areas.Admin.Extensions;
+using Web.Areas.Admin.Infrastructure.Auth;
 using Web.Areas.Admin.Models.Default.Sensors;
 using Web.Helpers;
 
 namespace Web.Areas.Admin.Controllers.Default
 {
     [Area(AdminArea.Name)]
-    [Authorize]
+    [Authorize(AuthenticationSchemes = CookieAuthenticationDefaults.AuthenticationScheme, Policy = AuthPolicies.Admin)]
     public class SensorsController : Controller
     {
         private static IMapper _mapper = new Mapper(new MapperConfiguration(x =>

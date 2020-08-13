@@ -1,15 +1,23 @@
-﻿using Microsoft.AspNetCore.Builder;
+﻿using System;
+using System.Text;
+using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.IdentityModel.Tokens;
 using Web.Areas.Admin.Application.Readings.Queries;
 using Web.Areas.Admin.Application.Users.Queries;
 using Web.Areas.Admin.Helpers.Implementations;
 using Web.Areas.Admin.Helpers.Interfaces;
+using Web.Areas.Admin.Infrastructure.Auth;
+using Web.Areas.Admin.Infrastructure.Auth.JWT;
 using Web.Areas.Admin.Infrastructure.Hubs;
 using Web.Areas.Admin.Infrastructure.Middlewares;
+using Web.Infrastructure;
 using Web.Infrastructure.Middlewares;
 
 namespace Web.Areas.Admin
@@ -20,12 +28,55 @@ namespace Web.Areas.Admin
         public const string DefaultRoutePrefix = "admin";
         public const string APIRoutePrefix = "api/admin";
 
-        public static IServiceCollection AddAdminAreaServices(this IServiceCollection services)
+        public static IServiceCollection AddAdminAreaServices(this IServiceCollection services, IConfiguration configuration)
         {
+            var jwtSettings = configuration.GetSection("JWT").Get<JWTAppSettings>();
+            
+            services.AddTransient<JWTAppSettings>((_) => jwtSettings);
+            
             services.AddTransient<IReadingsQueries, ReadingsQueries>();
             services.AddTransient<IUserQueries, UserQueries>();
             services.AddTransient<IAdminDispatchHelper, AdminSignalRHubDispatchHelper>();
+            
+            services.Configure<CookiePolicyOptions>(options =>
+            {
+                // This lambda determines whether user consent for non-essential cookies is needed for a given request.
+                options.CheckConsentNeeded = context => true;
+                options.MinimumSameSitePolicy = SameSiteMode.None;
+            });
+            
+            services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
+                .AddCookie(options =>
+                {
+                    options.Cookie.Name = "CSM.Admin.Auth";
+                    options.LoginPath = new PathString($"/{DefaultRoutePrefix}/account/login");
+                });
+            
+            services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+                .AddJwtBearer(options =>
+                {
+                    options.RequireHttpsMetadata = false;
+                    options.SaveToken = true;
+                    options.TokenValidationParameters = new TokenValidationParameters
+                    {
+                        ValidateIssuer = true,
+                        ValidateAudience = true,
+                        ValidateLifetime = true,
+                        ValidateIssuerSigningKey = true,
+                        ValidIssuer = jwtSettings.Issuer,
+                        ValidAudience = jwtSettings.Audience,
+                        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSettings.SecretKey)),
+                        ClockSkew = TimeSpan.Zero
+                    };
+                });
+            
+            services.AddAuthorization(config =>
+            {
+                config.AddPolicy(AuthPolicies.Admin, AuthPolicies.AdminPolicy());
+                config.AddPolicy(AuthPolicies.Supervisor, AuthPolicies.SupervisorPolicy());
+            });
 
+            
             return services;
         }
 
@@ -43,7 +94,7 @@ namespace Web.Areas.Admin
                         }
                         else
                         {
-                            applicationBuilder.UseExceptionHandler($"/{DefaultRoutePrefix}/Error/ServerError");
+                            applicationBuilder.UseExceptionHandler($"/{DefaultRoutePrefix}/error/serverError");
                             app.UseMiddleware<ExceptionLoggerMiddleware>();
                         }
 

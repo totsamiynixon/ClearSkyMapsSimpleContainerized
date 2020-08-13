@@ -6,13 +6,14 @@ using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Web.Areas.Admin.Infrastructure.Auth;
 using Web.Areas.Admin.Models.Default.Account;
 using Web.Domain.Entities.Identity;
 
 namespace Web.Areas.Admin.Controllers.Default
 {
     [Area(AdminArea.Name)]
-    [Authorize]
+    [Authorize(AuthenticationSchemes = CookieAuthenticationDefaults.AuthenticationScheme, Policy = AuthPolicies.Admin)]
     public class AccountController : Controller
     {
         private UserManager<User> _userManager;
