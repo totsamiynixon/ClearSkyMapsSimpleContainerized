@@ -1,4 +1,4 @@
-﻿namespace Web.Areas.PWA.Models.API.Sensors
+﻿namespace Web.Models.API.Sensors
 {
     public class StaticSensorReadingModel
     {

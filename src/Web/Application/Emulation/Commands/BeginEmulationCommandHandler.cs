@@ -31,7 +31,7 @@ namespace Web.Application.Emulation.Commands
                 throw new EmulationIsNotAvailableException();
             }
             
-            await _emulator.RunEmulationAsync();
+            _emulator.RunEmulation();
 
             await _mediator.Publish(new EmulationStartedNotification(_emulator), cancellationToken);
             

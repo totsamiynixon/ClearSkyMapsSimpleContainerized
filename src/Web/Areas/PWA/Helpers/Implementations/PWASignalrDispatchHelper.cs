@@ -11,17 +11,14 @@ namespace Web.Areas.PWA.Helpers.Implementations
 {
     public class PWASignalrDispatchHelper : IPWADispatchHelper
     {
-        private static readonly IMapper _mapper = new Mapper(new MapperConfiguration(x =>
-       {
-           x.CreateMap<Reading, ReadingDispatchModel>();
-       }));
-
+        private readonly IMapper _mapper;
         private readonly IHubContext<PWAStaticSensorHub, IPWAStaticSensorClient> _staticSensorHubContext;
 
         public PWASignalrDispatchHelper(
-            IHubContext<PWAStaticSensorHub, IPWAStaticSensorClient> staticSensorHubContext)
+            IHubContext<PWAStaticSensorHub, IPWAStaticSensorClient> staticSensorHubContext, IMapper mapper)
         {
             _staticSensorHubContext = staticSensorHubContext ?? throw new ArgumentNullException(nameof(staticSensorHubContext));
+            _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
         }
 
         public void DispatchReadingsForStaticSensor(int sensorId, PollutionLevel pollutionLevel, Reading reading)

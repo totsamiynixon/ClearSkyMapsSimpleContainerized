@@ -1,4 +1,4 @@
-﻿namespace Web.Areas.Admin.Models.Default.Hub
+﻿namespace Web.Areas.Admin.Models.Hub
 {
     public class PortableSensorCoordinatesDispatchModel
     {

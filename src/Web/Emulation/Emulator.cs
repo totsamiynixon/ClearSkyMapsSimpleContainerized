@@ -9,7 +9,7 @@ namespace Web.Emulation
 {
     public class Emulator
     {
-        public bool IsEmulationEnabled { get; private set; }
+        public bool IsEmulationStarted { get; private set; }
         private Random _emulatorRandom = new Random();
         private bool _firstInit = true;
         private List<string> _guids { get; set; }
@@ -22,32 +22,25 @@ namespace Web.Emulation
             _appSettings = appSettings ?? throw new ArgumentNullException(nameof(appSettings));
         }
         
-        public async Task RunEmulationAsync()
+        public void RunEmulation()
         {
-            if (!IsEmulationEnabled)
+            if (!IsEmulationStarted)
             {
-                IsEmulationEnabled = true;
-                /*_repository.ReinitializeDb();
-                _sensorCacheHelper.RemoveAllSensorsFromCache();*/
-            }
-            if (_firstInit)
-            {
-                await SeedSensorsAsync();
-                _firstInit = false;
+                IsEmulationStarted = true;
+                SeedSensors();
             }
         }
 
         public void StopEmulation()
         {
-            if (IsEmulationEnabled)
+            if (IsEmulationStarted)
             {
-                IsEmulationEnabled = false;
-                /*_repository.ReinitializeDb();
-                _sensorCacheHelper.RemoveAllSensorsFromCache();*/
+                IsEmulationStarted = false;
+                ClearSensors();
             }
         }
 
-        private async Task SeedSensorsAsync()
+        private void SeedSensors()
         {
             _guids = new List<string>();
             Devices = new List<SensorEmulator>();
@@ -71,6 +64,11 @@ namespace Web.Emulation
                 //await _repository.AddPortableSensorAsync(fakeSensor.sensor.ApiKey);
                 Devices.Add(fakeSensor.emulator);
             }
+        }
+
+        private void ClearSensors()
+        {
+            Devices.Clear();
         }
 
         private (SensorEmulator emulator, StaticSensor sensor) GetStaticFakeSensor(string guid)

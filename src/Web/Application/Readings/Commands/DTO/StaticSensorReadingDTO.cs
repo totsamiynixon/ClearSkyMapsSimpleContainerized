@@ -1,8 +1,6 @@
-﻿using System;
-
-namespace Web.Areas.Admin.Models.Default.Hub
+﻿namespace Web.Application.Readings.Commands.DTO
 {
-    public class PortableSensorReadingsDispatchModel
+    public class StaticSensorReadingDTO
     {
         public float CO2 { get; set; }
         public float LPG { get; set; }
@@ -12,6 +10,7 @@ namespace Web.Areas.Admin.Models.Default.Hub
         public float Temp { get; set; }
         public float Hum { get; set; }
         public float Preassure { get; set; }
-        public DateTime Created { get; set; }
+        public double Latitude { get; set; }
+        public double Longitude { get; set; }
     }
 }

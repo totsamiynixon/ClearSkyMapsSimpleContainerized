@@ -1,4 +1,5 @@
-﻿using MediatR;
+﻿using AutoMapper;
+using MediatR;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Hosting;
@@ -11,6 +12,7 @@ using Web.Helpers.Implementations;
 using Microsoft.Extensions.Logging;
 using Web.Areas.Admin;
 using Microsoft.Extensions.Hosting;
+using Web.Application.Emulation.Queries;
 using Web.Application.Readings.Queries;
 using Web.Areas.PWA;
 using Web.Domain.Entities.Identity;
@@ -44,9 +46,11 @@ namespace Web
             //TODO: Check how it works
             services.AddTransient<AppSettings>((_) => appSettings);
             services.AddMediatR(typeof(Startup));
+            services.AddAutoMapper(typeof(Startup));
 
             services.AddSingleton<Emulator>();
             services.AddTransient<IReadingsQueries, ReadingsQueries>();
+            services.AddTransient<IEmulationQueries, EmulationQueries>();
             services.AddTransient<IPollutionCalculator, PollutionCalculator>();
             services.AddTransient<ISensorCacheHelper, SensorCacheHelper>();
 
@@ -56,14 +60,14 @@ namespace Web
             services.AddTransient<IDataContextFactory<DataContext>>(provider =>
             {
                 var emulator = provider.GetService<Emulator>();
-                return new DefaultDataContextFactory<DataContext>(emulator.IsEmulationEnabled
+                return new DefaultDataContextFactory<DataContext>(emulator.IsEmulationStarted
                     ? appSettings.Emulation.ConnectionString
                     : appSettings.ConnectionString);
             });
             services.AddTransient<IDataContextFactory<IdentityDataContext>>(provider =>
             {
                 var emulator = provider.GetService<Emulator>();
-                return new DefaultDataContextFactory<IdentityDataContext>(emulator.IsEmulationEnabled
+                return new DefaultDataContextFactory<IdentityDataContext>(emulator.IsEmulationStarted
                     ? appSettings.Emulation.ConnectionString
                     : appSettings.ConnectionString);
             });

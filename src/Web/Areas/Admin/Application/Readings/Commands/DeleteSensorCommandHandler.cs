@@ -14,6 +14,7 @@ namespace Web.Areas.Admin.Application.Readings.Commands
     {
         private readonly IDataContextFactory<DataContext> _dataContextFactory;
         private readonly IMediator _mediator;
+        
         public DeleteSensorCommandHandler(IDataContextFactory<DataContext> dataContextFactory, IMediator mediator)
         {
             _dataContextFactory = dataContextFactory ?? throw new ArgumentNullException(nameof(dataContextFactory));

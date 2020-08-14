@@ -76,9 +76,9 @@
             @if (AppSettings.Emulation.Enabled)
             {
                 <div class="card-footer">
-                    @using (Html.BeginForm($"{(Emulator.IsEmulationEnabled ? "Stop" : "Start")}Emulation", "Emulator", new { area = "Admin", ReturnUrl = ViewBag.ReturnUrl }, FormMethod.Post, null, new { @class = "form-horizontal", role = "form" }))
+                    @using (Html.BeginForm($"{(Emulator.IsEmulationStarted ? "Stop" : "Start")}Emulation", "Emulator", new { area = "Admin", ReturnUrl = ViewBag.ReturnUrl }, FormMethod.Post, null, new { @class = "form-horizontal", role = "form" }))
                     {
-                        <button class="btn btn-default">@((Emulator.IsEmulationEnabled ? "Выключить" : "Включить")) эмуляцию</button>
+                        <button class="btn btn-default">@((Emulator.IsEmulationStarted ? "Выключить" : "Включить")) эмуляцию</button>
                     }
                 </div>
             }

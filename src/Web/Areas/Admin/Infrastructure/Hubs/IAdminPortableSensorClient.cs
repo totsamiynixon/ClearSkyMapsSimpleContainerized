@@ -1,5 +1,5 @@
 ﻿using System.Threading.Tasks;
-using Web.Areas.Admin.Models.Default.Hub;
+using Web.Areas.Admin.Models.Hub;
 
 namespace Web.Areas.Admin.Infrastructure.Hubs
 {

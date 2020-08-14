@@ -10,8 +10,8 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Web.Application.Readings.Exceptions;
 using Web.Areas.Admin.Application.Readings.Commands;
-using Web.Areas.Admin.Application.Readings.DTO;
 using Web.Areas.Admin.Application.Readings.Queries;
+using Web.Areas.Admin.Application.Readings.Queries.DTO;
 using Web.Areas.Admin.Extensions;
 using Web.Areas.Admin.Infrastructure.Auth;
 using Web.Areas.Admin.Models.Default.Sensors;
@@ -23,35 +23,15 @@ namespace Web.Areas.Admin.Controllers.Default
     [Authorize(AuthenticationSchemes = CookieAuthenticationDefaults.AuthenticationScheme, Policy = AuthPolicies.Admin)]
     public class SensorsController : Controller
     {
-        private static IMapper _mapper = new Mapper(new MapperConfiguration(x =>
-        {
-            x.CreateMap<SensorDTO, SensorListItemViewModel>();
-            x.CreateMap<StaticSensorDTO, StaticSensorListItemViewModel>()
-                .IncludeBase<SensorDTO, SensorListItemViewModel>();
-            x.CreateMap<SensorDTO, SensorDetailsViewModel>();
-            x.CreateMap<StaticSensorDTO, StaticSensorDetailsViewModel>()
-                .IncludeBase<SensorDTO, SensorDetailsViewModel>();
-
-            x.CreateMap<CreateStaticSensorModel, CreateStaticSensorCommand>()
-                .ConstructUsing(z => new CreateStaticSensorCommand(z.ApiKey, z.Latitude, z.Longitude));
-            x.CreateMap<CreatePortableSensorModel, CreatePortableSensorCommand>()
-                .ConstructUsing(z => new CreatePortableSensorCommand(z.ApiKey));
-            x.CreateMap<DeleteSensorModel, DeleteSensorCommand>()
-                .ConstructUsing(z => new DeleteSensorCommand(z.Id.Value, z.IsCompletely));
-            x.CreateMap<ChangeActivationSensorModel, ChangeSensorActivationStateCommand>()
-                .ConstructUsing(z => new ChangeSensorActivationStateCommand(z.Id.Value, z.IsActive));
-            x.CreateMap<ChangeVisibilityStaticSensorModel, ChangeStaticSensorVisibilityStateCommand>()
-                .ConstructUsing(z => new ChangeStaticSensorVisibilityStateCommand(z.Id.Value, z.IsVisible));
-        }));
-
-
+        private readonly IMapper _mapper;
         private readonly IReadingsQueries _readingsQueries;
         private readonly IMediator _mediator;
 
-        public SensorsController(IReadingsQueries readingsQueries, IMediator mediator)
+        public SensorsController(IReadingsQueries readingsQueries, IMediator mediator, IMapper mapper)
         {
             _readingsQueries = readingsQueries ?? throw new ArgumentNullException(nameof(readingsQueries));
             _mediator = mediator ?? throw new ArgumentNullException(nameof(mediator));
+            _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
         }
 
         public async Task<ActionResult> Index()

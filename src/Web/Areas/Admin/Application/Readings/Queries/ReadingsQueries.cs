@@ -4,7 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using AutoMapper;
 using Microsoft.EntityFrameworkCore;
-using Web.Areas.Admin.Application.Readings.DTO;
+using Web.Areas.Admin.Application.Readings.Queries.DTO;
 using Web.Domain.Entities;
 using Web.Infrastructure.Data;
 using Web.Infrastructure.Data.Factory;
@@ -13,21 +13,14 @@ namespace Web.Areas.Admin.Application.Readings.Queries
 {
     public class ReadingsQueries : IReadingsQueries
     {
-        private static IMapper _mapper = new Mapper(new MapperConfiguration(x =>
-        {
-            x.CreateMap<Sensor, SensorDTO>();
-            x.CreateMap<StaticSensor, StaticSensorDTO>()
-                .IncludeBase<Sensor, SensorDTO>();
-            x.CreateMap<PortableSensor, PortableSensorDTO>()
-                .IncludeBase<Sensor, SensorDTO>();
-        }));
-        
+        private readonly IMapper _mapper;
         private readonly IDataContextFactory<DataContext> _dataContextFactory;
 
         public ReadingsQueries(
-            IDataContextFactory<DataContext> dataContextFactory)
+            IDataContextFactory<DataContext> dataContextFactory, IMapper mapper)
         {
             _dataContextFactory = dataContextFactory ?? throw new ArgumentNullException(nameof(dataContextFactory));
+            _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
         }
 
         public async Task<List<SensorDTO>> GetSensorsAsync()

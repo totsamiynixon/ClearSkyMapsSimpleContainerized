@@ -1,5 +1,5 @@
 ﻿using MediatR;
-using Web.Areas.Admin.Application.Readings.DTO;
+using Web.Areas.Admin.Application.Readings.Commands.DTO;
 
 namespace Web.Areas.Admin.Application.Readings.Commands
 {

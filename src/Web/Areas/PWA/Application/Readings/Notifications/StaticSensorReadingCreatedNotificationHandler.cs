@@ -4,10 +4,8 @@ using System.Threading.Tasks;
 using AutoMapper;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
-using Web.Application.Readings.DTO;
 using Web.Application.Readings.Notifications;
 using Web.Areas.PWA.Helpers.Interfaces;
-using Web.Domain.Entities;
 using Web.Helpers.Interfaces;
 using Web.Infrastructure.Data;
 using Web.Infrastructure.Data.Factory;
@@ -20,18 +18,15 @@ namespace Web.Areas.PWA.Application.Readings.Notifications
         private readonly IPWADispatchHelper _pwaDispatchHelper;
         private readonly ISensorCacheHelper _sensorCacheHelper;
         private readonly IDataContextFactory<DataContext> _dataContextFactory;
-
-        private static readonly IMapper _mapper = new Mapper(new MapperConfiguration(x =>
-        {
-            x.CreateMap<SensorReadingDTO, StaticSensorReading>();
-        }));
+        private readonly IMapper _mapper;
 
         public StaticSensorReadingCreatedNotificationHandler(IPWADispatchHelper pwaDispatchHelper,
-            ISensorCacheHelper sensorCacheHelper, IDataContextFactory<DataContext> dataContextFactory)
+            ISensorCacheHelper sensorCacheHelper, IDataContextFactory<DataContext> dataContextFactory, IMapper mapper)
         {
             _pwaDispatchHelper = pwaDispatchHelper ?? throw new ArgumentNullException(nameof(pwaDispatchHelper));
             _sensorCacheHelper = sensorCacheHelper ?? throw new ArgumentNullException(nameof(sensorCacheHelper));
             _dataContextFactory = dataContextFactory ?? throw new ArgumentNullException(nameof(dataContextFactory));
+            _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
         }
 
         public async Task Handle(StaticSensorReadingCreatedNotification notification,

@@ -1,4 +1,4 @@
-﻿namespace Web.Areas.Admin.Application.Readings.DTO
+﻿namespace Web.Areas.Admin.Application.Readings.Queries.DTO
 {
     public class SensorDTO
     {

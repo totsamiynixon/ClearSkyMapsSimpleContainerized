@@ -4,7 +4,7 @@ using System.Threading.Tasks;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using Web.Application.Readings.Commands;
-using Web.Application.Readings.DTO;
+using Web.Application.Readings.Commands.DTO;
 using Web.Application.Readings.Exceptions;
 
 namespace Web.Controllers.API
@@ -42,13 +42,13 @@ namespace Web.Controllers.API
         }
 
 
-        private (string apiKey,SensorReadingDTO reading) GetModelFromString(string data)
+        private (string apiKey,StaticSensorReadingDTO reading) GetModelFromString(string data)
         {
             try
             {
                 var trimmed = data.Trim(';');
                 var groupes = trimmed.Split(",").Select(x => x.Replace('.', ',')).ToArray();
-                return (apiKey: groupes[0], reading: new SensorReadingDTO
+                return (apiKey: groupes[0], reading: new StaticSensorReadingDTO
                 {
                     Temp = float.Parse(groupes[1]),
                     Hum = float.Parse(groupes[2]),

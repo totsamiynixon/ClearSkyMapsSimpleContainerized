@@ -4,7 +4,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using AutoMapper;
 using MediatR;
-using Web.Areas.Admin.Application.Readings.DTO;
+using Web.Areas.Admin.Application.Readings.Commands.DTO;
 using Web.Domain.Entities;
 using Web.Infrastructure.Data;
 using Web.Infrastructure.Data.Factory;
@@ -14,17 +14,12 @@ namespace Web.Areas.Admin.Application.Readings.Commands
     public class CreateStaticSensorCommandHandler : IRequestHandler<CreateStaticSensorCommand, StaticSensorDTO>
     {
         private readonly IDataContextFactory<DataContext> _dataContextFactory;
+        private readonly IMapper _mapper;
 
-        private static IMapper _mapper = new Mapper(new MapperConfiguration(x =>
-        {
-            x.CreateMap<Sensor, SensorDTO>();
-            x.CreateMap<StaticSensor, StaticSensorDTO>()
-                .IncludeBase<Sensor, SensorDTO>();
-        }));
-
-        public CreateStaticSensorCommandHandler(IDataContextFactory<DataContext> dataContextFactory)
+        public CreateStaticSensorCommandHandler(IDataContextFactory<DataContext> dataContextFactory, IMapper mapper)
         {
             _dataContextFactory = dataContextFactory ?? throw new ArgumentNullException(nameof(dataContextFactory));
+            _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
         }
 
         public async Task<StaticSensorDTO> Handle(CreateStaticSensorCommand request,

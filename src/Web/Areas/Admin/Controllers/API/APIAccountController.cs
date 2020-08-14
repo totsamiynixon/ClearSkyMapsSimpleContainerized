@@ -25,14 +25,11 @@ namespace Web.Areas.Admin.Controllers.API
     {
         private readonly UserManager<User> _userManager;
         private readonly JWTAppSettings _jwtAppSettings;
-        private readonly SignInManager<User> _signInManager;
 
-        public APIAccountController(UserManager<User> userManager, JWTAppSettings jwtAppSettings,
-            SignInManager<User> signInManager)
+        public APIAccountController(UserManager<User> userManager, JWTAppSettings jwtAppSettings)
         {
             _userManager = userManager ?? throw new ArgumentNullException(nameof(userManager));
             _jwtAppSettings = jwtAppSettings ?? throw new ArgumentNullException(nameof(jwtAppSettings));
-            _signInManager = signInManager ?? throw new ArgumentNullException(nameof(signInManager));
         }
 
         [HttpPost("login")]

@@ -5,7 +5,7 @@ using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
 using Web.Application.Readings.Queries;
 using Web.Application.Readings.Queries.DTO;
-using Web.Areas.PWA.Models.API.Sensors;
+using Web.Models.API.Sensors;
 
 namespace Web.Controllers.API
 {
@@ -13,17 +13,13 @@ namespace Web.Controllers.API
     [ApiController]
     public class SensorsController : ControllerBase
     {
-        private static IMapper _mapper = new Mapper(new MapperConfiguration(x =>
-        {
-            x.CreateMap<StaticSensorDTO, StaticSensorModel>();
-            x.CreateMap<StaticSensorReadingDTO, StaticSensorReadingModel>();
-        }));
-
+        private readonly IMapper _mapper;
         private readonly IReadingsQueries _readingsQueries;
 
-        public SensorsController(IReadingsQueries readingsQueries)
+        public SensorsController(IReadingsQueries readingsQueries, IMapper mapper)
         {
             _readingsQueries = readingsQueries ?? throw new ArgumentNullException(nameof(readingsQueries));
+            _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
         }
 
         [HttpGet]

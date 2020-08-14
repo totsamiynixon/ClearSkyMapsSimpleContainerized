@@ -11,16 +11,13 @@ namespace Web.Application.Readings.Queries
 {
     public class ReadingsQueries : IReadingsQueries
     {
-        private static IMapper _mapper = new Mapper(new MapperConfiguration(x =>
-        {
-            x.CreateMap<Reading, StaticSensorReadingDTO>();
-        }));
-
+        private readonly IMapper _mapper;
         private readonly ISensorCacheHelper _sensorCacheHelper;
 
-        public ReadingsQueries(ISensorCacheHelper sensorCacheHelper)
+        public ReadingsQueries(ISensorCacheHelper sensorCacheHelper, IMapper mapper)
         {
             _sensorCacheHelper = sensorCacheHelper ?? throw new ArgumentNullException(nameof(sensorCacheHelper));
+            _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
         }
 
         public async Task<List<StaticSensorDTO>> GetStaticSensorsAsync()

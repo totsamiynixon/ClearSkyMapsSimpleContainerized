@@ -13,17 +13,12 @@ namespace Web.Areas.Admin.Application.Users.Queries
     public class UserQueries : IUserQueries
     {
         private readonly UserManager<User> _userManager;
+        private readonly IMapper _mapper;
 
-        private static readonly IMapper _mapper = new Mapper(new MapperConfiguration(x =>
-        {
-            x.CreateMap<User, UserListItemDTO>();
-            x.CreateMap<User, UserDetailsDTO>();
-        }));
-
-        
-        public UserQueries(UserManager<User> userManager)
+        public UserQueries(UserManager<User> userManager, IMapper mapper)
         {
             _userManager = userManager ?? throw new ArgumentNullException(nameof(userManager));
+            _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
         }
 
         public async Task<IEnumerable<UserListItemDTO>> GetUsersAsync()

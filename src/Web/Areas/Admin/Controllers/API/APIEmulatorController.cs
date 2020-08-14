@@ -8,9 +8,10 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Web.Application.Emulation.Commands;
 using Web.Application.Emulation.Exceptions;
+using Web.Application.Emulation.Queries;
+using Web.Application.Emulation.Queries.DTO;
 using Web.Areas.Admin.Infrastructure.Auth;
 using Web.Areas.Admin.Models.API.Emulator;
-using Web.Emulation;
 
 namespace Web.Areas.Admin.Controllers.API
 {
@@ -22,37 +23,22 @@ namespace Web.Areas.Admin.Controllers.API
     [ApiController]
     public class APIEmulatorController : Controller
     {
-        private readonly Emulator _emulator;
+        private readonly IEmulationQueries _emulationQueries;
         private readonly IMediator _mediator;
+        private readonly IMapper _mapper;
 
-        private static readonly IMapper _mapper = new Mapper(new MapperConfiguration(x =>
+        public APIEmulatorController(IMediator mediator, IMapper mapper, IEmulationQueries emulationQueries)
         {
-            x.CreateMap<SensorEmulator, SensorEmulatorListItemModel>()
-                .ForMember(f => f.Latitude, m => m.MapFrom((s, d) => s.Latitude))
-                .ForMember(f => f.Longitude, m => m.MapFrom((s, d) => s.Longitude))
-                .ForMember(f => f.Guid, m => m.MapFrom(s => s.GetGuid()))
-                .ForMember(f => f.IsOn, m => m.MapFrom(s => s.IsPowerOn))
-                .ForMember(f => f.ApiKey, m => m.MapFrom(s => s.ApiKey))
-                .ForMember(f => f.Type, m => m.MapFrom(s => s.SensorType.Name))
-                ;
-        }));
-
-        public APIEmulatorController(Emulator emulator, IMediator mediator)
-        {
-            _emulator = emulator ?? throw new ArgumentNullException(nameof(emulator));
             _mediator = mediator ?? throw new ArgumentNullException(nameof(mediator));
+            _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
+            _emulationQueries = emulationQueries ?? throw new ArgumentNullException(nameof(emulationQueries));
         }
 
         [HttpGet]
-        public ActionResult Index()
+        public async Task<ActionResult> Index()
         {
-            List<SensorEmulator> emulators = new List<SensorEmulator>();
-            if (_emulator.IsEmulationEnabled)
-            {
-                emulators = _emulator.Devices;
-            }
-
-            return Ok(_mapper.Map<List<SensorEmulator>, List<SensorEmulatorListItemModel>>(emulators));
+            var devices = await _emulationQueries.GetEmulatorDevicesAsync();
+            return Ok(_mapper.Map<List<EmulatorDeviceDTO>, List<SensorEmulatorListItemModel>>(devices));
         }
 
 

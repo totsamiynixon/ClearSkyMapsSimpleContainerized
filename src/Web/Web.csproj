@@ -7,7 +7,8 @@
 
 
   <ItemGroup>
-    <PackageReference Include="AutoMapper" Version="8.0.0" />
+    <PackageReference Include="AutoMapper" Version="10.0.0" />
+    <PackageReference Include="AutoMapper.Extensions.Microsoft.DependencyInjection" Version="8.0.1" />
     <PackageReference Include="Fleck" Version="1.1.0" />
     <PackageReference Include="Karambolo.AspNetCore.Bundling" Version="3.3.0" />
     <PackageReference Include="Karambolo.AspNetCore.Bundling.NUglify" Version="2.0.0" />
@@ -134,6 +135,9 @@
   </ItemGroup>
   <ItemGroup>
     <_ContentIncludedByDefault Remove="Areas\Admin\Views\StatusCode\Index.cshtml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Areas\PWA\Models" />
   </ItemGroup>
   <Target Name="CompilePWA" AfterTargets="Build">
     <Exec Command="powershell.exe ./compilepwa.ps1" />

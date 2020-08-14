@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using Web.Domain.Enums;
 
-namespace Web.Areas.PWA.Models.API.Sensors
+namespace Web.Models.API.Sensors
 {
     public class StaticSensorModel
     {

@@ -4,7 +4,7 @@ using System.Threading.Tasks;
 using AutoMapper;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
-using Web.Application.Readings.DTO;
+using Web.Application.Readings.Commands.DTO;
 using Web.Application.Readings.Exceptions;
 using Web.Application.Readings.Notifications;
 using Web.Domain.Entities;
@@ -18,16 +18,13 @@ namespace Web.Application.Readings.Commands
         private readonly IMediator _mediator;
         private readonly IDataContextFactory<DataContext> _dataContextFactory;
 
-        private static readonly IMapper _mapper = new Mapper(new MapperConfiguration(x =>
-        {
-            x.CreateMap<SensorReadingDTO, StaticSensorReading>();
-            x.CreateMap<SensorReadingDTO, PortableSensorReading>();
-        }));
+        private readonly IMapper _mapper;
 
-        public CreateReadingCommandHandler(IMediator mediator, IDataContextFactory<DataContext> dataContextFactory)
+        public CreateReadingCommandHandler(IMediator mediator, IDataContextFactory<DataContext> dataContextFactory, IMapper mapper)
         {
             _mediator = mediator ?? throw new ArgumentNullException(nameof(mediator));
             _dataContextFactory = dataContextFactory ?? throw new ArgumentNullException(nameof(dataContextFactory));
+            _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));;
         }
 
         public async Task<bool> Handle(CreateReadingCommand request, CancellationToken cancellationToken)
@@ -42,11 +39,11 @@ namespace Web.Application.Readings.Commands
                 case PortableSensor _:
                     await _mediator.Publish(
                         new PortableReadingCreatedNotification(sensor.Id,
-                            _mapper.Map<SensorReadingDTO, PortableSensorReading>(request.Reading)), cancellationToken);
+                            _mapper.Map<StaticSensorReadingDTO, PortableSensorReading>(request.Reading)), cancellationToken);
                     break;
                 case StaticSensor staticSensor:
                 {
-                    var reading = _mapper.Map<SensorReadingDTO, StaticSensorReading>(request.Reading);
+                    var reading = _mapper.Map<StaticSensorReadingDTO, StaticSensorReading>(request.Reading);
                     reading.StaticSensorId = sensor.Id;
 
                     await context.Set<Reading>().AddAsync(reading, cancellationToken);

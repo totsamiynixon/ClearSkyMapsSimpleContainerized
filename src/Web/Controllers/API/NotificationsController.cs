@@ -5,8 +5,8 @@ using System.Net.Http.Headers;
 using System.Text;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
-using Web.Areas.PWA.Models.API.Notifications;
 using Web.Infrastructure;
+using Web.Models.API.Notifications;
 
 namespace Web.Controllers.API
 {

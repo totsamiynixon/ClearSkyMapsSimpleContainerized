@@ -22,31 +22,15 @@ namespace Web.Areas.Admin.Controllers.API
     [ApiController]
     public class APIUsersController : Controller
     {
-        private static readonly IMapper _mapper = new Mapper(new MapperConfiguration(x =>
-        {
-            x.CreateMap<UserListItemDTO, UserListItemModel>();
-            x.CreateMap<UserDetailsDTO, UserChangePasswordModel>();
-            x.CreateMap<UserDetailsDTO, DeleteUserModel>();
-            x.CreateMap<UserDetailsDTO, ActivateUserModel>();
-
-            x.CreateMap<CreateUserModel, CreateUserCommand>()
-                .ConstructUsing(z => new CreateUserCommand(z.Email, z.Password));
-            x.CreateMap<UserChangePasswordModel, ChangeUserPasswordCommand>()
-                .ConstructUsing(z => new ChangeUserPasswordCommand(z.Id, z.Email, z.Password, z.ConfirmPassword));
-            x.CreateMap<DeleteUserModel, DeleteUserCommand>()
-                .ConstructUsing(z => new DeleteUserCommand(z.Id));
-            x.CreateMap<ActivateUserModel, ChangeUserActivationStateCommand>()
-                .ConstructUsing(z => new ChangeUserActivationStateCommand(z.Id, z.IsActive));
-        }));
-
-
+        private readonly IMapper _mapper;
         private readonly IMediator _mediator;
         private readonly IUserQueries _userQueries;
 
-        public APIUsersController(IMediator mediator, IUserQueries userQueries)
+        public APIUsersController(IMediator mediator, IUserQueries userQueries, IMapper mapper)
         {
             _mediator = mediator ?? throw new ArgumentNullException(nameof(mediator));
             _userQueries = userQueries ?? throw new ArgumentNullException(nameof(userQueries));
+            _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
         }
 
         [HttpGet]
