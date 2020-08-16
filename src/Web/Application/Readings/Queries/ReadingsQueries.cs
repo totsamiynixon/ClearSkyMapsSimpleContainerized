@@ -24,7 +24,7 @@ namespace Web.Application.Readings.Queries
         {
             var sensors = await _sensorCacheHelper.GetStaticSensorsAsync();
             
-            var model = sensors?.Select(f => new StaticSensorDTO
+            var model = sensors.Select(f => new StaticSensorDTO
             {
                 Id = f.Sensor.Id,
                 Latitude = f.Sensor.Latitude,

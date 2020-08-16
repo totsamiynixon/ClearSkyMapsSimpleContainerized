@@ -1,14 +1,15 @@
 ﻿using MediatR;
+using Web.Domain.Entities;
 
 namespace Web.Areas.Admin.Application.Readings.Notifications
 {
     public class SensorDeletedNotification : INotification
     {
-        public SensorDeletedNotification(int sensorId)
+        public SensorDeletedNotification(Sensor deletedSensor)
         {
-            SensorId = sensorId;
+            DeletedSensor = deletedSensor;
         }
 
-        public int SensorId { get; }
+        public Sensor DeletedSensor { get; }
     }
 }

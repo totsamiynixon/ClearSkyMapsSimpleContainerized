@@ -7,8 +7,7 @@ using Web.Areas.Admin.Helpers.Interfaces;
 
 namespace Web.Areas.Admin.Application.Readings.Notifications
 {
-    public class
-        StaticSensorReadingCreatedNotificationHandler : INotificationHandler<StaticSensorReadingCreatedNotification>
+    public class StaticSensorReadingCreatedNotificationHandler : INotificationHandler<StaticSensorReadingCreatedNotification>
     {
         private readonly IAdminDispatchHelper _adminDispatchHelper;
 

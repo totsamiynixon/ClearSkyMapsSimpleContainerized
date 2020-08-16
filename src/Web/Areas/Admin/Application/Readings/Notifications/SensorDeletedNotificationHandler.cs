@@ -2,6 +2,7 @@
 using System.Threading;
 using System.Threading.Tasks;
 using MediatR;
+using Web.Domain.Entities;
 using Web.Helpers.Interfaces;
 
 namespace Web.Areas.Admin.Application.Readings.Notifications
@@ -17,7 +18,10 @@ namespace Web.Areas.Admin.Application.Readings.Notifications
 
         public async Task Handle(SensorDeletedNotification notification, CancellationToken cancellationToken)
         {
-            await _sensorCacheHelper.RemoveStaticSensorFromCacheAsync(notification.SensorId);
+            if (notification.DeletedSensor is StaticSensor staticSensor)
+            {
+                await _sensorCacheHelper.RemoveStaticSensorFromCacheAsync(staticSensor.Id);
+            }
         }
     }
 }

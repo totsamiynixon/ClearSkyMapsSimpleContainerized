@@ -6,6 +6,7 @@ using MediatR;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Web.Areas.Admin.Application.Users.Exceptions;
+using Web.Areas.Admin.Infrastructure.Auth;
 using Web.Domain.Entities.Identity;
 
 namespace Web.Areas.Admin.Application.Users.Commands
@@ -21,10 +22,10 @@ namespace Web.Areas.Admin.Application.Users.Commands
 
         public async Task<bool> Handle(CreateUserCommand request, CancellationToken cancellationToken)
         {
-            var user = await _userManager.Users.FirstOrDefaultAsync(f => f.Email == request.Email, cancellationToken);
+            var user = await _userManager.FindByEmailAsync(request.Email);
             if (user != null)
             {
-                throw new UserEmailAddressIsAlreadyTakenException();
+                throw new UserEmailAddressIsAlreadyTakenException(request.Email);
             }
 
             var newUser = new User
@@ -40,7 +41,7 @@ namespace Web.Areas.Admin.Application.Users.Commands
                 throw new UserUnableToCreateException(result.Errors.First().Description);
             }
 
-            await _userManager.AddToRoleAsync(newUser, "Admin");
+            await _userManager.AddToRoleAsync(newUser, AuthSettings.Roles.Admin);
 
             return true;
         }

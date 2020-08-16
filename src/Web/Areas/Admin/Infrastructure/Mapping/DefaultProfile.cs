@@ -1,5 +1,5 @@
 ﻿using AutoMapper;
-using Web.Application.Emulation.Queries.DTO;
+using Web.Areas.Admin.Application.Emulation.Queries.DTO;
 using Web.Areas.Admin.Application.Readings.Commands;
 using Web.Areas.Admin.Application.Readings.Queries.DTO;
 using Web.Areas.Admin.Application.Users.Commands;
@@ -49,7 +49,7 @@ namespace Web.Areas.Admin.Infrastructure.Mapping
                 CreateMap<CreateUserModel, CreateUserCommand>()
                     .ConstructUsing(z => new CreateUserCommand(z.Email, z.Password));
                 CreateMap<UserChangePasswordModel, ChangeUserPasswordCommand>()
-                    .ConstructUsing(z => new ChangeUserPasswordCommand(z.Id, z.Email, z.Password, z.ConfirmPassword));
+                    .ConstructUsing(z => new ChangeUserPasswordCommand(z.Id,  z.Password, z.ConfirmPassword));
                 CreateMap<DeleteUserModel, DeleteUserCommand>()
                     .ConstructUsing(z => new DeleteUserCommand(z.Id));
                 CreateMap<ActivateUserModel, ChangeUserActivationStateCommand>()
@@ -93,7 +93,7 @@ namespace Web.Areas.Admin.Infrastructure.Mapping
                 CreateMap<Web.Areas.Admin.Models.Default.Users.CreateUserModel, CreateUserCommand>()
                     .ConstructUsing(z => new CreateUserCommand(z.Email, z.Password));
                 CreateMap<Web.Areas.Admin.Models.Default.Users.UserChangePasswordModel, ChangeUserPasswordCommand>()
-                    .ConstructUsing(z => new ChangeUserPasswordCommand(z.Id, z.Email, z.Password, z.ConfirmPassword));
+                    .ConstructUsing(z => new ChangeUserPasswordCommand(z.Id, z.Password, z.ConfirmPassword));
                 CreateMap<Web.Areas.Admin.Models.Default.Users.DeleteUserModel, DeleteUserCommand>()
                     .ConstructUsing(z => new DeleteUserCommand(z.Id));
                 CreateMap<Web.Areas.Admin.Models.Default.Users.ActivateUserModel, ChangeUserActivationStateCommand>()

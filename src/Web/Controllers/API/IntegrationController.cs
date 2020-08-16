@@ -42,13 +42,13 @@ namespace Web.Controllers.API
         }
 
 
-        private (string apiKey,StaticSensorReadingDTO reading) GetModelFromString(string data)
+        private (string apiKey,SensorReadingDTO reading) GetModelFromString(string data)
         {
             try
             {
                 var trimmed = data.Trim(';');
                 var groupes = trimmed.Split(",").Select(x => x.Replace('.', ',')).ToArray();
-                return (apiKey: groupes[0], reading: new StaticSensorReadingDTO
+                return (apiKey: groupes[0], reading: new SensorReadingDTO
                 {
                     Temp = float.Parse(groupes[1]),
                     Hum = float.Parse(groupes[2]),

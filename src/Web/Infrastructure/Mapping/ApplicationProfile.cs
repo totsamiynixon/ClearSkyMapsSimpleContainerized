@@ -8,8 +8,8 @@ namespace Web.Infrastructure.Mapping
     {
         public ApplicationProfile()
         {
-            CreateMap<Application.Readings.Commands.DTO.StaticSensorReadingDTO, StaticSensorReading>();
-            CreateMap<Application.Readings.Commands.DTO.StaticSensorReadingDTO, PortableSensorReading>();
+            CreateMap<Application.Readings.Commands.DTO.SensorReadingDTO, StaticSensorReading>();
+            CreateMap<Application.Readings.Commands.DTO.SensorReadingDTO, PortableSensorReading>();
 
 
             CreateMap<Reading, Application.Readings.Queries.DTO.StaticSensorReadingDTO>();

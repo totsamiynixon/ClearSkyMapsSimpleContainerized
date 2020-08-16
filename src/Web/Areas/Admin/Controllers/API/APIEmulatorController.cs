@@ -6,10 +6,10 @@ using MediatR;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Web.Application.Emulation.Commands;
-using Web.Application.Emulation.Exceptions;
-using Web.Application.Emulation.Queries;
-using Web.Application.Emulation.Queries.DTO;
+using Web.Areas.Admin.Application.Emulation.Commands;
+using Web.Areas.Admin.Application.Emulation.Exceptions;
+using Web.Areas.Admin.Application.Emulation.Queries;
+using Web.Areas.Admin.Application.Emulation.Queries.DTO;
 using Web.Areas.Admin.Infrastructure.Auth;
 using Web.Areas.Admin.Models.API.Emulator;
 

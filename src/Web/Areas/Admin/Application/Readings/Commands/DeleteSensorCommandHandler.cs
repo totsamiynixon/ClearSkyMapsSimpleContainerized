@@ -41,7 +41,7 @@ namespace Web.Areas.Admin.Application.Readings.Commands
                 
             await context.SaveChangesAsync(cancellationToken);
 
-            await _mediator.Publish(new SensorDeletedNotification(request.Id), cancellationToken);
+            await _mediator.Publish(new SensorDeletedNotification(sensor), cancellationToken);
 
             return true;
         }

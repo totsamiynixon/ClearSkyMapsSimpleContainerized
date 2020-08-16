@@ -1,5 +1,5 @@
 ﻿using AutoMapper;
-using Web.Application.Emulation.Queries.DTO;
+using Web.Areas.Admin.Application.Emulation.Queries.DTO;
 using Web.Areas.Admin.Application.Users.Queries.DTO;
 using Web.Domain.Entities;
 using Web.Domain.Entities.Identity;

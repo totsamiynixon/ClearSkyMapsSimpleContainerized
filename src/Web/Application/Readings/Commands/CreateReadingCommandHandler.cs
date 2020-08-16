@@ -39,14 +39,15 @@ namespace Web.Application.Readings.Commands
                 case PortableSensor _:
                     await _mediator.Publish(
                         new PortableReadingCreatedNotification(sensor.Id,
-                            _mapper.Map<StaticSensorReadingDTO, PortableSensorReading>(request.Reading)), cancellationToken);
+                            _mapper.Map<SensorReadingDTO, PortableSensorReading>(request.Reading)), cancellationToken);
                     break;
                 case StaticSensor staticSensor:
                 {
-                    var reading = _mapper.Map<StaticSensorReadingDTO, StaticSensorReading>(request.Reading);
+                    var reading = _mapper.Map<SensorReadingDTO, StaticSensorReading>(request.Reading);
                     reading.StaticSensorId = sensor.Id;
 
-                    await context.Set<Reading>().AddAsync(reading, cancellationToken);
+                    await context.StaticSensorReadings.AddAsync(reading, cancellationToken);
+                    await context.SaveChangesAsync(cancellationToken);
 
                     await _mediator.Publish(new StaticSensorReadingCreatedNotification(sensor.Id, reading),
                         cancellationToken);

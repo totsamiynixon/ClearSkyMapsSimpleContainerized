@@ -5,11 +5,11 @@ namespace Web.Application.Readings.Commands
 {
     public class CreateReadingCommand : IRequest<bool>
     {
-        public StaticSensorReadingDTO Reading { get; }
+        public SensorReadingDTO Reading { get; }
         
         public string ApiKey { get; }
         
-        public CreateReadingCommand(StaticSensorReadingDTO reading, string apiKey)
+        public CreateReadingCommand(SensorReadingDTO reading, string apiKey)
         {
             Reading = reading;
             ApiKey = apiKey;

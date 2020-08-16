@@ -30,7 +30,7 @@ namespace Web.Areas.Admin.Application.Readings.Commands
                
             if (sensor == null)
             {
-                throw new SensorNotFoundException("No Such Sensor");
+                throw new SensorNotFoundException(request.SensorId);
             }
                 
             sensor.IsActive = request.IsActive;

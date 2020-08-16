@@ -21,7 +21,7 @@ namespace Web.Areas.Admin.Application.Users.Commands
 
         public async Task<bool> Handle(ChangeUserPasswordCommand request, CancellationToken cancellationToken)
         {
-            var user = await _userManager.Users.FirstOrDefaultAsync(f => f.Id == request.UserId, cancellationToken);
+            var user = await _userManager.FindByIdAsync(request.UserId);
             if (user == null)
             {
                 throw new UserNotFoundException(request.UserId);

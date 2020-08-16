@@ -7,7 +7,7 @@ namespace Web.Areas.PWA.Infrastructure.Mapping
     {
         public ApplicationProfile()
         {
-            CreateMap<Web.Application.Readings.Commands.DTO.StaticSensorReadingDTO, StaticSensorReading>();
+            CreateMap<Web.Application.Readings.Commands.DTO.SensorReadingDTO, StaticSensorReading>();
         }
     }
 }
