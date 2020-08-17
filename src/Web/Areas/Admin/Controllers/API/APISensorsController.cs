@@ -6,6 +6,7 @@ using AutoMapper;
 using MediatR;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Web.Application.Readings.Exceptions;
 using Web.Areas.Admin.Application.Readings.Commands;
@@ -22,6 +23,8 @@ namespace Web.Areas.Admin.Controllers.API
     //TODO: check how to resolve naming conflict
     [Route(AdminArea.APIRoutePrefix + "/sensors")]
     [ApiController]
+    [Produces("application/json")]
+    [Consumes("application/json")]
     public class APISensorsController : Controller
     {
         private readonly IMapper _mapper;
@@ -35,10 +38,15 @@ namespace Web.Areas.Admin.Controllers.API
             _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
         }
 
-        public async Task<ActionResult> Index()
+        /// <summary>
+        /// Returns all users
+        /// </summary>
+        [HttpGet]
+        [ProducesResponseType(typeof(SensorListModel), StatusCodes.Status200OK)]
+        public async Task<ActionResult> GetAllSensors()
         {
             var sensors = await _readingsQueries.GetSensorsAsync();
-            var model = new
+            var model = new SensorListModel
             {
                 PortableSensors =
                     _mapper.Map<List<PortableSensorDTO>, List<SensorListItemModel>>(sensors
@@ -52,8 +60,13 @@ namespace Web.Areas.Admin.Controllers.API
             return Ok(model);
         }
 
-
-        [HttpPost]
+        /// <summary>
+        /// Create static sensor
+        /// </summary>
+        /// <response code="400">If model is invalid</response>
+        [HttpPost("static")]
+        [ProducesResponseType(typeof(StaticSensorModel), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
         public async Task<ActionResult> CreateStaticSensor(
             CreateStaticSensorModel model)
         {
@@ -68,8 +81,14 @@ namespace Web.Areas.Admin.Controllers.API
 
             return Ok(_mapper.Map<StaticSensorDTO, StaticSensorModel>(sensorDto));
         }
-
-        [HttpPost]
+        
+        /// <summary>
+        /// Create portable sensor
+        /// </summary>
+        /// <response code="400">If model is invalid</response>
+        [HttpPost("portable")]
+        [ProducesResponseType(typeof(PortableSensorModel), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
         public async Task<ActionResult> CreatePortableSensor(
             CreatePortableSensorModel model)
         {
@@ -86,8 +105,16 @@ namespace Web.Areas.Admin.Controllers.API
         }
 
 
-        [HttpPost]
-        [Authorize(Roles = "Supervisor")]
+        /// <summary>
+        /// Delete sensor
+        /// </summary>
+        /// <response code="400">If model is invalid</response>
+        /// <response code="404">If sensor not found</response>
+        [Authorize(Policy = AuthPolicies.Supervisor)]
+        [HttpPost("delete")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<ActionResult> Delete(
             DeleteSensorModel model)
         {
@@ -110,7 +137,15 @@ namespace Web.Areas.Admin.Controllers.API
             return Ok();
         }
 
-        [HttpPost]
+        /// <summary>
+        /// Change sensor activation state
+        /// </summary>
+        /// <response code="400">If model is invalid</response>
+        /// <response code="404">If sensor not found</response>
+        [HttpPost("changeActivation")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<ActionResult> ChangeActivation(
             ChangeActivationSensorModel model)
         {
@@ -133,8 +168,15 @@ namespace Web.Areas.Admin.Controllers.API
             return Ok();
         }
 
-
-        [HttpPost]
+        /// <summary>
+        /// Change static sensor visibility state
+        /// </summary>
+        /// <response code="400">If model is invalid</response>
+        /// <response code="404">If static sensor not found</response>
+        [HttpPost("static/changeVisibility")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<ActionResult> ChangeVisibilityStaticSensor(
             ChangeVisibilityStaticSensorModel model)
         {

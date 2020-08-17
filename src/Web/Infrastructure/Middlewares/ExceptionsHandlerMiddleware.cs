@@ -5,6 +5,8 @@ using Microsoft.Extensions.Logging;
 
 namespace Web.Infrastructure.Middlewares
 {
+    //TODO: Important! Check Error handling https://docs.microsoft.com/en-us/aspnet/core/web-api/handle-errors?view=aspnetcore-3.1
+    //TODO: Important! Problem Details object
     public class ExceptionHandlerMiddleware
     {
         private readonly RequestDelegate _next;

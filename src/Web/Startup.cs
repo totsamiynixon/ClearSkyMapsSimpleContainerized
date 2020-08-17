@@ -1,4 +1,7 @@
-﻿using AutoMapper;
+﻿using System;
+using System.IO;
+using System.Reflection;
+using AutoMapper;
 using MediatR;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Identity;
@@ -12,6 +15,7 @@ using Web.Helpers.Implementations;
 using Microsoft.Extensions.Logging;
 using Web.Areas.Admin;
 using Microsoft.Extensions.Hosting;
+using Microsoft.OpenApi.Models;
 using Web.Application.Readings.Queries;
 using Web.Areas.Admin.Application.Emulation.Queries;
 using Web.Areas.PWA;
@@ -23,6 +27,7 @@ using Web.Infrastructure.Data.Factory;
 using Web.Infrastructure.Data.Initialize;
 using Web.Infrastructure.Data.Initialize.Seed;
 using Web.Infrastructure.Middlewares;
+using Web.Infrastructure.Swagger;
 
 namespace Web
 {
@@ -54,8 +59,10 @@ namespace Web
             services.AddTransient<IPollutionCalculator, PollutionCalculator>();
             services.AddTransient<ISensorCacheHelper, SensorCacheHelper>();
 
-            services.AddSingleton<IEmulationDataContextFactory<DataContext>>(provider => new DefaultDataContextFactory<DataContext>(appSettings.Emulation.ConnectionString));
-            services.AddSingleton<IEmulationDataContextFactory<IdentityDataContext>>(provider => new DefaultDataContextFactory<IdentityDataContext>(appSettings.Emulation.ConnectionString));
+            services.AddSingleton<IEmulationDataContextFactory<DataContext>>(provider =>
+                new DefaultDataContextFactory<DataContext>(appSettings.Emulation.ConnectionString));
+            services.AddSingleton<IEmulationDataContextFactory<IdentityDataContext>>(provider =>
+                new DefaultDataContextFactory<IdentityDataContext>(appSettings.Emulation.ConnectionString));
 
             services.AddTransient<IDataContextFactory<DataContext>>(provider =>
             {
@@ -80,7 +87,7 @@ namespace Web
                 (provider, builder) => provider.GetService<IDataContextFactory<DataContext>>().Create());
             services.AddDbContext<IdentityDataContext>(
                 (provider, builder) => provider.GetService<IDataContextFactory<IdentityDataContext>>().Create());*/
-                
+
             services.AddScoped<DataContext>(
                 (provider) => provider.GetService<IDataContextFactory<DataContext>>().Create());
             services.AddScoped<IdentityDataContext>(
@@ -93,8 +100,10 @@ namespace Web
                 .AddSignInManager<SignInManager<User>>()
                 .AddEntityFrameworkStores<IdentityDataContext>();
 
-            services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_3_0);
-            services.AddControllersWithViews().AddRazorRuntimeCompilation();
+            services.AddMvc(c => { c.Conventions.Add(new ApiExplorerGroupPerAreaConvention()); })
+                .SetCompatibilityVersion(CompatibilityVersion.Version_3_0);
+            services.AddControllersWithViews()
+                .AddRazorRuntimeCompilation();
             services.AddMemoryCache();
 
             services.AddSignalR();
@@ -103,14 +112,80 @@ namespace Web
 
             services.AddAdminAreaServices(Configuration);
             services.AddPWAAreaServices();
+            
+            services.AddSwaggerGen(c =>
+            {
+                c.SwaggerDoc("integration", new OpenApiInfo
+                {
+                    Version = "v1",
+                    Title = "CSM Open API",
+                    Description = "Clear Sky Maps REST API for Integration",
+                    Contact = new OpenApiContact
+                    {
+                        Name = "Yauheni But-Husaim",
+                        Email = "totsamiynixon@gmail.com",
+                        Url = new Uri("https://vk.com/id169573384"),
+                    }
+                });
+
+
+                c.SwaggerDoc(AdminArea.Name.ToLower(), new OpenApiInfo
+                {
+                    Version = "v1",
+                    Title = $"CSM Open API | {AdminArea.Name}",
+                    Description = $"Clear Sky Maps REST API for {AdminArea.Name} Area",
+                    Contact = new OpenApiContact
+                    {
+                        Name = "Yauheni But-Husaim",
+                        Email = "totsamiynixon@gmail.com",
+                        Url = new Uri("https://vk.com/id169573384"),
+                    }
+                });
+                
+                c.DocInclusionPredicate((version, desc) =>
+                {
+                    if (desc.GroupName == null && version == "integration")
+                    {
+                        return true;   
+                    }
+                    if (desc.GroupName == AdminArea.Name && version == AdminArea.Name.ToLower())
+                    {
+                        return true;   
+                    }
+
+                    return false;
+                });
+                
+                c.DocumentFilter<LowercasePathsDocumentFilter>();
+
+                // Set the comments path for the Swagger JSON and UI.
+                var xmlFile = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
+                var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
+                c.IncludeXmlComments(xmlPath);
+            });
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env, ILoggerFactory loggerFactory)
         {
-
             app.UseAdminArea(Configuration, env);
             app.UsePWAArea(env);
+
+            app.UseSwagger();
+            /*app.UseSwaggerUI(c =>
+            {
+                c.SwaggerEndpoint("/swagger/integration/swagger.json", "CSM API | Integration | v1");
+                c.SwaggerEndpoint($"/swagger/{AdminArea.Name.ToLower()}/swagger.json", $"CSM API | {AdminArea.Name} | v1");
+            });*/
+            app.UseSwaggerUI(c =>
+            {
+                c.RoutePrefix = $"swagger/{AdminArea.DefaultRoutePrefix}";
+                c.SwaggerEndpoint($"/swagger/{AdminArea.Name.ToLower()}/swagger.json", $"CSM API | {AdminArea.Name} | v1");
+            });
+            app.UseSwaggerUI(c =>
+            {
+                c.SwaggerEndpoint("/swagger/integration/swagger.json", "CSM API | Integration | v1");
+            });
 
             if (env.IsDevelopment())
             {
@@ -121,9 +196,9 @@ namespace Web
                 app.UseMiddleware<ExceptionHandlerMiddleware>();
                 app.UseMiddleware<ExceptionLoggerMiddleware>();
             }
-            
+
             app.UseRouting();
-            
+
             app.UseStaticFiles();
             app.UseCookiePolicy();
 
@@ -134,7 +209,6 @@ namespace Web
                     name: "default",
                     pattern: "{area=pwa}/{controller=home}/{action=index}/{id?}");
             });
-            
         }
     }
 }
