@@ -21,7 +21,6 @@
     </ItemGroup>
 
     <ItemGroup>
-      <Folder Include="Functional\Areas\Admin\Application\Users\Queries" />
       <Folder Include="Functional\Integration" />
     </ItemGroup>
 

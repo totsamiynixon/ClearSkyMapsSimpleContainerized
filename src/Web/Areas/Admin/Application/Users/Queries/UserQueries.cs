@@ -29,7 +29,7 @@ namespace Web.Areas.Admin.Application.Users.Queries
 
         public async Task<UserDetailsDTO> GetUserAsync(string userId)
         {
-            var user = await _userManager.Users.FirstOrDefaultAsync(f => f.Id == userId);
+            var user = await _userManager.FindByIdAsync(userId);
             if (user == null)
             {
                 return null;
