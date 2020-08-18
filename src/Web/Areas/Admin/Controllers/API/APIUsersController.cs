@@ -57,14 +57,13 @@ namespace Web.Areas.Admin.Controllers.API
         /// <response code="403">If user doesn't have permissions to operation</response>
         [HttpPost]
         [ProducesResponseType(StatusCodes.Status200OK)]
-        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(typeof(ValidationProblemDetails),StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
         public async Task<ActionResult> Create(CreateUserModel model)
         {
             if (!ModelState.IsValid)
             {
-                //TODO: check how to return model state
-                return BadRequest("Invalid Data");
+                return ValidationProblem();
             }
 
             try
@@ -90,14 +89,13 @@ namespace Web.Areas.Admin.Controllers.API
         /// <response code="404">If user not found</response>
         [HttpPost("changePassword")]
         [ProducesResponseType(StatusCodes.Status200OK)]
-        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(typeof(ValidationProblemDetails), StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
         public async Task<ActionResult> ChangePassword(UserChangePasswordModel model)
         {
             if (!ModelState.IsValid)
             {
-                //TODO: check how to return model state
-                return BadRequest("Invalid Data");
+                return ValidationProblem();
             }
 
             try
@@ -127,15 +125,14 @@ namespace Web.Areas.Admin.Controllers.API
         /// <response code="404">If user not found</response>
         [HttpDelete]
         [ProducesResponseType(StatusCodes.Status200OK)]
-        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(typeof(ValidationProblemDetails), StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<ActionResult> Delete(DeleteUserModel model)
         {
             if (!ModelState.IsValid)
             {
-                //TODO: check how to return model state
-                return BadRequest("Invalid Data");
+                return ValidationProblem();
             }
 
             try
@@ -158,14 +155,13 @@ namespace Web.Areas.Admin.Controllers.API
 
         [HttpPost("changeActivation")]
         [ProducesResponseType(StatusCodes.Status200OK)]
-        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(typeof(ValidationProblemDetails), StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
         public async Task<ActionResult> ChangeActivation(ActivateUserModel model)
         {
             if (!ModelState.IsValid)
             {
-                //TODO: check how to return model state
-                return BadRequest("Invalid Data");
+                return ValidationProblem();
             }
 
             try

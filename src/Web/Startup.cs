@@ -1,7 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Reflection;
 using AutoMapper;
 using MediatR;
@@ -182,11 +180,6 @@ namespace Web
             app.UsePWAArea(env);
 
             app.UseSwagger();
-            /*app.UseSwaggerUI(c =>
-            {
-                c.SwaggerEndpoint("/swagger/integration/swagger.json", "CSM API | Integration | v1");
-                c.SwaggerEndpoint($"/swagger/{AdminArea.Name.ToLower()}/swagger.json", $"CSM API | {AdminArea.Name} | v1");
-            });*/
             app.UseSwaggerUI(c =>
             {
                 c.RoutePrefix = $"swagger/{AdminArea.DefaultRoutePrefix}";
