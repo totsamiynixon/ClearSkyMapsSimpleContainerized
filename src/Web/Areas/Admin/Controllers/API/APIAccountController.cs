@@ -44,12 +44,12 @@ namespace Web.Areas.Admin.Controllers.API
         [AllowAnonymous]
         [HttpPost("login")]
         [ProducesResponseType(typeof(TokenModel), StatusCodes.Status200OK)]
-        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(typeof(ValidationProblemDetails), StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<IActionResult> Login([FromBody] LoginModel model)
         {
             if (!ModelState.IsValid)
-                return BadRequest("Login failed: invalid data!");
+                return ValidationProblem();
 
             var user = await _userManager.FindByEmailAsync(model.Email);
             if (user == null)

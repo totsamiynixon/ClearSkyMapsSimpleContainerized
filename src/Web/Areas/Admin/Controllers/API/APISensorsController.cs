@@ -66,14 +66,13 @@ namespace Web.Areas.Admin.Controllers.API
         /// <response code="400">If model is invalid</response>
         [HttpPost("static")]
         [ProducesResponseType(typeof(StaticSensorModel), StatusCodes.Status200OK)]
-        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(typeof(ValidationProblemDetails), StatusCodes.Status400BadRequest)]
         public async Task<ActionResult> CreateStaticSensor(
             CreateStaticSensorModel model)
         {
             if (!ModelState.IsValid)
             {
-                //TODO: check how to return model state
-                return BadRequest("Invalid Data");
+                return ValidationProblem();
             }
 
             var command = _mapper.Map<CreateStaticSensorModel, CreateStaticSensorCommand>(model);
@@ -81,7 +80,7 @@ namespace Web.Areas.Admin.Controllers.API
 
             return Ok(_mapper.Map<StaticSensorDTO, StaticSensorModel>(sensorDto));
         }
-        
+
         /// <summary>
         /// Create portable sensor
         /// </summary>
@@ -94,8 +93,7 @@ namespace Web.Areas.Admin.Controllers.API
         {
             if (!ModelState.IsValid)
             {
-                //TODO: check how to return model state
-                return BadRequest("Invalid Data");
+                return ValidationProblem(ModelState);
             }
 
             var command = _mapper.Map<CreatePortableSensorModel, CreatePortableSensorCommand>(model);
@@ -113,15 +111,14 @@ namespace Web.Areas.Admin.Controllers.API
         [Authorize(Policy = AuthPolicies.Supervisor)]
         [HttpPost("delete")]
         [ProducesResponseType(StatusCodes.Status200OK)]
-        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(typeof(ValidationProblemDetails), StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<ActionResult> Delete(
             DeleteSensorModel model)
         {
             if (!ModelState.IsValid)
             {
-                //TODO: check how to return model state
-                return BadRequest("Invalid Data");
+                return ValidationProblem();
             }
 
             try
@@ -144,15 +141,14 @@ namespace Web.Areas.Admin.Controllers.API
         /// <response code="404">If sensor not found</response>
         [HttpPost("changeActivation")]
         [ProducesResponseType(StatusCodes.Status200OK)]
-        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(typeof(ValidationProblemDetails), StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<ActionResult> ChangeActivation(
             ChangeActivationSensorModel model)
         {
             if (!ModelState.IsValid)
             {
-                //TODO: check how to return model state
-                return BadRequest("Invalid Data");
+                return ValidationProblem();
             }
 
             try
@@ -175,15 +171,14 @@ namespace Web.Areas.Admin.Controllers.API
         /// <response code="404">If static sensor not found</response>
         [HttpPost("static/changeVisibility")]
         [ProducesResponseType(StatusCodes.Status200OK)]
-        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(typeof(ValidationProblemDetails), StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<ActionResult> ChangeVisibilityStaticSensor(
             ChangeVisibilityStaticSensorModel model)
         {
             if (!ModelState.IsValid)
             {
-                //TODO: check how to return model state
-                return BadRequest("Invalid Data");
+                return ValidationProblem();
             }
 
             try
