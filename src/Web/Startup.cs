@@ -1,8 +1,11 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Reflection;
 using AutoMapper;
 using MediatR;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Hosting;
@@ -142,6 +145,12 @@ namespace Web
                     }
                 });
                 
+                c.AddSecurityDefinition(JwtBearerDefaults.AuthenticationScheme,
+                    new OpenApiSecurityScheme { In = ParameterLocation.Header,
+                        Description = "Please enter into field the word 'Bearer' following by space and JWT", 
+                        Name = "Authorization", Type = SecuritySchemeType.ApiKey, Scheme = JwtBearerDefaults.AuthenticationScheme});
+
+                
                 c.DocInclusionPredicate((version, desc) =>
                 {
                     if (desc.GroupName == null && version == "integration")
@@ -156,6 +165,7 @@ namespace Web
                     return false;
                 });
                 
+                c.OperationFilter<AuthorizeOperationFilter>();
                 c.DocumentFilter<LowercasePathsDocumentFilter>();
 
                 // Set the comments path for the Swagger JSON and UI.
