@@ -2,6 +2,7 @@
 using System.Linq;
 using System.Threading.Tasks;
 using MediatR;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Web.Application.Readings.Commands;
 using Web.Application.Readings.Commands.DTO;
@@ -11,6 +12,8 @@ namespace Web.Controllers.API
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Produces("application/json")]
+    [Consumes("application/json")]
     public class IntegrationController : ControllerBase
     {
         private readonly IMediator _mediator;
@@ -20,7 +23,24 @@ namespace Web.Controllers.API
             _mediator = mediator ?? throw new ArgumentNullException(nameof(mediator));
         }
 
+        /// <summary>
+        /// Creates new reading 
+        /// </summary>
+        /// <remarks>
+        /// Sample request:
+        /// 
+        ///     GET /api/integration/getaspost?data=qwerty,28,0.5,20,20,20,20,20,20,20,53.2222,52.3333
+        ///
+        /// Explanation:
+        /// 
+        ///     HTTP GET is used, because it's more easy for actual device to integrate
+        /// </remarks>
+        /// <param name="data">Data as string in format: ApiKey,Temp,Hum,Preassure,CO2,LPG,CO,CH4,Dust,Longitude,Latitude;</param>
+        /// <response code="202">If data has been successfully accepted</response>
+        /// <response code="400">If data structure or readings are invalid</response>   
         [HttpGet("getaspost")]
+        [ProducesResponseType(StatusCodes.Status202Accepted)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
         public async Task<IActionResult> GetAsPostDataAsync(string data)
         {
             var model = GetModelFromString(data);
@@ -38,7 +58,7 @@ namespace Web.Controllers.API
                 return NotFound(ex.Message);
             }
 
-            return Ok();
+            return Accepted();
         }
 
 
