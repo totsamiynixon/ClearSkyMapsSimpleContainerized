@@ -1,9 +1,12 @@
-﻿using Microsoft.AspNetCore;
+﻿using MediatR;
+using Microsoft.AspNetCore;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using Web.Infrastructure.Data;
 using Web.Infrastructure.Data.Initialize;
+using Web.Infrastructure.MediatR.Commands;
 
 namespace Web
 {
@@ -13,12 +16,8 @@ namespace Web
         {
             var host = CreateWebHostBuilder(args).Build();
 
-            using (var scope = host.Services.CreateScope())
-            {
-                var databaseInitializer = scope.ServiceProvider.GetService<IApplicationDatabaseInitializer>();
-                databaseInitializer.InitializeDbAsync().Wait();
-            }
-
+            InitializeApplication(host);
+            
             host.Run();
         }
 
@@ -41,5 +40,14 @@ namespace Web
                     logging.AddAzureWebAppDiagnostics();
                 })
                 .UseStartup<Startup>();
+
+        public static void InitializeApplication(IWebHost host)
+        {
+            using (var scope = host.Services.CreateScope())
+            {
+                var mediator = scope.ServiceProvider.GetService<IMediator>();
+                mediator.Send(new InitApplicationCommand()).Wait();
+            }
+        }
     }
 }

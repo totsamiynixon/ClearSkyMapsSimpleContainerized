@@ -53,38 +53,10 @@ namespace Web
             services.AddTransient<IEmulationQueries, EmulationQueries>();
             services.AddTransient<IPollutionCalculator, PollutionCalculator>();
             services.AddTransient<ISensorCacheHelper, SensorCacheHelper>();
-
-            services.AddSingleton<IEmulationDataContextFactory<DataContext>>(provider => new DefaultDataContextFactory<DataContext>(appSettings.Emulation.ConnectionString));
-            services.AddSingleton<IEmulationDataContextFactory<IdentityDataContext>>(provider => new DefaultDataContextFactory<IdentityDataContext>(appSettings.Emulation.ConnectionString));
-
-            services.AddTransient<IDataContextFactory<DataContext>>(provider =>
-            {
-                var emulator = provider.GetService<Emulator>();
-                return new DefaultDataContextFactory<DataContext>(emulator.IsEmulationStarted
-                    ? appSettings.Emulation.ConnectionString
-                    : appSettings.ConnectionString);
-            });
-            services.AddTransient<IDataContextFactory<IdentityDataContext>>(provider =>
-            {
-                var emulator = provider.GetService<Emulator>();
-                return new DefaultDataContextFactory<IdentityDataContext>(emulator.IsEmulationStarted
-                    ? appSettings.Emulation.ConnectionString
-                    : appSettings.ConnectionString);
-            });
-            services.AddTransient<IDatabaseSeeder<DataContext>, DataContextDatabaseSeeder>();
-            services.AddTransient<IDatabaseSeeder<IdentityDataContext>, IdentityDataContextDatabaseSeeder>();
-            services.AddTransient<IApplicationDatabaseInitializer, DefaultApplicationDatabaseInitializer>();
-
-            //TODO: Check why doesnt work with identity
-            /*services.AddDbContext<DataContext>(
-                (provider, builder) => provider.GetService<IDataContextFactory<DataContext>>().Create());
-            services.AddDbContext<IdentityDataContext>(
-                (provider, builder) => provider.GetService<IDataContextFactory<IdentityDataContext>>().Create());*/
-                
-            services.AddScoped<DataContext>(
-                (provider) => provider.GetService<IDataContextFactory<DataContext>>().Create());
-            services.AddScoped<IdentityDataContext>(
-                (provider) => provider.GetService<IDataContextFactory<IdentityDataContext>>().Create());
+            
+            SetupDatabase(services, appSettings);
+            SetupDatabaseInitializers(services);
+            SetupDataContext(services);
 
             services.AddIdentityCore<User>()
                 .AddUserManager<UserManager<User>>()
@@ -92,9 +64,9 @@ namespace Web
                 .AddRoleManager<RoleManager<IdentityRole>>()
                 .AddSignInManager<SignInManager<User>>()
                 .AddEntityFrameworkStores<IdentityDataContext>();
-
-            services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_3_0);
-            services.AddControllersWithViews().AddRazorRuntimeCompilation();
+            
+            SetupMVC(services);
+            
             services.AddMemoryCache();
 
             services.AddSignalR();
@@ -135,6 +107,56 @@ namespace Web
                     pattern: "{area=pwa}/{controller=home}/{action=index}/{id?}");
             });
             
+        }
+
+        protected virtual void SetupDatabase(IServiceCollection services, AppSettings appSettings)
+        {
+            services.AddSingleton<IEmulationDataContextFactory<DataContext>>(provider => new DefaultDataContextFactory<DataContext>(appSettings.Emulation.ConnectionString));
+            services.AddSingleton<IEmulationDataContextFactory<IdentityDataContext>>(provider => new DefaultDataContextFactory<IdentityDataContext>(appSettings.Emulation.ConnectionString));
+
+            services.AddTransient<IDataContextFactory<DataContext>>(provider =>
+            {
+                var emulator = provider.GetService<Emulator>();
+                return new DefaultDataContextFactory<DataContext>(emulator.IsEmulationStarted
+                    ? appSettings.Emulation.ConnectionString
+                    : appSettings.ConnectionString);
+            });
+            services.AddTransient<IDataContextFactory<IdentityDataContext>>(provider =>
+            {
+                var emulator = provider.GetService<Emulator>();
+                return new DefaultDataContextFactory<IdentityDataContext>(emulator.IsEmulationStarted
+                    ? appSettings.Emulation.ConnectionString
+                    : appSettings.ConnectionString);
+            });
+        }
+
+        
+        protected virtual void SetupDatabaseInitializers(IServiceCollection services)
+        {
+            services.AddTransient<IDatabaseSeeder<DataContext>, DataContextDatabaseSeeder>();
+            services.AddTransient<IDatabaseSeeder<IdentityDataContext>, IdentityDataContextDatabaseSeeder>();
+            services.AddTransient<IApplicationDatabaseInitializer, DefaultApplicationDatabaseInitializer>();
+        }
+
+        protected virtual void SetupDataContext(IServiceCollection services)
+        {
+            //TODO: Check why doesnt work with identity
+            /*services.AddDbContext<DataContext>(
+                (provider, builder) => provider.GetService<IDataContextFactory<DataContext>>().Create());
+            services.AddDbContext<IdentityDataContext>(
+                (provider, builder) => provider.GetService<IDataContextFactory<IdentityDataContext>>().Create());*/
+                
+            services.AddScoped<DataContext>(
+                (provider) => provider.GetService<IDataContextFactory<DataContext>>().Create());
+            services.AddScoped<IdentityDataContext>(
+                (provider) => provider.GetService<IDataContextFactory<IdentityDataContext>>().Create());
+        }
+
+        protected virtual IMvcBuilder SetupMVC(IServiceCollection services)
+        {
+            services.AddControllersWithViews().AddRazorRuntimeCompilation();
+            return services.AddMvc()
+                .SetCompatibilityVersion(CompatibilityVersion.Version_3_0);
         }
     }
 }

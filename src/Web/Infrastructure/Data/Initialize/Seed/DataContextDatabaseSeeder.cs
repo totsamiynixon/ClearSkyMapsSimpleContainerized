@@ -1,6 +1,7 @@
 ﻿using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Internal;
 using Web.Helpers;
 using Web.Infrastructure.Data.Migrations;
 
@@ -10,8 +11,8 @@ namespace Web.Infrastructure.Data.Initialize.Seed
     {
         public async Task SeedAsync(DataContext context)
         {
-            var appliedMigrations = await context.Database.GetAppliedMigrationsAsync();
-            if (appliedMigrations.Last().Contains(nameof(AddApiKey)))
+            var appliedMigrations = (await context.Database.GetAppliedMigrationsAsync()).ToArray();
+            if (appliedMigrations.Any() && appliedMigrations.Last().Contains(nameof(AddApiKey)))
             {
                 var sensors = context.Sensors.Where(f => f.ApiKey == null).ToList();
                 foreach (var sensor in sensors)
