@@ -3,9 +3,18 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
 VisualStudioVersion = 15.0.28307.572
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Web", "Web\Web.csproj", "{1CC5614B-7779-4FD8-9E23-33A6AF820990}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Web", "src\Web\Web.csproj", "{1CC5614B-7779-4FD8-9E23-33A6AF820990}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Web.Tests", "Web.Tests\Web.Tests.csproj", "{FDFF8599-3357-4E87-AEC7-537664642BE1}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Web.Tests", "src\Web.Tests\Web.Tests.csproj", "{FDFF8599-3357-4E87-AEC7-537664642BE1}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "docker", "docker", "{2169BAD2-6718-4215-AC7A-2344F516BFF5}"
+ProjectSection(SolutionItems) = preProject
+	.dockerignore = .dockerignore
+	docker-compose.override.yml = docker-compose.override.yml
+	docker-compose.tests.override.yml = docker-compose.tests.override.yml
+	docker-compose.yml = docker-compose.yml
+	docker-compose.tests.yml = docker-compose.tests.yml
+EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

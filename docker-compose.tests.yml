@@ -1,14 +1,14 @@
 version: '3.4'
 
 services:
-
-  web-sql-server:
+  web-test-sql-server:
     image: mcr.microsoft.com/mssql/server:2017-latest 
 
-  web:
-    image: web
+  web-test:
+    image: web-test
     build:
       context: .
       dockerfile: src/Web/Dockerfile
+      target: tests
     depends_on:
-      - web-sql-server
+      - web-test-sql-server
