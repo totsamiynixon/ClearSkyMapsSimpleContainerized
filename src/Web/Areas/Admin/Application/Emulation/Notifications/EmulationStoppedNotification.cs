@@ -1,5 +1,5 @@
 ﻿using MediatR;
-using Web.Emulation;
+using Web.Areas.Admin.Emulation;
 
 namespace Web.Areas.Admin.Application.Emulation.Notifications
 {

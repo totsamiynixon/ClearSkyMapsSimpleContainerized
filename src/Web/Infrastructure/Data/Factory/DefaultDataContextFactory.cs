@@ -1,9 +1,11 @@
 ﻿using System;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Design;
+using Web.Areas.Admin.Infrastructure.Data.Factory;
 
 namespace Web.Infrastructure.Data.Factory
 {
-    public class DefaultDataContextFactory<TContext> : IEmulationDataContextFactory<TContext> where TContext : DbContext
+    public class DefaultDataContextFactory<TContext> : IDataContextFactory<TContext> where TContext : DbContext
 
     {
         private readonly string _connectionString;

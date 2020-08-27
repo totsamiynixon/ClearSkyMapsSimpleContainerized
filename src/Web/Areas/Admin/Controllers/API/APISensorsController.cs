@@ -35,7 +35,7 @@ namespace Web.Areas.Admin.Controllers.API
             _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
         }
 
-        public async Task<ActionResult> Index()
+        public async Task<ActionResult> GetAll()
         {
             var sensors = await _readingsQueries.GetSensorsAsync();
             var model = new

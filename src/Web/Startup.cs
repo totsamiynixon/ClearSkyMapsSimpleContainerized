@@ -1,22 +1,21 @@
-﻿using AutoMapper;
+﻿using System.Collections.Generic;
+using AutoMapper;
 using MediatR;
 using Microsoft.AspNetCore.Builder;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Web.Extensions;
 using Web.Helpers.Interfaces;
 using Web.Helpers.Implementations;
-using Microsoft.Extensions.Logging;
-using Web.Areas.Admin;
 using Microsoft.Extensions.Hosting;
 using Web.Application.Readings.Queries;
+using Web.Areas;
 using Web.Areas.Admin.Application.Emulation.Queries;
-using Web.Areas.PWA;
-using Web.Domain.Entities.Identity;
-using Web.Emulation;
+using Web.Areas.Admin.Emulation;
+using Web.Areas.Admin.Infrastructure.Data;
 using Web.Infrastructure;
 using Web.Infrastructure.Data;
 using Web.Infrastructure.Data.Factory;
@@ -28,23 +27,23 @@ namespace Web
 {
     public class Startup
     {
-        public IConfiguration Configuration { get; }
+        protected readonly IConfiguration _configuration;
+        protected readonly IWebHostEnvironment _environment;
+        protected readonly IEnumerable<IArea> _areas;
+        protected readonly AppSettings _appSettings;
 
-        private readonly IWebHostEnvironment _environment;
-
-        public Startup(IConfiguration configuration, IWebHostEnvironment env)
+        public Startup(IConfiguration configuration, IWebHostEnvironment env, IEnumerable<IArea> areas,
+            AppSettings appSettings)
         {
-            Configuration = configuration;
+            _configuration = configuration;
             _environment = env;
+            _areas = areas;
+            _appSettings = appSettings;
         }
 
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            var appSettings = Configuration.GetSection("Settings").Get<AppSettings>();
-
-            //TODO: Check how it works
-            services.AddTransient<AppSettings>((_) => appSettings);
             services.AddMediatR(typeof(Startup));
             services.AddAutoMapper(typeof(Startup));
 
@@ -53,38 +52,28 @@ namespace Web
             services.AddTransient<IEmulationQueries, EmulationQueries>();
             services.AddTransient<IPollutionCalculator, PollutionCalculator>();
             services.AddTransient<ISensorCacheHelper, SensorCacheHelper>();
-            
-            SetupDatabase(services, appSettings);
+
+            SetupDatabase(services, _appSettings);
             SetupDatabaseInitializers(services);
             SetupDataContext(services);
 
-            services.AddIdentityCore<User>()
-                .AddUserManager<UserManager<User>>()
-                .AddRoles<IdentityRole>()
-                .AddRoleManager<RoleManager<IdentityRole>>()
-                .AddSignInManager<SignInManager<User>>()
-                .AddEntityFrameworkStores<IdentityDataContext>();
-            
             SetupMVC(services);
-            
+
             services.AddMemoryCache();
 
             services.AddSignalR();
 
             services.AddAppBundling(_environment);
 
-            services.AddAdminAreaServices(Configuration);
-            services.AddPWAAreaServices();
+            ConfigureAreaServices(services);
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, IWebHostEnvironment env, ILoggerFactory loggerFactory)
+        public void Configure(IApplicationBuilder app)
         {
+            ConfigureArea(app);
 
-            app.UseAdminArea(Configuration, env);
-            app.UsePWAArea(env);
-
-            if (env.IsDevelopment())
+            if (_environment.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
             }
@@ -93,9 +82,9 @@ namespace Web
                 app.UseMiddleware<ExceptionHandlerMiddleware>();
                 app.UseMiddleware<ExceptionLoggerMiddleware>();
             }
-            
+
             app.UseRouting();
-            
+
             app.UseStaticFiles();
             app.UseCookiePolicy();
 
@@ -106,35 +95,20 @@ namespace Web
                     name: "default",
                     pattern: "{area=pwa}/{controller=home}/{action=index}/{id?}");
             });
-            
         }
 
         protected virtual void SetupDatabase(IServiceCollection services, AppSettings appSettings)
         {
-            services.AddSingleton<IEmulationDataContextFactory<DataContext>>(provider => new DefaultDataContextFactory<DataContext>(appSettings.Emulation.ConnectionString));
-            services.AddSingleton<IEmulationDataContextFactory<IdentityDataContext>>(provider => new DefaultDataContextFactory<IdentityDataContext>(appSettings.Emulation.ConnectionString));
-
             services.AddTransient<IDataContextFactory<DataContext>>(provider =>
-            {
-                var emulator = provider.GetService<Emulator>();
-                return new DefaultDataContextFactory<DataContext>(emulator.IsEmulationStarted
-                    ? appSettings.Emulation.ConnectionString
-                    : appSettings.ConnectionString);
-            });
+                new DefaultDataContextFactory<DataContext>(appSettings.ConnectionString));
             services.AddTransient<IDataContextFactory<IdentityDataContext>>(provider =>
-            {
-                var emulator = provider.GetService<Emulator>();
-                return new DefaultDataContextFactory<IdentityDataContext>(emulator.IsEmulationStarted
-                    ? appSettings.Emulation.ConnectionString
-                    : appSettings.ConnectionString);
-            });
+                new DefaultDataContextFactory<IdentityDataContext>(appSettings.ConnectionString));
         }
 
-        
+
         protected virtual void SetupDatabaseInitializers(IServiceCollection services)
         {
             services.AddTransient<IDatabaseSeeder<DataContext>, DataContextDatabaseSeeder>();
-            services.AddTransient<IDatabaseSeeder<IdentityDataContext>, IdentityDataContextDatabaseSeeder>();
             services.AddTransient<IApplicationDatabaseInitializer, DefaultApplicationDatabaseInitializer>();
         }
 
@@ -142,14 +116,10 @@ namespace Web
         {
             //TODO: Check why doesnt work with identity
             /*services.AddDbContext<DataContext>(
-                (provider, builder) => provider.GetService<IDataContextFactory<DataContext>>().Create());
-            services.AddDbContext<IdentityDataContext>(
-                (provider, builder) => provider.GetService<IDataContextFactory<IdentityDataContext>>().Create());*/
-                
+                (provider, builder) => provider.GetService<IDataContextFactory<DataContext>>().Create());*/
+            
             services.AddScoped<DataContext>(
                 (provider) => provider.GetService<IDataContextFactory<DataContext>>().Create());
-            services.AddScoped<IdentityDataContext>(
-                (provider) => provider.GetService<IDataContextFactory<IdentityDataContext>>().Create());
         }
 
         protected virtual IMvcBuilder SetupMVC(IServiceCollection services)
@@ -157,6 +127,23 @@ namespace Web
             services.AddControllersWithViews().AddRazorRuntimeCompilation();
             return services.AddMvc()
                 .SetCompatibilityVersion(CompatibilityVersion.Version_3_0);
+        }
+
+
+        protected virtual void ConfigureAreaServices(IServiceCollection services)
+        {
+            foreach (var area in _areas)
+            {
+                area.ConfigureServices(services);
+            }
+        }
+
+        protected virtual void ConfigureArea(IApplicationBuilder app)
+        {
+            foreach (var area in _areas)
+            {
+                area.Configure(app);
+            }
         }
     }
 }

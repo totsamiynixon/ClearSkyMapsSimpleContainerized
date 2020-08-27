@@ -4,20 +4,19 @@ using System.Threading.Tasks;
 using MediatR;
 using Web.Areas.Admin.Application.Emulation.Exceptions;
 using Web.Areas.Admin.Application.Emulation.Notifications;
-using Web.Emulation;
-using Web.Infrastructure;
+using Web.Areas.Admin.Emulation;
 
 namespace Web.Areas.Admin.Application.Emulation.Commands
 {
     public class StopEmulationCommandHandler : IRequestHandler<StopEmulationCommand, bool>
     {
-        private readonly AppSettings _appSettings;
+        private readonly EmulationAppSettings _emulationAppSettings;
         private readonly Emulator _emulator;
         private readonly IMediator _mediator;
 
-        public StopEmulationCommandHandler(AppSettings appSettings, Emulator emulator, IMediator mediator)
+        public StopEmulationCommandHandler(EmulationAppSettings emulationAppSettings, Emulator emulator, IMediator mediator)
         {
-            _appSettings = appSettings ?? throw new ArgumentNullException(nameof(appSettings));
+            _emulationAppSettings = emulationAppSettings ?? throw new ArgumentNullException(nameof(emulationAppSettings));
             _emulator = emulator ?? throw new ArgumentNullException(nameof(emulator));
             _mediator = mediator ?? throw new ArgumentNullException(nameof(mediator));
         }
@@ -26,7 +25,7 @@ namespace Web.Areas.Admin.Application.Emulation.Commands
         {
             //TODO: add validator for request
 
-            if (!_appSettings.Emulation.Enabled)
+            if (!_emulationAppSettings.Enabled)
             {
                 throw new EmulationIsNotAvailableException();
             }

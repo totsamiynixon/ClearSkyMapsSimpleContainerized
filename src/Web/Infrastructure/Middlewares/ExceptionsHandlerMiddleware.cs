@@ -24,7 +24,6 @@ namespace Web.Infrastructure.Middlewares
             }
             catch (Exception ex)
             {
-                //TODO: не забыть обновить кеш при инийиализации
                 context.Response.Clear();
                 context.Response.Headers.Clear();
                 context.Response.StatusCode = 500;

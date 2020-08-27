@@ -4,13 +4,14 @@ using Web.Areas.Admin.Application.Readings.Commands;
 using Web.Areas.Admin.Application.Readings.Queries.DTO;
 using Web.Areas.Admin.Application.Users.Commands;
 using Web.Areas.Admin.Application.Users.Queries.DTO;
+using Web.Areas.Admin.Emulation;
 using Web.Areas.Admin.Models.API.Emulator;
 using Web.Areas.Admin.Models.API.Sensors;
 using Web.Areas.Admin.Models.API.Users;
 using Web.Areas.Admin.Models.Default.Emulator;
 using Web.Areas.Admin.Models.Default.Sensors;
+using Web.Areas.Admin.Models.Hub;
 using Web.Domain.Entities;
-using Web.Emulation;
 using Web.Models.Hub;
 
 namespace Web.Areas.Admin.Infrastructure.Mapping
@@ -101,6 +102,7 @@ namespace Web.Areas.Admin.Infrastructure.Mapping
                 
                 
                 CreateMap<Reading, StaticSensorReadingDispatchModel>();
+                CreateMap<Reading, PortableSensorReadingsDispatchModel>();
 
                 CreateMap<EmulatorDeviceDTO, SensorEmulatorListItemModel>();
                 CreateMap<EmulatorDeviceDTO, SensorEmulatorListItemViewModel>();
