@@ -1,5 +1,4 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Design;
 using Web.Infrastructure.Data.Factory;
 
 namespace Web.Areas.Admin.Infrastructure.Data.Factory

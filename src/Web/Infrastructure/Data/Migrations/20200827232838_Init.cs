@@ -1,28 +1,21 @@
 ﻿using System;
-using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.Migrations;
 
 namespace Web.Infrastructure.Data.Migrations
 {
-    public partial class IdentityUserUpdate : Migration
+    public partial class Init : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.AddColumn<bool>(
-                name: "IsActive",
-                table: "AspNetUsers",
-                nullable: false,
-                defaultValue: false);
-
             migrationBuilder.CreateTable(
                 name: "Sensors",
                 columns: table => new
                 {
                     Id = table.Column<int>(nullable: false)
-                        .Annotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn),
+                        .Annotation("SqlServer:Identity", "1, 1"),
                     IsDeleted = table.Column<bool>(nullable: false),
                     IsActive = table.Column<bool>(nullable: false),
-                    IPAddress = table.Column<string>(nullable: true),
+                    ApiKey = table.Column<string>(nullable: true),
                     Discriminator = table.Column<string>(nullable: false),
                     Latitude = table.Column<double>(nullable: true),
                     Longitude = table.Column<double>(nullable: true),
@@ -38,7 +31,7 @@ namespace Web.Infrastructure.Data.Migrations
                 columns: table => new
                 {
                     Id = table.Column<int>(nullable: false)
-                        .Annotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn),
+                        .Annotation("SqlServer:Identity", "1, 1"),
                     CO2 = table.Column<float>(nullable: false),
                     LPG = table.Column<float>(nullable: false),
                     CO = table.Column<float>(nullable: false),
@@ -74,10 +67,6 @@ namespace Web.Infrastructure.Data.Migrations
 
             migrationBuilder.DropTable(
                 name: "Sensors");
-
-            migrationBuilder.DropColumn(
-                name: "IsActive",
-                table: "AspNetUsers");
         }
     }
 }

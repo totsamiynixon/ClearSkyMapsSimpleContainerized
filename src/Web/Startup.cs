@@ -1,10 +1,10 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using AutoMapper;
 using MediatR;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Web.Extensions;
@@ -16,6 +16,8 @@ using Web.Areas;
 using Web.Areas.Admin.Application.Emulation.Queries;
 using Web.Areas.Admin.Emulation;
 using Web.Areas.Admin.Infrastructure.Data;
+using Web.Areas.PWA.Helpers.Implementations;
+using Web.Areas.PWA.Helpers.Interfaces;
 using Web.Infrastructure;
 using Web.Infrastructure.Data;
 using Web.Infrastructure.Data.Factory;
@@ -108,7 +110,6 @@ namespace Web
 
         protected virtual void SetupDatabaseInitializers(IServiceCollection services)
         {
-            services.AddTransient<IDatabaseSeeder<DataContext>, DataContextDatabaseSeeder>();
             services.AddTransient<IApplicationDatabaseInitializer, DefaultApplicationDatabaseInitializer>();
         }
 

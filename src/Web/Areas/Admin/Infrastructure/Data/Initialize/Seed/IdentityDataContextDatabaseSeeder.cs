@@ -3,10 +3,10 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Internal;
-using Web.Areas.Admin.Infrastructure.Data;
 using Web.Domain.Entities.Identity;
+using Web.Infrastructure.Data.Initialize.Seed;
 
-namespace Web.Infrastructure.Data.Initialize.Seed
+namespace Web.Areas.Admin.Infrastructure.Data.Initialize.Seed
 {
     public class IdentityDataContextDatabaseSeeder : IDatabaseSeeder<IdentityDataContext>
     {

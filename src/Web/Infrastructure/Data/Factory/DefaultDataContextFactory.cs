@@ -1,7 +1,5 @@
 ﻿using System;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Design;
-using Web.Areas.Admin.Infrastructure.Data.Factory;
 
 namespace Web.Infrastructure.Data.Factory
 {

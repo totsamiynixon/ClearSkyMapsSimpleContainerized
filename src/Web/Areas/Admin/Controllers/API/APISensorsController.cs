@@ -38,7 +38,7 @@ namespace Web.Areas.Admin.Controllers.API
         public async Task<ActionResult> GetAll()
         {
             var sensors = await _readingsQueries.GetSensorsAsync();
-            var model = new
+            var model = new SensorsListModel
             {
                 PortableSensors =
                     _mapper.Map<List<PortableSensorDTO>, List<SensorListItemModel>>(sensors
