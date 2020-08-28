@@ -15,6 +15,7 @@ using Web.Infrastructure.Data;
 using Web.Infrastructure.Data.Initialize.Seed;
 using Web.IntegrationTests.Areas.Admin;
 using Web.IntegrationTests.Areas.Admin.Infrastructure;
+using Web.IntegrationTests.Areas.Admin.Infrastructure.Data.Initialize.Seed;
 using Web.IntegrationTests.Infrastructure.Data.Initialize.Seed;
 
 namespace Web.IntegrationTests
@@ -38,7 +39,7 @@ namespace Web.IntegrationTests
                 _identityDatabaseSeeders = new List<IDatabaseSeeder<IdentityDataContext>>();
             }
 
-            public TestServerBuilder UseDatabaseSeeder(IDatabaseSeeder<DataContext> databaseSeeder)
+            /*public TestServerBuilder UseDatabaseSeeder(IDatabaseSeeder<DataContext> databaseSeeder)
             {
                 _databaseSeeders.Add(databaseSeeder);
 
@@ -51,11 +52,25 @@ namespace Web.IntegrationTests
                 _identityDatabaseSeeders.Add(identityDatabaseSeeder);
 
                 return this;
-            }
+            }*/
 
             public TestServerBuilder UseSensors(params Sensor[] sensors)
             {
                 _databaseSeeders.Add(new TestSensorsDatabaseSeeder(sensors));
+
+                return this;
+            }
+
+            public TestServerBuilder UseUsers(params User[] users)
+            {
+                _identityDatabaseSeeders.Add(new TestIdentityDatabaseSeeder(users));
+
+                return this;
+            }
+
+            public TestServerBuilder UseUsersWithRoles(params (User user, List<string> roles)[] usersWithRoles)
+            {
+                _identityDatabaseSeeders.Add(new TestIdentityDatabaseSeeder(usersWithRoles));
 
                 return this;
             }
@@ -72,7 +87,7 @@ namespace Web.IntegrationTests
             public TestServerBuilder UseDefaultAuth()
             {
                 User = AdminAreaDefaults.DefaultUser;
-                Roles = new List<string> {AuthSettings.Roles.Supervisor};
+                Roles = new List<string> {AuthSettings.Roles.Admin};
                 _useCustomAuth = true;
 
                 return this;

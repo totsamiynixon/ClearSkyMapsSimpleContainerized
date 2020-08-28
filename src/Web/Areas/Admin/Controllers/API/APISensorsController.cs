@@ -39,7 +39,7 @@ namespace Web.Areas.Admin.Controllers.API
         }
 
         /// <summary>
-        /// Returns all users
+        /// Returns all sensors
         /// </summary>
         [HttpGet]
         [ProducesResponseType(typeof(SensorListModel), StatusCodes.Status200OK)]
@@ -109,7 +109,7 @@ namespace Web.Areas.Admin.Controllers.API
         /// <response code="400">If model is invalid</response>
         /// <response code="404">If sensor not found</response>
         [Authorize(Policy = AuthPolicies.Supervisor)]
-        [HttpPost("delete")]
+        [HttpDelete]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(ValidationProblemDetails), StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -128,7 +128,7 @@ namespace Web.Areas.Admin.Controllers.API
             }
             catch (SensorNotFoundException ex)
             {
-                return NotFound(ex);
+                return NotFound(ex.Message);
             }
 
             return Ok();
@@ -158,7 +158,7 @@ namespace Web.Areas.Admin.Controllers.API
             }
             catch (SensorNotFoundException ex)
             {
-                return NotFound(ex);
+                return NotFound(ex.Message);
             }
 
             return Ok();
@@ -189,7 +189,7 @@ namespace Web.Areas.Admin.Controllers.API
             }
             catch (SensorNotFoundException ex)
             {
-                return NotFound(ex);
+                return NotFound(ex.Message);
             }
 
             return Ok();

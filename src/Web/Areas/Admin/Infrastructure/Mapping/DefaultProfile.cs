@@ -35,11 +35,11 @@ namespace Web.Areas.Admin.Infrastructure.Mapping
                 CreateMap<Web.Areas.Admin.Models.API.Sensors.ChangeVisibilityStaticSensorModel, ChangeStaticSensorVisibilityStateCommand>()
                     .ConstructUsing(z => new ChangeStaticSensorVisibilityStateCommand(z.Id.Value, z.IsVisible));
 
-                CreateMap<SensorDTO, SensorModel>();
-                CreateMap<StaticSensorDTO, StaticSensorModel>()
-                    .IncludeBase<SensorDTO, SensorModel>();
-                CreateMap<PortableSensorDTO, PortableSensorModel>()
-                    .IncludeBase<SensorDTO, SensorModel>();
+                CreateMap<Web.Areas.Admin.Application.Readings.Commands.DTO.SensorDTO, SensorModel>();
+                CreateMap<Web.Areas.Admin.Application.Readings.Commands.DTO.StaticSensorDTO, StaticSensorModel>()
+                    .IncludeBase<Web.Areas.Admin.Application.Readings.Commands.DTO.SensorDTO, SensorModel>();
+                CreateMap<Web.Areas.Admin.Application.Readings.Commands.DTO.PortableSensorDTO, PortableSensorModel>()
+                    .IncludeBase<Web.Areas.Admin.Application.Readings.Commands.DTO.SensorDTO, SensorModel>();
                 
                 
                 CreateMap<UserListItemDTO,  Web.Areas.Admin.Models.API.Users.UserListItemModel>();
