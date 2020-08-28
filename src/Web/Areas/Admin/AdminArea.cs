@@ -6,10 +6,13 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc.ApiExplorer;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.IdentityModel.Tokens;
+using Microsoft.OpenApi.Models;
+using Swashbuckle.AspNetCore.SwaggerGen;
 using Web.Areas.Admin.Application.Readings.Queries;
 using Web.Areas.Admin.Application.Users.Queries;
 using Web.Areas.Admin.Emulation;
@@ -34,7 +37,7 @@ using Web.Infrastructure.Middlewares;
 
 namespace Web.Areas.Admin
 {
-    public class AdminArea : IArea
+    public class AdminArea : ISwaggerSupportArea
     {
         public const string Name = "Admin";
         public const string DefaultRoutePrefix = "admin";
@@ -96,6 +99,14 @@ namespace Web.Areas.Admin
             app.UseWhen(x => IsDefaultRequest(x.Request) || IsApiRequest(x.Request),
                 builder =>
                 {
+                    builder.UseSwagger(z=>z.RouteTemplate = "{documentName}/swagger/swagger.json");
+                    
+                    builder.UseSwaggerUI(c =>
+                    {
+                        c.RoutePrefix = $"{DefaultRoutePrefix}/swagger";
+                        c.SwaggerEndpoint($"/{DefaultRoutePrefix}/swagger/swagger.json", $"CSM API | {Name} | v1");
+                    });
+                    
                     builder.UseWhen(x => IsDefaultRequest(x.Request), applicationBuilder =>
                     {
                         if (_environment.IsDevelopment())
@@ -194,7 +205,7 @@ namespace Web.Areas.Admin
                     : appSettings.ConnectionString);
             });
         }
-        
+
         protected virtual void SetupDatabaseInitializers(IServiceCollection services)
         {
             services.AddTransient<IDatabaseSeeder<IdentityDataContext>, IdentityDataContextDatabaseSeeder>();
@@ -206,9 +217,37 @@ namespace Web.Areas.Admin
             //TODO: Check why doesnt work with identity
 
             /*services.AddDbContext<IdentityDataContext>(options => options.UseSqlServer(_appSettings.ConnectionString));*/
-            
+
             services.AddScoped<IdentityDataContext>(
                 (provider) => provider.GetService<IDataContextFactory<IdentityDataContext>>().Create());
         }
+
+        public void ConfigureSwagger(SwaggerGenOptions options)
+        {
+            options.SwaggerDoc(Name.ToLower(), new OpenApiInfo
+            {
+                Version = "v1",
+                Title = $"CSM Open API | {Name}",
+                Description = $"Clear Sky Maps REST API for {AdminArea.Name} Area",
+                Contact = new OpenApiContact
+                {
+                    Name = "Yauheni But-Husaim",
+                    Email = "totsamiynixon@gmail.com",
+                    Url = new Uri("https://vk.com/id169573384"),
+                }
+            });
+
+            options.AddSecurityDefinition(JwtBearerDefaults.AuthenticationScheme,
+                new OpenApiSecurityScheme
+                {
+                    In = ParameterLocation.Header,
+                    Description = "Please enter into field the word 'Bearer' following by space and JWT",
+                    Name = "Authorization", Type = SecuritySchemeType.ApiKey,
+                    Scheme = JwtBearerDefaults.AuthenticationScheme
+                });
+        }
+
+        public Func<string, ApiDescription, bool> SwaggerInclusionPredicate => (version, description) =>
+            description.GroupName == AdminArea.Name && version == AdminArea.Name.ToLower();
     }
 }

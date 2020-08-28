@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
@@ -21,6 +22,8 @@ namespace Web.Areas.Admin.Controllers.API
     //TODO: check how to resolve naming conflicts
     [Route(AdminArea.APIRoutePrefix + "/account")]
     [ApiController]
+    [Produces("application/json")]
+    [Consumes("application/json")]
     public class APIAccountController : Controller
     {
         private readonly UserManager<User> _userManager;
@@ -32,12 +35,21 @@ namespace Web.Areas.Admin.Controllers.API
             _jwtAppSettings = jwtAppSettings ?? throw new ArgumentNullException(nameof(jwtAppSettings));
         }
 
-        [HttpPost("login")]
+        /// <summary>
+        /// Perform login
+        /// </summary>
+        /// <response code="200">If login was successfully performed. Returns AccessToken</response>
+        /// <response code="400">If model is invalid or login failed</response>
+        /// <response code="404">If user was not found</response>
         [AllowAnonymous]
+        [HttpPost("login")]
+        [ProducesResponseType(typeof(TokenModel), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ValidationProblemDetails), StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<IActionResult> Login([FromBody] LoginModel model)
         {
             if (!ModelState.IsValid)
-                return BadRequest("Login failed: invalid data!");
+                return ValidationProblem();
 
             var user = await _userManager.FindByEmailAsync(model.Email);
             if (user == null)
@@ -45,21 +57,22 @@ namespace Web.Areas.Admin.Controllers.API
                 return NotFound("Login failed: user with that email doesn't exist");
             }
 
-            //TODO: check how to manage that through SignInManager
             if (!await _userManager.CheckPasswordAsync(user, model.Password))
             {
                 return BadRequest("Login failed: wrong password!");
             }
 
-            var tokenString = GenerateJWTToken(user, string.Join(",", await _userManager.GetRolesAsync(user)));
-            return Ok(new
+            var roles = await _userManager.GetRolesAsync(user);
+            var tokenString = GenerateJWTToken(user, string.Join(",", roles));
+            return Ok(new TokenModel
             {
-                token = tokenString,
-                userDetails = new
+                Token = tokenString,
+                UserDetails = new UserDetailsModel
                 {
-                    id = user.Id,
-                    userName = user.UserName,
-                    email = user.Email
+                    Id = user.Id,
+                    UserName = user.UserName,
+                    Email = user.Email,
+                    Roles = roles
                 },
             });
         }
