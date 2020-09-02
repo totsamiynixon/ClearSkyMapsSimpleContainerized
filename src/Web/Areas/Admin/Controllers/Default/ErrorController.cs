@@ -10,7 +10,6 @@ namespace Web.Areas.Admin.Controllers.Default
     {
         public IActionResult ServerError(int code = 500)
         {
-            throw HttpContext.Features.Get<IExceptionHandlerFeature>().Error;
             return this.StatusCodeView(HttpStatusCode.InternalServerError, "Internal Server Error");
         }
     }
