@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Web.Application.Readings.Exceptions;
+using Web.Areas.Admin.Application.Readings.Exceptions;
 using Web.Areas.Admin.Application.Readings.Notifications;
 using Web.Infrastructure.Data;
 using Web.Infrastructure.Data.Factory;
@@ -27,7 +28,12 @@ namespace Web.Areas.Admin.Application.Readings.Commands
             var sensor = await context.Sensors.FirstOrDefaultAsync(f => f.Id == request.Id, cancellationToken);
             if (sensor == null)
             {
-                throw new SensorNotFoundException("No Such Sensor");
+                throw new SensorNotFoundException(request.Id);
+            }
+
+            if (sensor.IsActive)
+            {
+                throw new SensorUnableApplyActionException(SensorUnableApplyActionException.Actions.Delete, "Sensor is active");
             }
                 
             if (!request.IsCompletely)

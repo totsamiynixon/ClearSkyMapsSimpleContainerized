@@ -28,22 +28,22 @@ namespace Web
             ConfigurePWAArea<PWAArea>(hostBuilder);
 
             var host = hostBuilder.Build();
-            
+
             InitializeApplication(host);
 
             host.Run();
         }
 
-        public static IWebHostBuilder CreateWebHostBuilder(string[] args) =>
+        public static IWebHostBuilder
+            CreateWebHostBuilder(string[] args) =>
             WebHost.CreateDefaultBuilder(args)
-                .ConfigureAppConfiguration((cxt, config) =>
+                .ConfigureAppConfiguration((context, builder) =>
                 {
-                    var env = cxt.HostingEnvironment;
-                    config
+                    var env = context.HostingEnvironment;
+                    builder
                         .AddJsonFile("appsettings.json", false, true)
                         .AddJsonFile($"appsettings.{env.EnvironmentName}.json", true, true);
-
-                    config.AddEnvironmentVariables();
+                    builder.AddEnvironmentVariables();
                 })
                 .ConfigureLogging((hostingContext, logging) =>
                 {
@@ -54,22 +54,20 @@ namespace Web
                 })
                 .ConfigureServices((ctx, services) =>
                 {
-                    
                     var appSettings = ctx.Configuration.GetSection("Settings").Get<AppSettings>();
                     var adminAppSettings = ctx.Configuration.GetSection("Admin").Get<AdminAppSettings>();
                     var emulationSettings = ctx.Configuration.GetSection("Emulation").Get<EmulationAppSettings>();
                     var pwaAppSettings = ctx.Configuration.GetSection("PWA").Get<PWAAppSettings>();
-                    
+
                     services.AddTransient<AppSettings>((_) => appSettings);
                     services.AddTransient<AdminAppSettings>((_) => adminAppSettings);
                     services.AddTransient<JWTAppSettings>((_) => adminAppSettings.JWT);
                     services.AddTransient<EmulationAppSettings>((_) => emulationSettings);
                     services.AddTransient<PWAAppSettings>((_) => pwaAppSettings);
-                    
+
                     //Hack to make migrations work
                     DesignTimeDataContextFactory.ConnectionString = appSettings.ConnectionString;
                     DesignTimeIdentityDataContextFactory.ConnectionString = appSettings.ConnectionString;
-
                 })
                 .UseStartup<Startup>();
 

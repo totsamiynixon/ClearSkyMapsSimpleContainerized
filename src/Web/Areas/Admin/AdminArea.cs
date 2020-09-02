@@ -159,7 +159,7 @@ namespace Web.Areas.Admin
             services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
                 .AddCookie(options =>
                 {
-                    options.Cookie.Name = "CSM.Admin.Auth";
+                    options.Cookie.Name = AuthSettings.CookieName;
                     options.LoginPath = new PathString($"/{AdminArea.DefaultRoutePrefix}/account/login");
                 });
 

@@ -8,6 +8,7 @@ using Moq;
 using Moq.EntityFrameworkCore;
 using Web.Application.Readings.Exceptions;
 using Web.Areas.Admin.Application.Readings.Commands;
+using Web.Areas.Admin.Application.Readings.Exceptions;
 using Web.Domain.Entities;
 using Web.Infrastructure.Data;
 using Web.Infrastructure.Data.Factory;
@@ -73,6 +74,44 @@ namespace Web.UnitTests.Areas.Admin.Application.Readings.Commands
             await Assert.ThrowsAsync<SensorNotFoundException>(Act);
         }
 
+        [Theory]
+        [InlineData(0)]
+        [InlineData(1)]
+        //TODO: think more about this test
+        public async Task Handler_should_throw_unable_to_apply_action_exception_if_sensor_is_active(int dataSetIndex)
+        {
+            var sensors = new List<Sensor>()
+            {
+                new PortableSensor
+                {
+                    Id = 1,
+                    IsActive = true
+                },
+                new StaticSensor
+                {
+                    Id = 1,
+                    IsActive = true
+                }
+            };
+            var fakeSensor = sensors[dataSetIndex];
+            var fakeSensorDbSet = new List<Sensor> {fakeSensor};
+
+            _dataContextMock.Setup(x => x.Sensors).ReturnsDbSet(fakeSensorDbSet);
+            _dataContextFactoryMock.Setup(x => x.Create()).Returns(_dataContextMock.Object);
+
+            var cancellationToken = new CancellationToken();
+            var command = new DeleteSensorCommand(fakeSensor.Id, default);
+            var handler =
+                new DeleteSensorCommandHandler(_dataContextFactoryMock.Object, _mediatorMock.Object);
+
+            //Act
+            Task Act() => handler.Handle(command, cancellationToken);
+
+            //Assert
+            var exception = await Assert.ThrowsAsync<SensorUnableApplyActionException>(Act);
+            Assert.Equal(SensorUnableApplyActionException.Actions.Delete, exception.Action);
+        }
+        
         [Theory]
         [InlineData(0, true)]
         [InlineData(1, true)]

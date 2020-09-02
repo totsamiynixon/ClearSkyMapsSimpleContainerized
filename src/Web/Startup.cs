@@ -23,6 +23,7 @@ using Web.Areas.Admin.Application.Emulation.Queries;
 using Web.Areas.Admin.Emulation;
 using Web.Areas.Admin.Infrastructure.Data;
 using Web.Infrastructure;
+using Web.Infrastructure.AntiForgery;
 using Web.Infrastructure.Data;
 using Web.Infrastructure.Data.Factory;
 using Web.Infrastructure.Data.Initialize;
@@ -64,6 +65,12 @@ namespace Web
             SetupDataContext(services);
 
             SetupMVC(services);
+            
+            services.AddAntiforgery(t =>
+            {
+                t.Cookie.Name = AntiForgerySettings.AntiForgeryCookieName;
+                t.FormFieldName = AntiForgerySettings.AntiForgeryFieldName;
+            });
 
             services.AddMemoryCache();
 
@@ -72,7 +79,7 @@ namespace Web
             services.AddAppBundling(_environment);
 
             ConfigureAreaServices(services);
-            
+
             services.AddSwaggerGen(options =>
             {
                 options.SwaggerDoc("integration", new OpenApiInfo
@@ -87,7 +94,7 @@ namespace Web
                         Url = new Uri("https://vk.com/id169573384"),
                     }
                 });
-                
+
 
                 ConfigureAreaSwagger(options);
 
@@ -96,18 +103,18 @@ namespace Web
                 {
                     if (desc.GroupName == null && version == "integration")
                     {
-                        return true;   
+                        return true;
                     }
 
                     if (desc.GroupName == "Admin" && version == "admin")
                     {
                         return true;
                     }
-                    
+
                     //TODO: Think more about that implementation
                     return ConfigureAreaSwaggerInclusionPredicates(version, desc);
                 });
-                
+
                 options.OperationFilter<AuthorizeOperationFilter>();
                 options.DocumentFilter<LowercasePathsDocumentFilter>();
                 options.DocumentFilter<AlphabetSchemaDocumentFilter>();
@@ -122,8 +129,28 @@ namespace Web
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app)
         {
-            ConfigureArea(app);
+            /*var defaultDateCulture = "en-US";
+            var ci = new CultureInfo(defaultDateCulture);
+            ci.NumberFormat.D
+            ci.NumberFormat.NumberDecimalSeparator = ".";
+            ci.NumberFormat.CurrencyDecimalSeparator = ".";
+            CultureInfo.DefaultThreadCurrentCulture = ci;
+            CultureInfo.DefaultThreadCurrentUICulture = ci;
+            app.UseRequestLocalization(new RequestLocalizationOptions
+            {
+                DefaultRequestCulture = new RequestCulture(ci),
+                SupportedCultures = new List<CultureInfo>
+                {
+                    ci,
+                },
+                SupportedUICultures = new List<CultureInfo>
+                {
+                    ci,
+                }
+            });*/
             
+            ConfigureArea(app);
+
             app.UseSwagger();
             app.UseSwaggerUI(c =>
             {
@@ -173,16 +200,20 @@ namespace Web
             //TODO: Check why doesnt work with identity
             /*services.AddDbContext<DataContext>(
                 (provider, builder) => provider.GetService<IDataContextFactory<DataContext>>().Create());*/
-            
+
             services.AddScoped<DataContext>(
                 (provider) => provider.GetService<IDataContextFactory<DataContext>>().Create());
         }
 
         protected virtual IMvcBuilder SetupMVC(IServiceCollection services)
         {
-            services.AddControllersWithViews().AddRazorRuntimeCompilation();
-            return services.AddMvc(c => { c.Conventions.Add(new ApiExplorerGroupPerAreaConvention()); })
-                .SetCompatibilityVersion(CompatibilityVersion.Version_3_0);
+            services.AddControllersWithViews()
+                    .AddRazorRuntimeCompilation();
+            return services.AddMvc(c =>
+                            {
+                                c.Conventions.Add(new ApiExplorerGroupPerAreaConvention());
+                            })
+                            .SetCompatibilityVersion(CompatibilityVersion.Version_3_0);
         }
 
 
@@ -193,7 +224,7 @@ namespace Web
                 area.ConfigureServices(services);
             }
         }
-        
+
         protected virtual void ConfigureAreaSwagger(SwaggerGenOptions options)
         {
             foreach (var area in _areas.OfType<ISwaggerSupportArea>())
@@ -201,7 +232,7 @@ namespace Web
                 area.ConfigureSwagger(options);
             }
         }
-        
+
         protected virtual bool ConfigureAreaSwaggerInclusionPredicates(string version, ApiDescription description)
         {
             foreach (var area in _areas.OfType<ISwaggerSupportArea>())

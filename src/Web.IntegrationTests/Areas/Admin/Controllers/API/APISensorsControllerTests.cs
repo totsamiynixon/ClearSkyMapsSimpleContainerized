@@ -22,6 +22,7 @@ namespace Web.IntegrationTests.Areas.Admin.Controllers.API
         {
             //Arrange
             using var server = new TestServerBuilder()
+                .UseDefaultAuth()
                 .Build();
             var client = server.CreateClient();
 
@@ -119,8 +120,8 @@ namespace Web.IntegrationTests.Areas.Admin.Controllers.API
             //Arrange
             var dataSet = new List<Sensor>
             {
-                Defaults.ActivePortableSensor,
-                Defaults.ActiveStaticSensor
+                Defaults.PortableSensor,
+                Defaults.StaticSensor
             };
             var currentSensor = dataSet[dataSetIndex];
 

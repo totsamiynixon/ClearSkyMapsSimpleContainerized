@@ -39,21 +39,6 @@ namespace Web.IntegrationTests
                 _identityDatabaseSeeders = new List<IDatabaseSeeder<IdentityDataContext>>();
             }
 
-            /*public TestServerBuilder UseDatabaseSeeder(IDatabaseSeeder<DataContext> databaseSeeder)
-            {
-                _databaseSeeders.Add(databaseSeeder);
-
-                return this;
-            }
-
-            public TestServerBuilder UseIdentityDatabaseSeeder(
-                IDatabaseSeeder<IdentityDataContext> identityDatabaseSeeder)
-            {
-                _identityDatabaseSeeders.Add(identityDatabaseSeeder);
-
-                return this;
-            }*/
-
             public TestServerBuilder UseSensors(params Sensor[] sensors)
             {
                 _databaseSeeders.Add(new TestSensorsDatabaseSeeder(sensors));
@@ -145,3 +130,40 @@ namespace Web.IntegrationTests
         }
     }
 }
+
+/*public TestServerBuilder UseDatabaseSeeder(IDatabaseSeeder<DataContext> databaseSeeder)
+{
+    _databaseSeeders.Add(databaseSeeder);
+
+    return this;
+}
+
+public TestServerBuilder UseIdentityDatabaseSeeder(
+    IDatabaseSeeder<IdentityDataContext> identityDatabaseSeeder)
+{
+    _identityDatabaseSeeders.Add(identityDatabaseSeeder);
+
+    return this;
+}*/
+
+//TODO: check how it works when docker fully implemented
+/*.ConfigureAppConfiguration((context, configBuilder) =>
+{
+    var config = configBuilder.Build();
+    configBuilder.AddInMemoryCollection(
+        new Dictionary<string, string>
+        {
+            ["Settings:ConnectionString"] = config.GetSection("Settings").GetValue<string>("ConnectionString").Replace("{Id}", Guid.NewGuid().ToString())
+        });
+})*/
+/*.ConfigureAppConfiguration((context, configBuilder) =>
+{
+    var testJsonConfigRootPath = Assembly.GetAssembly(typeof(TestStartup))
+        ?.Location;
+    
+    //var testJsonFileProvider = new PhysicalFileProvider(testJsonConfigRootPath);
+    //configBuilder.AddJsonFile(provider: testJsonFileProvider, path: "appsettings.json", optional: false, reloadOnChange: true);
+
+    var testJsonStr = File.ReadAllText(Path.Combine(testJsonConfigRootPath, "appsettings.json"));
+    configBuilder.AddJsonStream(new MemoryStream(Encoding.ASCII.GetBytes(testJsonStr)));
+})*/

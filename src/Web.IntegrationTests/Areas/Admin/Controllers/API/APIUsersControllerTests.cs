@@ -6,7 +6,6 @@ using System.Threading.Tasks;
 using Newtonsoft.Json;
 using Web.Areas.Admin.Infrastructure.Auth;
 using Web.Areas.Admin.Models.API.Users;
-using Web.Domain.Entities.Identity;
 using Web.IntegrationTests.Areas.Admin.Infrastructure;
 using Xunit;
 

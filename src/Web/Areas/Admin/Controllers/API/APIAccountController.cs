@@ -39,12 +39,14 @@ namespace Web.Areas.Admin.Controllers.API
         /// Perform login
         /// </summary>
         /// <response code="200">If login was successfully performed. Returns AccessToken</response>
-        /// <response code="400">If model is invalid or login failed</response>
+        /// <response code="400">If model is invalid</response>
+        /// <response code="400">If login failed</response>
         /// <response code="404">If user was not found</response>
         [AllowAnonymous]
         [HttpPost("login")]
         [ProducesResponseType(typeof(TokenModel), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(ValidationProblemDetails), StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<IActionResult> Login([FromBody] LoginModel model)
         {
@@ -52,7 +54,7 @@ namespace Web.Areas.Admin.Controllers.API
                 return ValidationProblem();
 
             var user = await _userManager.FindByEmailAsync(model.Email);
-            if (user == null)
+            if (user == null || !user.IsActive)
             {
                 return NotFound("Login failed: user with that email doesn't exist");
             }

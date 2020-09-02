@@ -49,7 +49,7 @@ namespace Web.IntegrationTests.Controllers.API
             //Act
             var response =
                 await client.GetAsync(
-                    $"api/integration/getaspost?data={System.Net.WebUtility.UrlEncode(GenerateData(currentSensor.ApiKey, latitude, longitude))}");
+                    $"api/integration/getaspost?data={WebUtility.UrlEncode(GenerateData(currentSensor.ApiKey, latitude, longitude))}");
 
             //Assert
             response.EnsureSuccessStatusCode();
