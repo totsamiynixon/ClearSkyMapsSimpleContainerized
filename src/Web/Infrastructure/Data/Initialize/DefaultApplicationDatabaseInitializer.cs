@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
@@ -11,23 +12,18 @@ namespace Web.Infrastructure.Data.Initialize
     {
         private static readonly object Lock = new object();
 
-        private readonly IDataContextFactory<DataContext> _dataContextFactory;
-        private readonly IDataContextFactory<IdentityDataContext> _identityDataContextFactory;
-        private readonly IDatabaseSeeder<DataContext> _databaseSeeder;
-        private readonly IDatabaseSeeder<IdentityDataContext> _identityDatabaseSeeder;
+        protected readonly IDataContextFactory<DataContext> _dataContextFactory;
+        protected readonly IEnumerable<IDatabaseSeeder<DataContext>> _databaseSeeders;
 
         public DefaultApplicationDatabaseInitializer(IDataContextFactory<DataContext> dataContextFactory,
-            IDataContextFactory<IdentityDataContext> identityDataContextFactory,
-            IDatabaseSeeder<DataContext> databaseSeeder, IDatabaseSeeder<IdentityDataContext> identityDatabaseSeeder)
+            IEnumerable<IDatabaseSeeder<DataContext>> databaseSeeders)
         {
             _dataContextFactory = dataContextFactory ?? throw new ArgumentNullException(nameof(dataContextFactory));
-            _identityDataContextFactory = identityDataContextFactory ?? throw new ArgumentNullException(nameof(identityDataContextFactory));
-            _databaseSeeder = databaseSeeder ?? throw new ArgumentNullException(nameof(databaseSeeder));
-            _identityDatabaseSeeder = identityDatabaseSeeder ?? throw new ArgumentNullException(nameof(identityDatabaseSeeder));
+            _databaseSeeders = databaseSeeders ?? throw new ArgumentNullException(nameof(databaseSeeders));
         }
 
 
-        public async Task InitializeDbAsync()
+        public virtual async Task InitializeDbAsync()
         {
             lock (Lock)
             {
@@ -36,20 +32,10 @@ namespace Web.Infrastructure.Data.Initialize
                     try
                     {
                         context.Database.Migrate();
-                        _databaseSeeder.SeedAsync(context).Wait();
-                    }
-                    catch (SqlException exception) when (exception.Number == 1801)
-                    {
-                        // retry
-                    }
-                }
-
-                 using (var context = _identityDataContextFactory.Create())
-                {
-                    try
-                    {
-                        context.Database.Migrate();
-                        _identityDatabaseSeeder.SeedAsync(context).Wait();
+                        foreach (var seeder in _databaseSeeders)
+                        {
+                            seeder.SeedAsync(context).Wait();
+                        }
                     }
                     catch (SqlException exception) when (exception.Number == 1801)
                     {

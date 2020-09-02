@@ -9,7 +9,7 @@ namespace Web.Infrastructure.Swagger
         public void Apply(ControllerModel controller)
         {
             
-            var controllerAreaAttribute = controller.ControllerType.GetCustomAttributes(true).OfType<AreaAttribute>().FirstOrDefault(); // e.g. "Controllers.V1"
+            var controllerAreaAttribute = controller.ControllerType.GetCustomAttributes(true).OfType<AreaAttribute>().FirstOrDefault();
             var controllerArea = controllerAreaAttribute?.RouteValue;
 
             if (!string.IsNullOrEmpty(controllerArea))

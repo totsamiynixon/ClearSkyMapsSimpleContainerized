@@ -54,11 +54,12 @@ namespace Web.Areas.Admin.Controllers.API
         /// </summary>
         /// <response code="200">If user successfully created</response>
         /// <response code="400">If model is invalid</response>
-        /// <response code="403">If user doesn't have permissions to operation</response>
+        /// <response code="409">If user state can't be changed</response>
+        /// <response code="409">If failed to create user</response>
         [HttpPost]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(ValidationProblemDetails),StatusCodes.Status400BadRequest)]
-        [ProducesResponseType(StatusCodes.Status403Forbidden)]
+        [ProducesResponseType(StatusCodes.Status409Conflict)]
         public async Task<ActionResult> Create(CreateUserModel model)
         {
             if (!ModelState.IsValid)
@@ -73,7 +74,11 @@ namespace Web.Areas.Admin.Controllers.API
             }
             catch (UserEmailAddressIsAlreadyTakenException ex)
             {
-                return Forbid(ex.Message);
+                return Conflict(ex.Message);
+            }
+            catch (UserUnableToCreateException ex)
+            {
+                return Conflict(ex.Message);
             }
 
             return Ok();
@@ -85,12 +90,13 @@ namespace Web.Areas.Admin.Controllers.API
         /// </summary>
         /// <response code="200">If password was successfully updated</response>
         /// <response code="400">If model is invalid</response>
-        /// <response code="403">If user doesn't have permissions to operation</response>
         /// <response code="404">If user not found</response>
+        /// <response code="409">If user state can't be changed</response>
         [HttpPost("changePassword")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(ValidationProblemDetails), StatusCodes.Status400BadRequest)]
-        [ProducesResponseType(StatusCodes.Status403Forbidden)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status409Conflict)]
         public async Task<ActionResult> ChangePassword(UserChangePasswordModel model)
         {
             if (!ModelState.IsValid)
@@ -109,7 +115,7 @@ namespace Web.Areas.Admin.Controllers.API
             }
             catch (UserUnableToChangeStateException ex)
             {
-                return Forbid(ex.Message);
+                return Conflict(ex.Message);
             }
 
             return Ok();
@@ -121,13 +127,13 @@ namespace Web.Areas.Admin.Controllers.API
         /// </summary>
         /// <response code="200">If user has been deleted successfully</response>
         /// <response code="400">If model is invalid</response>
-        /// <response code="403">If user doesn't have permissions to operation</response>
         /// <response code="404">If user not found</response>
+        /// <response code="409">If user state can't be changed</response>
         [HttpDelete]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(ValidationProblemDetails), StatusCodes.Status400BadRequest)]
-        [ProducesResponseType(StatusCodes.Status403Forbidden)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status409Conflict)]
         public async Task<ActionResult> Delete(DeleteUserModel model)
         {
             if (!ModelState.IsValid)
@@ -140,23 +146,30 @@ namespace Web.Areas.Admin.Controllers.API
                 var command = _mapper.Map<DeleteUserModel, DeleteUserCommand>(model);
                 await _mediator.Send(command);
             }
-            //TODO: Create Exception Filter for command exceptions
+
             catch (UserNotFoundException ex)
             {
                 return NotFound(ex.Message);
             }
             catch (UserUnableToChangeStateException ex)
             {
-                return Forbid(ex.Message);
+                return Conflict(ex.Message);
             }
 
             return Ok();
         }
 
+        /// <summary>
+        /// Change user activation state
+        /// </summary>
+        /// <response code="200">If activation state was successfully updated</response>
+        /// <response code="400">If model is invalid</response>
+        /// <response code="404">If user not found</response>
+        /// <response code="409">If user state can't be changed</response>
         [HttpPost("changeActivation")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(ValidationProblemDetails), StatusCodes.Status400BadRequest)]
-        [ProducesResponseType(StatusCodes.Status403Forbidden)]
+        [ProducesResponseType(StatusCodes.Status409Conflict)]
         public async Task<ActionResult> ChangeActivation(ActivateUserModel model)
         {
             if (!ModelState.IsValid)
@@ -175,7 +188,7 @@ namespace Web.Areas.Admin.Controllers.API
             }
             catch (UserUnableToChangeStateException ex)
             {
-                return Forbid(ex.Message);
+                return Conflict(ex.Message);
             }
 
             return Ok();

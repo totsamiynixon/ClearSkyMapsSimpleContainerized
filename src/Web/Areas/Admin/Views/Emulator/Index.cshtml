@@ -1,6 +1,5 @@
-﻿@using Web.Emulation
-@using Web.Infrastructure
-@inject AppSettings AppSettings
+﻿@using Web.Areas.Admin.Emulation
+@inject EmulationAppSettings EmulationAppSettings
 @inject Emulator Emulator
 @model List<Web.Areas.Admin.Models.Default.Emulator.SensorEmulatorListItemViewModel>
 @{
@@ -73,7 +72,7 @@
                     </table>
                 </div>
             </div>
-            @if (AppSettings.Emulation.Enabled)
+            @if (EmulationAppSettings.Enabled)
             {
                 <div class="card-footer">
                     @using (Html.BeginForm($"{(Emulator.IsEmulationStarted ? "Stop" : "Start")}Emulation", "Emulator", new { area = "Admin", ReturnUrl = ViewBag.ReturnUrl }, FormMethod.Post, null, new { @class = "form-horizontal", role = "form" }))

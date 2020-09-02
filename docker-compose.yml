@@ -1,14 +1,14 @@
+version: '3.4'
+
 services:
-  webapplication:
+
+  web-sql-server:
+    image: mcr.microsoft.com/mssql/server:2017-latest 
+
+  web:
+    image: web
     build:
       context: .
       dockerfile: src/Web/Dockerfile
     depends_on:
-      - db
-  db:
-    image: "mcr.microsoft.com/mssql/server"
-    environment:
-        SA_PASSWORD: "Password666"
-        ACCEPT_EULA: "Y"
-    ports:
-      - "1433:1433"
+      - web-sql-server

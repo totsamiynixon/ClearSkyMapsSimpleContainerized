@@ -1,0 +1,22 @@
+version: '3.4'
+
+services:
+
+  web-test-sql-server:
+    environment:
+      - SA_PASSWORD=Pass@word
+      - ACCEPT_EULA=Y
+    ports:
+      - "5433:1433"
+
+  web-test:
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_URLS=http://0.0.0.0:80
+    ports:
+      - "5113:80"
+    entrypoint:
+        - dotnet
+        - test
+        - --logger
+        - trx;

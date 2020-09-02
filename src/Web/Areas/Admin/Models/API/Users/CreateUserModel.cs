@@ -5,6 +5,7 @@ namespace Web.Areas.Admin.Models.API.Users
     public class CreateUserModel
     {
         [Display(Name = "Адрес электронной почты")]
+        [EmailAddress]
         public string Email { get; set; }
 
         [Required]

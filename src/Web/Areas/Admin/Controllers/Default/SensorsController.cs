@@ -8,8 +8,10 @@ using MediatR;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Web.Application.Readings.Exceptions;
 using Web.Areas.Admin.Application.Readings.Commands;
+using Web.Areas.Admin.Application.Readings.Exceptions;
 using Web.Areas.Admin.Application.Readings.Queries;
 using Web.Areas.Admin.Application.Readings.Queries.DTO;
 using Web.Areas.Admin.Extensions;
@@ -64,9 +66,11 @@ namespace Web.Areas.Admin.Controllers.Default
 
 
         [HttpPost]
-        public async Task<ActionResult> CreateStaticSensor([Bind(Prefix = nameof(CreateStaticSensorViewModel.Model))]
-            CreateStaticSensorModel model)
+        public async Task<ActionResult> CreateStaticSensor(
+            [Bind(Prefix = nameof(CreateStaticSensorViewModel.Model))]
+            [BindRequired] CreateStaticSensorModel model)
         {
+
             if (!ModelState.IsValid)
             {
                 return View(new CreateStaticSensorViewModel(model));
@@ -90,7 +94,7 @@ namespace Web.Areas.Admin.Controllers.Default
 
         [HttpPost]
         public async Task<ActionResult> CreatePortableSensor([Bind(Prefix = nameof(CreatePortableSensorViewModel.Model))]
-            CreatePortableSensorModel model)
+            [BindRequired] CreatePortableSensorModel model)
         {
             if (!ModelState.IsValid)
             {
@@ -115,18 +119,29 @@ namespace Web.Areas.Admin.Controllers.Default
         }
 
 
-        [HttpPost]
+        [HttpDelete]
         [Authorize(Roles = "Supervisor")]
         public async Task<ActionResult> Delete([Bind(Prefix = nameof(DeleteSensorViewModel.Model))]
-            DeleteSensorModel model)
+            [BindRequired] DeleteSensorModel model)
         {
             if (!ModelState.IsValid)
             {
                 return await BuildDeleteResultAsync(model.Id, model);
             }
 
-            var command = _mapper.Map<DeleteSensorModel, DeleteSensorCommand>(model);
-            await _mediator.Send(command);
+            try
+            {
+                var command = _mapper.Map<DeleteSensorModel, DeleteSensorCommand>(model);
+                await _mediator.Send(command);
+            }
+            catch (SensorNotFoundException ex)
+            {
+                return this.StatusCodeView(HttpStatusCode.NotFound, ex.Message);
+            }
+            catch (SensorUnableApplyActionException ex)
+            {
+                return this.StatusCodeView(HttpStatusCode.Conflict, ex.Message);
+            }
 
             return RedirectToAction("Index");
         }
@@ -135,7 +150,7 @@ namespace Web.Areas.Admin.Controllers.Default
         {
             if (!sensorId.HasValue)
             {
-                return this.StatusCodeView(HttpStatusCode.NotFound, "Sensor id is required!");
+                return this.StatusCodeView(HttpStatusCode.BadRequest, "Sensor id is required!");
             }
 
             var sensor = await _readingsQueries.GetSensorByIdAsync(sensorId.Value);
@@ -146,7 +161,7 @@ namespace Web.Areas.Admin.Controllers.Default
 
             if (sensor.IsActive)
             {
-                return this.StatusCodeView(HttpStatusCode.Forbidden, "Unable to delete active sensor");
+                return this.StatusCodeView(HttpStatusCode.Conflict, "Unable to delete active sensor");
             }
 
             var detailsVM = _mapper.Map<SensorDTO, SensorDetailsViewModel>(sensor);
@@ -170,7 +185,7 @@ namespace Web.Areas.Admin.Controllers.Default
 
         [HttpPost]
         public async Task<ActionResult> ChangeActivation([Bind(Prefix = nameof(ChangeActivationSensorViewModel.Model))]
-            ChangeActivationSensorModel model)
+            [BindRequired] ChangeActivationSensorModel model)
         {
             if (!ModelState.IsValid)
             {
@@ -222,6 +237,7 @@ namespace Web.Areas.Admin.Controllers.Default
         [HttpPost]
         public async Task<ActionResult> ChangeVisibilityStaticSensor(
             [Bind(Prefix = nameof(ChangeVisibilityStaticSensorViewModel.Model))]
+            [BindRequired]
             ChangeVisibilityStaticSensorModel model)
         {
             if (!ModelState.IsValid)

@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Web.Areas.PWA.Helpers.Implementations;
@@ -11,24 +12,33 @@ using Web.Infrastructure.Middlewares;
 
 namespace Web.Areas.PWA
 {
-    public static class PWAArea
+    public class PWAArea : IArea
     {
         public const string Name = "PWA";
         public const string DefaultRoutePrefix = "pwa";
         public const string APIRoutePrefix = "api/pwa";
 
-        public static IServiceCollection AddPWAAreaServices(this IServiceCollection services)
+
+        private readonly IConfiguration _configuration;
+        private readonly IWebHostEnvironment _env;
+
+        public PWAArea(IConfiguration configuration, IWebHostEnvironment env)
         {
-            services.AddTransient<IPWADispatchHelper, PWASignalrDispatchHelper>();
-            return services;
+            _configuration = configuration;
+            _env = env;
         }
 
-        public static IApplicationBuilder UsePWAArea(this IApplicationBuilder app, IWebHostEnvironment env)
+        public void ConfigureServices(IServiceCollection services)
         {
-            app.UseWhen(x => IsDefaultRequest(x.Request)|| IsApiRequest(x.Request),
+            services.AddTransient<IPWADispatchHelper, PWASignalrDispatchHelper>();
+        }
+
+        public void Configure(IApplicationBuilder app)
+        {
+            app.UseWhen(x => IsDefaultRequest(x.Request) || IsApiRequest(x.Request),
                 builder =>
                 {
-                    if (env.IsDevelopment())
+                    if (_env.IsDevelopment())
                     {
                         app.UseDeveloperExceptionPage();
                     }
@@ -37,9 +47,9 @@ namespace Web.Areas.PWA
                         app.UseMiddleware<ExceptionHandlerMiddleware>();
                         app.UseMiddleware<ExceptionLoggerMiddleware>();
                     }
-                    
+
                     builder.UseRouting();
-                    
+
                     builder.UseEndpoints(endpoints =>
                     {
                         endpoints.MapAreaControllerRoute("pwa_area", Name,
@@ -47,12 +57,10 @@ namespace Web.Areas.PWA
                         endpoints.MapHub<PWAStaticSensorHub>($"/{DefaultRoutePrefix}hub");
                     });
                 });
-            
-            app.AppBundles();
 
-            return app;
+            app.AppBundles();
         }
-        
+
         private static bool IsDefaultRequest(HttpRequest request)
         {
             return request.Path.Value.StartsWith($"/{DefaultRoutePrefix}");

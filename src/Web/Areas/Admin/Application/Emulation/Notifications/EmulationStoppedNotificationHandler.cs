@@ -2,9 +2,9 @@
 using System.Threading;
 using System.Threading.Tasks;
 using MediatR;
+using Web.Areas.Admin.Infrastructure.Data.Factory;
 using Web.Helpers.Interfaces;
 using Web.Infrastructure.Data;
-using Web.Infrastructure.Data.Factory;
 
 namespace Web.Areas.Admin.Application.Emulation.Notifications
 {
