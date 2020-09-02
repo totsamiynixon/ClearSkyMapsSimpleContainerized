@@ -5,6 +5,7 @@ using AutoMapper;
 using MediatR;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Web.Areas.Admin.Application.Emulation.Commands;
 using Web.Areas.Admin.Application.Emulation.Exceptions;
@@ -19,8 +20,10 @@ namespace Web.Areas.Admin.Controllers.API
     [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Policy = AuthPolicies.Admin)]
     //TODO: check area based api routes
     //TODO: check how to resolve naming conflict
-    [Route( AdminArea.APIRoutePrefix + "/emulator")]
+    [Route(AdminArea.APIRoutePrefix + "/emulator")]
     [ApiController]
+    [Produces("application/json")]
+    [Consumes("application/json")]
     public class APIEmulatorController : Controller
     {
         private readonly IEmulationQueries _emulationQueries;
@@ -34,15 +37,24 @@ namespace Web.Areas.Admin.Controllers.API
             _emulationQueries = emulationQueries ?? throw new ArgumentNullException(nameof(emulationQueries));
         }
 
+        /// <summary>
+        /// Returns all emulator sensors
+        /// </summary>
         [HttpGet]
-        public async Task<ActionResult> Index()
+        [ProducesResponseType(typeof(List<SensorEmulatorListItemModel>), StatusCodes.Status200OK)]
+        public async Task<ActionResult> GetAll()
         {
             var devices = await _emulationQueries.GetEmulatorDevicesAsync();
             return Ok(_mapper.Map<List<EmulatorDeviceDTO>, List<SensorEmulatorListItemModel>>(devices));
         }
 
-
+        /// <summary>
+        /// Start emulation
+        /// </summary>
+        /// <response code="403">If emulation is not available</response>
         [HttpPost("start")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status403Forbidden)]
         public async Task<IActionResult> StartEmulation()
         {
             try
@@ -57,7 +69,13 @@ namespace Web.Areas.Admin.Controllers.API
             return Ok();
         }
 
+        /// <summary>
+        /// Stop emulation
+        /// </summary>
+        /// <response code="403">If emulation is not available</response>
         [HttpPost("stop")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status403Forbidden)]
         public async Task<IActionResult> StopEmulation()
         {
             try
@@ -68,11 +86,19 @@ namespace Web.Areas.Admin.Controllers.API
             {
                 return Forbid(ex.Message);
             }
-            
+
             return Ok();
         }
 
+        /// <summary>
+        /// Power on emulator device
+        /// </summary>
+        /// <response code="403">If emulation is not available</response>
+        /// <response code="404">If emulator device was not found</response>
         [HttpPost("device/{guid}/powerOn")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status403Forbidden)]
         public ActionResult DevicePowerOn(string guid)
         {
             try
@@ -87,11 +113,19 @@ namespace Web.Areas.Admin.Controllers.API
             {
                 return NotFound(ex.Message);
             }
-            
+
             return Ok("Emulator device has been successfully started");
         }
 
+        /// <summary>
+        /// Power off emulator device
+        /// </summary>
+        /// <response code="403">If emulation is not available</response>
+        /// <response code="404">If emulator device was not found</response>
         [HttpPost("device/{guid}/powerOff")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status403Forbidden)]
         public ActionResult PowerOff(string guid)
         {
             try
@@ -106,7 +140,7 @@ namespace Web.Areas.Admin.Controllers.API
             {
                 return NotFound(ex.Message);
             }
-            
+
             return Ok("Emulator device has been successfully stopped");
         }
     }

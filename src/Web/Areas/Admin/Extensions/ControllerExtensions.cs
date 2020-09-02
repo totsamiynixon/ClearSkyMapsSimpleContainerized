@@ -8,7 +8,9 @@ namespace Web.Areas.Admin.Extensions
     {
         public static ViewResult StatusCodeView(this Controller controller, HttpStatusCode statusCode, string message)
         {
-            return controller.View("StatusCodeResult", new StatusCodeViewModel(statusCode, message));
+            var result = controller.View("StatusCodeResult", new StatusCodeViewModel(statusCode, message));
+            result.StatusCode = (int)statusCode;
+            return result;
         }
     }
 }

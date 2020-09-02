@@ -1,5 +1,5 @@
-﻿@using Web.Infrastructure
-@inject AppSettings AppSettings
+﻿@using Web.Areas.PWA.Infrastructure
+@inject PWAAppSettings PWAAppSettings
 @{
     ViewBag.Title = "Детали портативного дачтика";
     Layout = "~/Areas/Admin/Views/Shared/_Layout.cshtml";
@@ -97,7 +97,7 @@
 </script>
 @section Scripts {
     <!--  Yandex Maps Plugin    -->
-    <script src="https://api-maps.yandex.ru/2.1/?lang=ru_RU&amp;apikey=@(AppSettings.Yandex.MapsJavaScriptAPIKey)&onload=initPortableSensorPage" type="text/javascript"></script>
+    <script src="https://api-maps.yandex.ru/2.1/?lang=ru_RU&amp;apikey=@(PWAAppSettings.Yandex.MapsJavaScriptAPIKey)&onload=initPortableSensorPage" type="text/javascript"></script>
     <script src="~/admin/js/front/pages/portableSensorDetails.js"></script>
     <script>
         function initPortableSensorPage() {

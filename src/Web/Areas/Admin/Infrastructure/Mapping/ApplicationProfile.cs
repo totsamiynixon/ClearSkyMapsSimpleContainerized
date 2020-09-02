@@ -1,9 +1,9 @@
 ﻿using AutoMapper;
 using Web.Areas.Admin.Application.Emulation.Queries.DTO;
 using Web.Areas.Admin.Application.Users.Queries.DTO;
+using Web.Areas.Admin.Emulation;
 using Web.Domain.Entities;
 using Web.Domain.Entities.Identity;
-using Web.Emulation;
 
 namespace Web.Areas.Admin.Infrastructure.Mapping
 {

@@ -8,6 +8,7 @@ using MediatR;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Web.Areas.Admin.Application.Users.Commands;
 using Web.Areas.Admin.Application.Users.Exceptions;
 using Web.Areas.Admin.Application.Users.Queries;
@@ -19,7 +20,8 @@ using Web.Areas.Admin.Models.Default.Users;
 namespace Web.Areas.Admin.Controllers.Default
 {
     [Area(AdminArea.Name)]
-    [Authorize(AuthenticationSchemes = CookieAuthenticationDefaults.AuthenticationScheme, Policy = AuthPolicies.Supervisor)]
+    [Authorize(AuthenticationSchemes = CookieAuthenticationDefaults.AuthenticationScheme,
+        Policy = AuthPolicies.Supervisor)]
     public class UsersController : Controller
     {
         private readonly IMapper _mapper;
@@ -50,7 +52,6 @@ namespace Web.Areas.Admin.Controllers.Default
 
 
         [HttpPost]
-        [ValidateAntiForgeryToken]
         public async Task<ActionResult> Create(CreateUserModel model)
         {
             if (!ModelState.IsValid)
@@ -94,18 +95,19 @@ namespace Web.Areas.Admin.Controllers.Default
             }
 
             var mappedUser = _mapper.Map<UserDetailsDTO, UserChangePasswordModel>(user);
-            return View(new UserChangePasswordViewModel(mappedUser));
+            return View(new UserChangePasswordViewModel(mappedUser, user.Email));
         }
 
 
         [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<ActionResult> ChangePassword([Bind(Prefix = nameof(UserChangePasswordViewModel.Model))]
+        public async Task<ActionResult> ChangePassword(
+            [Bind(Prefix = nameof(UserChangePasswordViewModel.Model))] [BindRequired]
             UserChangePasswordModel model)
         {
             if (!ModelState.IsValid)
             {
-                return View(new UserChangePasswordViewModel(model));
+                var user = await _userQueries.GetUserAsync(model.Id);
+                return View(new UserChangePasswordViewModel(model, user?.Email));
             }
 
             try
@@ -150,8 +152,7 @@ namespace Web.Areas.Admin.Controllers.Default
         }
 
 
-        [HttpPost]
-        [ValidateAntiForgeryToken]
+        [HttpDelete]
         public async Task<ActionResult> Delete([Bind(Prefix = nameof(DeleteUserViewModel.Model))]
             DeleteUserModel model)
         {
@@ -205,8 +206,8 @@ namespace Web.Areas.Admin.Controllers.Default
 
 
         [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<ActionResult> ChangeActivation([Bind(Prefix = nameof(ActivateUserViewModel.Model))]
+        public async Task<ActionResult> ChangeActivation(
+            [Bind(Prefix = nameof(ActivateUserViewModel.Model))] [BindRequired]
             ActivateUserModel model)
         {
             if (!ModelState.IsValid)

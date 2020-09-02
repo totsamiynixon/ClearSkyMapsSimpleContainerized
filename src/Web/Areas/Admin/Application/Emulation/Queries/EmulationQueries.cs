@@ -3,8 +3,7 @@ using System.Threading.Tasks;
 using AutoMapper;
 using Web.Areas.Admin.Application.Emulation.Exceptions;
 using Web.Areas.Admin.Application.Emulation.Queries.DTO;
-using Web.Emulation;
-using Web.Infrastructure;
+using Web.Areas.Admin.Emulation;
 
 namespace Web.Areas.Admin.Application.Emulation.Queries
 {
@@ -12,18 +11,18 @@ namespace Web.Areas.Admin.Application.Emulation.Queries
     {
         private readonly Emulator _emulator;
         private readonly IMapper _mapper;
-        private readonly AppSettings _appSettings;
+        private readonly EmulationAppSettings _emulationAppSettings;
 
-        public EmulationQueries(Emulator emulator, IMapper mapper, AppSettings appSettings)
+        public EmulationQueries(Emulator emulator, IMapper mapper, EmulationAppSettings emulationAppSettings)
         {
             _emulator = emulator;
             _mapper = mapper;
-            _appSettings = appSettings;
+            _emulationAppSettings = emulationAppSettings;
         }
 
         public Task<List<EmulatorDeviceDTO>> GetEmulatorDevicesAsync()
         {
-            if (!_appSettings.Emulation.Enabled)
+            if (!_emulationAppSettings.Enabled)
             {
                 throw new EmulationIsNotAvailableException();
             }

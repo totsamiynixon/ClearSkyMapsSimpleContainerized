@@ -59,7 +59,13 @@ namespace Web.Areas.Admin.Controllers.Default
             ModelState.AddModelError("", "Login failed: wrong password!");
             return View(model);
         }
-
+        
+        public async Task<IActionResult> Logoff()
+        {
+            await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+            return RedirectToAction("Login", "Account");
+        }
+        
         private async Task Authenticate(string userName, string roles)
         {
             var claims = new List<Claim>
@@ -71,10 +77,5 @@ namespace Web.Areas.Admin.Controllers.Default
             await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, new ClaimsPrincipal(id));
         }
 
-        public async Task<IActionResult> Logoff()
-        {
-            await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
-            return RedirectToAction("Login", "Account");
-        }
     }
 }

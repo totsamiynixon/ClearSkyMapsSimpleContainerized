@@ -3,7 +3,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Web.Infrastructure.Data.Factory
 {
-    public class DefaultDataContextFactory<TContext> : IEmulationDataContextFactory<TContext> where TContext : DbContext
+    public class DefaultDataContextFactory<TContext> : IDataContextFactory<TContext> where TContext : DbContext
 
     {
         private readonly string _connectionString;

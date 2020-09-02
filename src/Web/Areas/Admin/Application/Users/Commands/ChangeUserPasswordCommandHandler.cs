@@ -3,7 +3,6 @@ using System.Threading;
 using System.Threading.Tasks;
 using MediatR;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.EntityFrameworkCore;
 using Web.Areas.Admin.Application.Users.Exceptions;
 using Web.Areas.Admin.Infrastructure.Auth;
 using Web.Domain.Entities.Identity;

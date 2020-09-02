@@ -2,6 +2,7 @@
 {
     public class AuthSettings
     {
+        public const string CookieName = "CSM.Admin.Auth";
         public class Roles
         {
             public const string Supervisor = nameof(Supervisor);

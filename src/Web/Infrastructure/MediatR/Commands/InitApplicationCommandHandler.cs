@@ -1,27 +1,31 @@
-﻿using System.Threading;
+﻿using System.Collections.Generic;
+using System.Threading;
 using System.Threading.Tasks;
 using MediatR;
-using Web.Infrastructure.Application.Notifications;
 using Web.Infrastructure.Data.Initialize;
+using Web.Infrastructure.MediatR.Notifications;
 
 namespace Web.Infrastructure.MediatR.Commands
 {
     public class InitApplicationCommandHandler : IRequestHandler<InitApplicationCommand, bool>
     {
         private readonly IMediator _mediator;
-        private readonly IApplicationDatabaseInitializer _applicationDatabaseInitializer;
+        private readonly IEnumerable<IApplicationDatabaseInitializer> _applicationDatabaseInitializers;
 
         public InitApplicationCommandHandler(IMediator mediator,
-            IApplicationDatabaseInitializer applicationDatabaseInitializer)
+            IEnumerable<IApplicationDatabaseInitializer> applicationDatabaseInitializers)
         {
             _mediator = mediator;
-            _applicationDatabaseInitializer = applicationDatabaseInitializer;
+            _applicationDatabaseInitializers = applicationDatabaseInitializers;
         }
 
         public async Task<bool> Handle(InitApplicationCommand request, CancellationToken cancellationToken)
         {
-            await _applicationDatabaseInitializer.InitializeDbAsync();
-            
+            foreach (var applicationDatabaseInitializer in _applicationDatabaseInitializers)
+            {
+                await applicationDatabaseInitializer.InitializeDbAsync();
+            }
+
             await _mediator.Publish(new ApplicationInitializedNotification(), cancellationToken);
 
             return true;

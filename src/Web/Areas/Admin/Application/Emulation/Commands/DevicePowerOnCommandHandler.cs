@@ -4,19 +4,18 @@ using System.Threading;
 using System.Threading.Tasks;
 using MediatR;
 using Web.Areas.Admin.Application.Emulation.Exceptions;
-using Web.Emulation;
-using Web.Infrastructure;
+using Web.Areas.Admin.Emulation;
 
 namespace Web.Areas.Admin.Application.Emulation.Commands
 {
     public class DevicePowerOnCommandHandler : IRequestHandler<DevicePowerOnCommand, bool>
     {
-        private readonly AppSettings _appSettings;
+        private readonly EmulationAppSettings _emulationAppSettings;
         private readonly Emulator _emulator;
 
-        public DevicePowerOnCommandHandler(AppSettings appSettings, Emulator emulator)
+        public DevicePowerOnCommandHandler(EmulationAppSettings emulationAppSettings, Emulator emulator)
         {
-            _appSettings = appSettings ?? throw new ArgumentNullException(nameof(appSettings));
+            _emulationAppSettings = emulationAppSettings ?? throw new ArgumentNullException(nameof(emulationAppSettings));
             _emulator = emulator ?? throw new ArgumentNullException(nameof(emulator));
         }
 
@@ -24,7 +23,7 @@ namespace Web.Areas.Admin.Application.Emulation.Commands
         {
             //TODO: add validator for request
 
-            if (!_appSettings.Emulation.Enabled)
+            if (!_emulationAppSettings.Enabled)
             {
                 throw new EmulationIsNotAvailableException();
             }

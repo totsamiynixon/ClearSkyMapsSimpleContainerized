@@ -4,7 +4,6 @@ using System.Threading.Tasks;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Web.Helpers.Interfaces;
-using Web.Infrastructure.Application.Notifications;
 using Web.Infrastructure.Data;
 using Web.Infrastructure.Data.Factory;
 

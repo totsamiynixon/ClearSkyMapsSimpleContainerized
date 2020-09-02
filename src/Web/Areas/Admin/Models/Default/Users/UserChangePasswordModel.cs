@@ -4,10 +4,8 @@ namespace Web.Areas.Admin.Models.Default.Users
 {
     public class UserChangePasswordModel
     {
+        [Required]
         public string Id { get; set; }
-
-        [Display(Name = "Адрес электронной почты")]
-        public string Email { get; set; }
 
         [Required]
         [DataType(DataType.Password)]
