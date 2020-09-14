@@ -1,7 +1,10 @@
-﻿@{
+﻿@using Web.Infrastructure
+@using Web.Areas.PWA.Infrastructure
+@{
     Layout = null;
 }
-@inject Web.Helpers.Interfaces.ISettingsProvider SettingsHelper
+@inject AppSettings AppSettings
+@inject PWAAppSettings PWAAppSettings
 <!DOCTYPE html>
 <html>
 <head>
@@ -14,7 +17,7 @@
     <meta name="theme-color" content="#ffffff">
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CSM, v=@SettingsHelper.ApplicationVersion</title>
+    <title>CSM, v=@AppSettings.Verison</title>
     <base href="@Url.Content("~/")" />
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
     @await Styles.RenderAsync("bundles/pwa.css")
@@ -29,17 +32,17 @@
     <partial name="Readings/Index" />
     <partial name="Offline/Index" />
     <script src="https://www.gstatic.com/firebasejs/5.8.6/firebase.js"></script>
-    <script src="https://api-maps.yandex.ru/2.1/?lang=ru_RU&amp;apikey=@(SettingsHelper.YandexMapsJavaScriptAPIKey)" type="text/javascript"></script>
+    <script src="https://api-maps.yandex.ru/2.1/?lang=ru_RU&amp;apikey=@(PWAAppSettings.Yandex.MapsJavaScriptAPIKey)" type="text/javascript"></script>
     @await Scripts.RenderAsync("bundles/pwa.js")
     <script>$(document).ready(function () { $('body').bootstrapMaterialDesign(); });</script>
     <script>
         firebase.initializeApp({
-            messagingSenderId: "@SettingsHelper.FirebaseCloudMessagingMessagingSenderId"
+            messagingSenderId: "@AppSettings.FirebaseCloudMessaging.MessagingSenderId"
         });
     </script>
     <script>
         window.settings = {};
-        window.settings.version = "@SettingsHelper.ApplicationVersion";
+        window.settings.version = "@AppSettings.Verison";
         if ('serviceWorker' in navigator) {
             navigator.serviceWorker
                 .register('@Url.Content("~/pwa/service-worker.js")')

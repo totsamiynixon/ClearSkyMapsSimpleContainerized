@@ -1,0 +1,56 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 15
+VisualStudioVersion = 15.0.28307.572
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Web", "src\Web\Web.csproj", "{1CC5614B-7779-4FD8-9E23-33A6AF820990}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Web.UnitTests", "src\Web.UnitTests\Web.UnitTests.csproj", "{FDFF8599-3357-4E87-AEC7-537664642BE1}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "docker", "docker", "{2169BAD2-6718-4215-AC7A-2344F516BFF5}"
+ProjectSection(SolutionItems) = preProject
+	.dockerignore = .dockerignore
+	docker-compose.override.yml = docker-compose.override.yml
+	docker-compose.tests.override.yml = docker-compose.tests.override.yml
+	docker-compose.yml = docker-compose.yml
+	docker-compose.tests.yml = docker-compose.tests.yml
+	docker-compose.dev.override.yml = docker-compose.dev.override.yml
+EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{2D2A870B-2A76-4237-AC4B-2E39827DB9D5}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Web.IntegrationTests", "src\Web.IntegrationTests\Web.IntegrationTests.csproj", "{6D5AAE37-8EA0-4DD0-8C92-3423AF7AEE7C}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "functional", "functional", "{6A3301F8-3C61-478F-B828-C0572BE9D901}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{1CC5614B-7779-4FD8-9E23-33A6AF820990}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1CC5614B-7779-4FD8-9E23-33A6AF820990}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1CC5614B-7779-4FD8-9E23-33A6AF820990}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1CC5614B-7779-4FD8-9E23-33A6AF820990}.Release|Any CPU.Build.0 = Release|Any CPU
+		{FDFF8599-3357-4E87-AEC7-537664642BE1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{FDFF8599-3357-4E87-AEC7-537664642BE1}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{FDFF8599-3357-4E87-AEC7-537664642BE1}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{FDFF8599-3357-4E87-AEC7-537664642BE1}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6D5AAE37-8EA0-4DD0-8C92-3423AF7AEE7C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6D5AAE37-8EA0-4DD0-8C92-3423AF7AEE7C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6D5AAE37-8EA0-4DD0-8C92-3423AF7AEE7C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6D5AAE37-8EA0-4DD0-8C92-3423AF7AEE7C}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {E7BD2DEB-15E1-4AD6-9BDC-16148AE7AD8B}
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{6A3301F8-3C61-478F-B828-C0572BE9D901} = {2D2A870B-2A76-4237-AC4B-2E39827DB9D5}
+		{6D5AAE37-8EA0-4DD0-8C92-3423AF7AEE7C} = {6A3301F8-3C61-478F-B828-C0572BE9D901}
+		{FDFF8599-3357-4E87-AEC7-537664642BE1} = {6A3301F8-3C61-478F-B828-C0572BE9D901}
+	EndGlobalSection
+EndGlobal

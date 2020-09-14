@@ -1,5 +1,4 @@
-﻿@using Web.Areas.Admin.Models.Users
-@model DeleteUserViewModel
+﻿@model Web.Areas.Admin.Models.Default.Users.DeleteUserViewModel
 @{
     ViewBag.Title = "Подтверждение удаления";
     Layout = "~/Areas/Admin/Views/Shared/_Layout.cshtml";
@@ -14,12 +13,7 @@
                     {
                         @Html.AntiForgeryToken()
                         @Html.ValidationSummary(true, "", new { @class = "text-danger" })
-                        @Html.HiddenFor(f => f.Id)
-                        <div class="form-group">
-                            @Html.LabelFor(m => m.Email)
-                            @Html.TextBoxFor(m => m.Email, new { @class = "form-control", disabled = true })
-                            @Html.ValidationMessageFor(m => m.Email, "", new { @class = "text-danger" })
-                        </div>
+                        @Html.HiddenFor(f => f.Model.Id)
                         <div class="form-group">
                             <div class="col-md-offset-2 col-md-10">
                                 <input type="submit" value="Удалить" class="btn btn-danger" />

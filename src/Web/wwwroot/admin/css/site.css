@@ -69,3 +69,11 @@
         width: 30vw;
     }
 }
+
+
+/*page error*/
+
+.page-error .error-wrapper {
+    align-items: center;
+    display: flex;
+}

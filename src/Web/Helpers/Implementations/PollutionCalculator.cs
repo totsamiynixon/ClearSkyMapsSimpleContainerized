@@ -1,9 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
-using Web.Data.Models;
-using Web.Enums;
+using Web.Domain.Entities;
+using Web.Domain.Enums;
 using Web.Helpers.Interfaces;
 
 namespace Web.Helpers.Implementations

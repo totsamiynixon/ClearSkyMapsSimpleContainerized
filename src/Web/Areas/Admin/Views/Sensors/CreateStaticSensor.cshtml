@@ -1,5 +1,4 @@
-﻿@using Web.Areas.Admin.Models.Sensors
-@model CreateStaticSensorModel
+﻿@model Web.Areas.Admin.Models.Default.Sensors.CreateStaticSensorViewModel
 @{
     ViewBag.Title = "Регистрация статического датчика";
     Layout = "~/Areas/Admin/Views/Shared/_Layout.cshtml";
@@ -15,19 +14,19 @@
                         @Html.AntiForgeryToken()
                         @Html.ValidationSummary(true, "", new { @class = "text-danger" })
                         <div class="form-group">
-                            @Html.LabelFor(m => m.ApiKey)
-                            @Html.TextBoxFor(m => m.ApiKey, new { @class = "form-control", @readonly = true })
-                            @Html.ValidationMessageFor(m => m.ApiKey, "", new { @class = "text-danger" })
+                            @Html.LabelFor(m => m.Model.ApiKey)
+                            @Html.TextBoxFor(m => m.Model.ApiKey, new { @class = "form-control", @readonly = true })
+                            @Html.ValidationMessageFor(m => m.Model.ApiKey, "", new { @class = "text-danger" })
                         </div>
                         <div class="form-group">
-                            @Html.LabelFor(m => m.Latitude)
-                            @Html.TextBoxFor(m => m.Latitude, new { @class = "form-control" })
-                            @Html.ValidationMessageFor(m => m.Latitude, "", new { @class = "text-danger" })
+                            @Html.LabelFor(m => m.Model.Latitude)
+                            @Html.TextBoxFor(m => m.Model.Latitude, new { @class = "form-control" })
+                            @Html.ValidationMessageFor(m => m.Model.Latitude, "", new { @class = "text-danger" })
                         </div>
                         <div class="form-group">
-                            @Html.LabelFor(m => m.Longitude)
-                            @Html.TextBoxFor(m => m.Longitude, new { @class = "form-control" })
-                            @Html.ValidationMessageFor(m => m.Longitude, "", new { @class = "text-danger" })
+                            @Html.LabelFor(m => m.Model.Longitude)
+                            @Html.TextBoxFor(m => m.Model.Longitude, new { @class = "form-control" })
+                            @Html.ValidationMessageFor(m => m.Model.Longitude, "", new { @class = "text-danger" })
                         </div>
                         <div class="form-group">
                             <div class="col-md-offset-2 col-md-10">

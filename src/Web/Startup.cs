@@ -1,143 +1,257 @@
 ﻿using System;
+using System.IO;
+using System.Reflection;
+using System.Collections.Generic;
+using System.Linq;
+using AutoMapper;
+using MediatR;
 using Microsoft.AspNetCore.Builder;
-using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.Identity.UI;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using Web.Data;
+using Microsoft.AspNetCore.Mvc.ApiExplorer;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Web.Data.Models.Identity;
 using Web.Extensions;
 using Web.Helpers.Interfaces;
 using Web.Helpers.Implementations;
-using Microsoft.Extensions.Logging;
-using Web.Middlewares;
-using Web.Areas.Admin;
-using Microsoft.AspNetCore.Authentication.Cookies;
-using Web.Areas.PWA.Helpers.Interfaces;
-using Web.Areas.PWA.Helpers.Implementations;
-using Web.Areas.Admin.Helpers.Interfaces;
-using Web.Areas.Admin.Helpers.Implementations;
-using Web.Areas.PWA;
+using Microsoft.Extensions.Hosting;
+using Microsoft.OpenApi.Models;
+using Swashbuckle.AspNetCore.SwaggerGen;
+using Web.Application.Readings.Queries;
+using Web.Areas;
+using Web.Areas.Admin.Application.Emulation.Queries;
+using Web.Areas.Admin.Emulation;
+using Web.Areas.Admin.Infrastructure.Data;
+using Web.Infrastructure;
+using Web.Infrastructure.AntiForgery;
+using Web.Infrastructure.Data;
+using Web.Infrastructure.Data.Factory;
+using Web.Infrastructure.Data.Initialize;
+using Web.Infrastructure.Middlewares;
+using Web.Infrastructure.Swagger;
 
 namespace Web
 {
     public class Startup
     {
-        public IConfiguration Configuration { get; }
-        public static Func<IServiceProvider> ServiceProvider { get; private set; }
+        protected readonly IConfiguration _configuration;
+        protected readonly IWebHostEnvironment _environment;
+        protected readonly IEnumerable<IArea> _areas;
+        protected readonly AppSettings _appSettings;
 
-        private IServiceScopeFactory _scopeFactory { get; set; }
-
-        private readonly IHostingEnvironment _environment;
-
-        public Startup(IConfiguration configuration, IServiceProvider serviceProvider, IHostingEnvironment env)
+        public Startup(IConfiguration configuration, IWebHostEnvironment env, IEnumerable<IArea> areas,
+            AppSettings appSettings)
         {
-            Configuration = configuration;
+            _configuration = configuration;
             _environment = env;
+            _areas = areas;
+            _appSettings = appSettings;
         }
 
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddTransient<UserManager<User>>();
-            services.AddTransient<RoleManager<User>>();
+            services.AddMediatR(typeof(Startup));
+            services.AddAutoMapper(typeof(Startup));
 
-            services.AddTransient<ISettingsProvider, JsonConfigSettingsProvider>();
-            services.AddTransient<IRepository, Repository>();
+            services.AddSingleton<Emulator>();
+            services.AddTransient<IReadingsQueries, ReadingsQueries>();
+            services.AddTransient<IEmulationQueries, EmulationQueries>();
             services.AddTransient<IPollutionCalculator, PollutionCalculator>();
             services.AddTransient<ISensorCacheHelper, SensorCacheHelper>();
-            services.AddTransient<IPWADispatchHelper, PWASignalrDispatchHelper>();
-            services.AddTransient<IAdminDispatchHelper, AdminSignalRHubDispatchHelper>();
 
-            services.Configure<CookiePolicyOptions>(options =>
+            SetupDatabase(services, _appSettings);
+            SetupDatabaseInitializers(services);
+            SetupDataContext(services);
+
+            SetupMVC(services);
+            
+            services.AddAntiforgery(t =>
             {
-                // This lambda determines whether user consent for non-essential cookies is needed for a given request.
-                options.CheckConsentNeeded = context => true;
-                options.MinimumSameSitePolicy = SameSiteMode.None;
+                t.Cookie.Name = AntiForgerySettings.AntiForgeryCookieName;
+                t.FormFieldName = AntiForgerySettings.AntiForgeryFieldName;
             });
 
-            services.AddDbContext<DataContext>(options =>
-                {
-                    var scopeFactory = services
-                        .BuildServiceProvider()
-                        .GetRequiredService<IServiceScopeFactory>();
-
-                    using (var scope = scopeFactory.CreateScope())
-                    {
-                        {
-                            options.UseSqlServer(
-                                ((ISettingsProvider) scope.ServiceProvider.GetService(typeof(ISettingsProvider)))
-                                .ConnectionString);
-                        }
-                    }
-                }, ServiceLifetime.Transient)
-                ;
-            services.AddDbContext<IdentityDbContext>(options =>
-            {
-                var scopeFactory = services
-                    .BuildServiceProvider()
-                    .GetRequiredService<IServiceScopeFactory>();
-
-                using (var scope = scopeFactory.CreateScope())
-                {
-                    {
-                        options.UseSqlServer(
-                            ((ISettingsProvider) scope.ServiceProvider.GetService(typeof(ISettingsProvider)))
-                            .IdentityConnectionString);
-                    }
-                }
-            }, ServiceLifetime.Transient);
-
-            services.AddDefaultIdentity<User>()
-                .AddDefaultUI(UIFramework.Bootstrap4)
-                .AddUserManager<UserManager<User>>()
-                .AddRoles<IdentityRole>()
-                .AddRoleManager<RoleManager<IdentityRole>>()
-                .AddEntityFrameworkStores<IdentityDbContext>();
-
-            services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
             services.AddMemoryCache();
-
-            services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
-                .AddCookie(options =>
-                {
-                    options.Cookie.Name = "CSM.Auth";
-                    options.LoginPath = new PathString("/Admin/Account/Login");
-                });
 
             services.AddSignalR();
 
             services.AddAppBundling(_environment);
+
+            ConfigureAreaServices(services);
+
+            services.AddSwaggerGen(options =>
+            {
+                options.SwaggerDoc("integration", new OpenApiInfo
+                {
+                    Version = "v1",
+                    Title = "CSM Open API",
+                    Description = "Clear Sky Maps REST API for Integration",
+                    Contact = new OpenApiContact
+                    {
+                        Name = "Yauheni But-Husaim",
+                        Email = "totsamiynixon@gmail.com",
+                        Url = new Uri("https://vk.com/id169573384"),
+                    }
+                });
+
+
+                ConfigureAreaSwagger(options);
+
+
+                options.DocInclusionPredicate((version, desc) =>
+                {
+                    if (desc.GroupName == null && version == "integration")
+                    {
+                        return true;
+                    }
+
+                    if (desc.GroupName == "Admin" && version == "admin")
+                    {
+                        return true;
+                    }
+
+                    //TODO: Think more about that implementation
+                    return ConfigureAreaSwaggerInclusionPredicates(version, desc);
+                });
+
+                options.OperationFilter<AuthorizeOperationFilter>();
+                options.DocumentFilter<LowercasePathsDocumentFilter>();
+                options.DocumentFilter<AlphabetSchemaDocumentFilter>();
+
+                // Set the comments path for the Swagger JSON and UI.
+                var xmlFile = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
+                var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
+                options.IncludeXmlComments(xmlPath);
+            });
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, IHostingEnvironment env, ILoggerFactory loggerFactory)
+        public void Configure(IApplicationBuilder app)
         {
-            _scopeFactory = app.ApplicationServices.GetRequiredService<IServiceScopeFactory>();
-            ServiceProvider = () => { return _scopeFactory.CreateScope().ServiceProvider; };
-            app.UseMiddleware<ExceptionHandlerMiddleware>();
+            /*var defaultDateCulture = "en-US";
+            var ci = new CultureInfo(defaultDateCulture);
+            ci.NumberFormat.D
+            ci.NumberFormat.NumberDecimalSeparator = ".";
+            ci.NumberFormat.CurrencyDecimalSeparator = ".";
+            CultureInfo.DefaultThreadCurrentCulture = ci;
+            CultureInfo.DefaultThreadCurrentUICulture = ci;
+            app.UseRequestLocalization(new RequestLocalizationOptions
+            {
+                DefaultRequestCulture = new RequestCulture(ci),
+                SupportedCultures = new List<CultureInfo>
+                {
+                    ci,
+                },
+                SupportedUICultures = new List<CultureInfo>
+                {
+                    ci,
+                }
+            });*/
+            
+            ConfigureArea(app);
+
+            app.UseSwagger();
+            app.UseSwaggerUI(c =>
+            {
+                c.SwaggerEndpoint("/swagger/integration/swagger.json", "CSM API | Integration | v1");
+            });
+
+            if (_environment.IsDevelopment())
+            {
+                app.UseDeveloperExceptionPage();
+            }
+            else
+            {
+                app.UseMiddleware<ExceptionHandlerMiddleware>();
+                app.UseMiddleware<ExceptionLoggerMiddleware>();
+            }
+
+            app.UseRouting();
+
             app.UseStaticFiles();
             app.UseCookiePolicy();
-            app.UseAuthentication();
-            app.UseMvc(routes =>
-            {
-                routes.MapRoute(
-                    name: "areaRoute",
-                    template: "{area:exists}/{controller=sensors}/{action=index}/{id?}"
-                );
 
-                routes.MapRoute(
+            app.UseEndpoints(endpoints =>
+            {
+                endpoints.MapControllers();
+                endpoints.MapControllerRoute(
                     name: "default",
-                    template: "{controller=home}/{action=index}/{id?}");
+                    pattern: "{area=pwa}/{controller=home}/{action=index}/{id?}");
             });
-            app.UseAdminArea(env);
-            app.UsePWAArea(env);
-            app.InitializeDatabase();
-            app.AppBundles();
+        }
+
+        protected virtual void SetupDatabase(IServiceCollection services, AppSettings appSettings)
+        {
+            services.AddTransient<IDataContextFactory<DataContext>>(provider =>
+                new DefaultDataContextFactory<DataContext>(appSettings.ConnectionString));
+            services.AddTransient<IDataContextFactory<IdentityDataContext>>(provider =>
+                new DefaultDataContextFactory<IdentityDataContext>(appSettings.ConnectionString));
+        }
+
+
+        protected virtual void SetupDatabaseInitializers(IServiceCollection services)
+        {
+            services.AddTransient<IApplicationDatabaseInitializer, DefaultApplicationDatabaseInitializer>();
+        }
+
+        protected virtual void SetupDataContext(IServiceCollection services)
+        {
+            //TODO: Check why doesnt work with identity
+            /*services.AddDbContext<DataContext>(
+                (provider, builder) => provider.GetService<IDataContextFactory<DataContext>>().Create());*/
+
+            services.AddScoped<DataContext>(
+                (provider) => provider.GetService<IDataContextFactory<DataContext>>().Create());
+        }
+
+        protected virtual IMvcBuilder SetupMVC(IServiceCollection services)
+        {
+            services.AddControllersWithViews()
+                    .AddRazorRuntimeCompilation();
+            return services.AddMvc(c =>
+                            {
+                                c.Conventions.Add(new ApiExplorerGroupPerAreaConvention());
+                            })
+                            .SetCompatibilityVersion(CompatibilityVersion.Version_3_0);
+        }
+
+
+        protected virtual void ConfigureAreaServices(IServiceCollection services)
+        {
+            foreach (var area in _areas)
+            {
+                area.ConfigureServices(services);
+            }
+        }
+
+        protected virtual void ConfigureAreaSwagger(SwaggerGenOptions options)
+        {
+            foreach (var area in _areas.OfType<ISwaggerSupportArea>())
+            {
+                area.ConfigureSwagger(options);
+            }
+        }
+
+        protected virtual bool ConfigureAreaSwaggerInclusionPredicates(string version, ApiDescription description)
+        {
+            foreach (var area in _areas.OfType<ISwaggerSupportArea>())
+            {
+                if (area.SwaggerInclusionPredicate(version, description))
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        protected virtual void ConfigureArea(IApplicationBuilder app)
+        {
+            foreach (var area in _areas)
+            {
+                area.Configure(app);
+            }
         }
     }
 }

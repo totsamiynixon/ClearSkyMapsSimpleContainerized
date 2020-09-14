@@ -1,4 +1,5 @@
-﻿@inject Web.Helpers.Interfaces.ISettingsProvider SettingsProvider
+﻿@using Web.Areas.Admin.Emulation
+@inject EmulationAppSettings EmulationAppSettings
 @if (User.Identity.IsAuthenticated)
 {
     <div class="sidebar" data-color="white" data-active-color="danger">
@@ -29,7 +30,7 @@
                         <p>Датчики</p>
                     </a>
                 </li>
-                @if (SettingsProvider.EmulationEnabled)
+                @if (EmulationAppSettings.Enabled)
                 {
                     <li>
                         <a href="emulator">

@@ -1,8 +1,7 @@
-﻿@using Web.Areas.Admin.Models.Sensors
-@using Web.Extensions;
-@using Web.Helpers;
-@inject Web.Helpers.Interfaces.ISettingsProvider SettingsProvider
-@model SensorsIndexViewModel
+﻿@using Web.Extensions;
+@using Web.Areas.PWA.Infrastructure
+@inject PWAAppSettings PWAAppSettings
+@model Web.Areas.Admin.Models.Default.Sensors.SensorsIndexViewModel
 @{
     ViewBag.Title = "Датчики";
     Layout = "~/Areas/Admin/Views/Shared/_Layout.cshtml";
@@ -161,7 +160,7 @@
 </div>
 @section Scripts {
     <!--  Yandex Maps Plugin    -->
-    <script src="https://api-maps.yandex.ru/2.1/?lang=ru_RU&amp;apikey=@(SettingsProvider.YandexMapsJavaScriptAPIKey)" type="text/javascript"></script>
+    <script src="https://api-maps.yandex.ru/2.1/?lang=ru_RU&amp;apikey=@(PWAAppSettings.Yandex.MapsJavaScriptAPIKey)" type="text/javascript"></script>
     <script src="~/admin/js/front/pages/sensors.js"></script>
     <script>
         jQuery(function ($) {

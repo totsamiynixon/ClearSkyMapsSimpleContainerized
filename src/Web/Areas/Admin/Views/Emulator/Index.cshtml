@@ -1,8 +1,7 @@
-﻿@using Web.Areas.Admin.Models.Emulator
-@using Web.Areas.Admin.Emulation
-@using Web.Helpers;
-@inject Web.Helpers.Interfaces.ISettingsProvider SettingsProvider
-@model List<SensorEmulatorListItemViewModel>
+﻿@using Web.Areas.Admin.Emulation
+@inject EmulationAppSettings EmulationAppSettings
+@inject Emulator Emulator
+@model List<Web.Areas.Admin.Models.Default.Emulator.SensorEmulatorListItemViewModel>
 @{
     ViewBag.Title = "Датчики-эмуляторы";
     Layout = "~/Areas/Admin/Views/Shared/_Layout.cshtml";
@@ -73,12 +72,12 @@
                     </table>
                 </div>
             </div>
-            @if (SettingsProvider.EmulationEnabled)
+            @if (EmulationAppSettings.Enabled)
             {
                 <div class="card-footer">
-                    @using (Html.BeginForm($"{(Emulator.IsEmulationEnabled ? "Stop" : "Start")}Emulation", "Emulator", new { area = "Admin", ReturnUrl = ViewBag.ReturnUrl }, FormMethod.Post, null, new { @class = "form-horizontal", role = "form" }))
+                    @using (Html.BeginForm($"{(Emulator.IsEmulationStarted ? "Stop" : "Start")}Emulation", "Emulator", new { area = "Admin", ReturnUrl = ViewBag.ReturnUrl }, FormMethod.Post, null, new { @class = "form-horizontal", role = "form" }))
                     {
-                        <button class="btn btn-default">@((Emulator.IsEmulationEnabled ? "Выключить" : "Включить")) эмуляцию</button>
+                        <button class="btn btn-default">@((Emulator.IsEmulationStarted ? "Выключить" : "Включить")) эмуляцию</button>
                     }
                 </div>
             }

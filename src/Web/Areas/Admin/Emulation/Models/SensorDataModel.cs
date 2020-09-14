@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Globalization;
 
 namespace Web.Areas.Admin.Emulation.Models
 {
@@ -27,5 +28,15 @@ namespace Web.Areas.Admin.Emulation.Models
         public double Latitude { get; set; }
 
         public double Longitude { get; set; }
+
+        public override string ToString()
+        {
+            return string.Join(",", ApiKey, Temp.ToString(CultureInfo.InvariantCulture),
+                Hum.ToString(CultureInfo.InvariantCulture), Preassure.ToString(CultureInfo.InvariantCulture),
+                CO2.ToString(CultureInfo.InvariantCulture), LPG.ToString(CultureInfo.InvariantCulture),
+                CO.ToString(CultureInfo.InvariantCulture), CH4.ToString(CultureInfo.InvariantCulture),
+                Dust.ToString(CultureInfo.InvariantCulture), Longitude.ToString(CultureInfo.InvariantCulture),
+                Latitude.ToString(CultureInfo.InvariantCulture));
+        }
     }
 }

@@ -1,9 +1,9 @@
-﻿using Newtonsoft.Json;
-using Newtonsoft.Json.Serialization;
-using System;
+﻿using System;
 using System.Net.Http;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Serialization;
 using Web.Areas.Admin.Emulation.Models;
-using Web.Data.Models;
+using Web.Domain.Entities;
 
 namespace Web.Areas.Admin.Emulation
 {
@@ -46,7 +46,7 @@ namespace Web.Areas.Admin.Emulation
                 try
                 {
                     var data = GetSensorData();
-                    var response = await _httpClient.PostAsJsonAsync($"http://{_serverIp}/api/integration", data);
+                    var response = await _httpClient.GetAsync($"{_serverIp}/api/integration/getaspost?data={data}");
                 }
                 catch (Exception ex)
                 {
