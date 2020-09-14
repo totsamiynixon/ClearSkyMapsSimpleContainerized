@@ -25,11 +25,11 @@ namespace Web.IntegrationTests.Areas.Admin
             _adminAreaOptions = options.Value;
         }
 
-        protected override void ConfigureAuthentication(IServiceCollection services, JWTAppSettings jwtSettings)
+        protected override void ConfigureAuthentication(IServiceCollection services)
         {
             if (!_adminAreaOptions.Auth.UseCustomAuth)
             {
-                base.ConfigureAuthentication(services, jwtSettings);
+                base.ConfigureAuthentication(services);
                 return;
             }
 

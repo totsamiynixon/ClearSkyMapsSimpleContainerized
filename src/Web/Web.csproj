@@ -13,12 +13,10 @@
   <ItemGroup>
     <PackageReference Include="AutoMapper" Version="10.0.0" />
     <PackageReference Include="AutoMapper.Extensions.Microsoft.DependencyInjection" Version="8.0.1" />
-    <PackageReference Include="Fleck" Version="1.1.0" />
     <PackageReference Include="Karambolo.AspNetCore.Bundling" Version="3.3.0" />
     <PackageReference Include="Karambolo.AspNetCore.Bundling.NUglify" Version="2.0.0" />
     <PackageReference Include="MediatR" Version="8.1.0" />
     <PackageReference Include="MediatR.Extensions.Microsoft.DependencyInjection" Version="8.1.0" />
-    <PackageReference Include="Microsoft.AspNetCore.App" />
     <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="3.1.7" />
     <PackageReference Include="Microsoft.AspNetCore.AzureAppServicesIntegration" Version="2.2.0" />
     <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="3.1.6" />
@@ -28,10 +26,8 @@
     <PackageReference Include="Microsoft.EntityFrameworkCore.Relational" Version="3.1.6" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="3.1.6" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="3.1.6" />
-    <PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.4.10" />
     <PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Design" Version="3.1.4" />
     <PackageReference Include="Swashbuckle.AspNetCore" Version="5.5.1" />
-    <PackageReference Include="WebSocketSharp" Version="1.0.3-rc11" />
   </ItemGroup>
   <ItemGroup>
     <None Include="wwwroot\admin\theme\css\bootstrap.min.css" />
@@ -114,53 +110,26 @@
     <None Include="wwwroot\pwa\js\libs\vue.js" />
   </ItemGroup>
   <ItemGroup>
-    <Content Update="Areas\PWA\manifest.json">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
     <Content Update="appsettings.Development.json">
       <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
     </Content>
-    <Content Update="Areas\Admin\Views\Shared\StatusCodeResult.cshtml">
-      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
-      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
-    </Content>
-    <Content Update="Areas\Admin\Pages\Error\ServerErrir.cshtml">
-      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
-      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
-    </Content>
-    <Content Update="Areas\Admin\Views\Error\StatusCodeResult.cshtml">
-      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
-      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
-    </Content>
     <Content Update="appsettings.json">
       <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
-    </Content>
-    <Content Update="appsettings.json">
-      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
-    </Content>
-    <Content Update="Areas\Admin\Views\Sensors\Index.cshtml">
-      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
       <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
     </Content>
   </ItemGroup>
   <ItemGroup>
-    <None Update="Areas\PWA\service-worker.js">
+    <Content Update="Areas\PWA\manifest.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
-  </ItemGroup>
-  <ItemGroup>
-    <_ContentIncludedByDefault Remove="Areas\Admin\Views\StatusCode\Index.cshtml" />
+    </Content>
+    <Content Update="Areas\PWA\service-worker.js">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Areas\PWA\Models" />
   </ItemGroup>
-  <Target Name="CompilePWA" AfterTargets="Build">
-    <Exec Command="powershell.exe ./compilepwa.ps1" />
-  </Target>
 </Project>

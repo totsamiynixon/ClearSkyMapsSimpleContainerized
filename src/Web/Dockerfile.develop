@@ -1,14 +1,20 @@
-FROM mcr.microsoft.com/dotnet/core/sdk:3.0-buster
+FROM mcr.microsoft.com/dotnet/core/sdk:3.1-focal
 ARG BUILD_CONFIGURATION=Debug
 ENV ASPNETCORE_ENVIRONMENT=Development
 ENV DOTNET_USE_POLLING_FILE_WATCHER=true
 EXPOSE 80
 
-WORKDIR /src
+COPY "ClearSkyMapsSimple.sln" "ClearSkyMapsSimple.sln"
+COPY "src/Web/Web.csproj" "src/Web/Web.csproj"
 
-RUN dotnet restore Web/Web.csproj -nowarn:msb3202,nu1503
-COPY . .
 WORKDIR /src/Web
-RUN dotnet build --no-restore -c $BUILD_CONFIGURATION
+
+RUN dotnet restore Web.csproj -nowarn:msb3202,nu1503
+
+
+WORKDIR /
+
+COPY . .
+RUN dotnet build  --no-restore -c $BUILD_CONFIGURATION
 
 ENTRYPOINT ["dotnet", "run", "--no-build", "--no-launch-profile", "-c", "$BUILD_CONFIGURATION", "--"]

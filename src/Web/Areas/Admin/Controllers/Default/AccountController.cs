@@ -73,7 +73,7 @@ namespace Web.Areas.Admin.Controllers.Default
                 new Claim(ClaimsIdentity.DefaultNameClaimType, userName),
                 new Claim(ClaimsIdentity.DefaultRoleClaimType, roles)
             };
-            ClaimsIdentity id = new ClaimsIdentity(claims, "ApplicationCookie", ClaimsIdentity.DefaultNameClaimType, ClaimsIdentity.DefaultRoleClaimType);
+            ClaimsIdentity id = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme, ClaimsIdentity.DefaultNameClaimType, ClaimsIdentity.DefaultRoleClaimType);
             await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, new ClaimsPrincipal(id));
         }
 

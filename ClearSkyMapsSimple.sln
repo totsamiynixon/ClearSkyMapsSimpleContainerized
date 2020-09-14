@@ -14,6 +14,7 @@ ProjectSection(SolutionItems) = preProject
 	docker-compose.tests.override.yml = docker-compose.tests.override.yml
 	docker-compose.yml = docker-compose.yml
 	docker-compose.tests.yml = docker-compose.tests.yml
+	docker-compose.dev.override.yml = docker-compose.dev.override.yml
 EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{2D2A870B-2A76-4237-AC4B-2E39827DB9D5}"

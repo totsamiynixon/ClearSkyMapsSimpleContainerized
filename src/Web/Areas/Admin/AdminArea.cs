@@ -85,7 +85,7 @@ namespace Web.Areas.Admin
                 options.MinimumSameSitePolicy = SameSiteMode.None;
             });
 
-            ConfigureAuthentication(services, _jwtAppSettings);
+            ConfigureAuthentication(services);
 
             services.AddAuthorization(config =>
             {
@@ -154,17 +154,17 @@ namespace Web.Areas.Admin
             return request.Path.Value.StartsWith($"/{APIRoutePrefix}");
         }
 
-        protected virtual void ConfigureAuthentication(IServiceCollection services, JWTAppSettings jwtSettings)
+        protected virtual void ConfigureAuthentication(IServiceCollection services)
         {
-            services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
-                .AddCookie(options =>
+            services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+                .AddCookie(CookieAuthenticationDefaults.AuthenticationScheme, options =>
                 {
                     options.Cookie.Name = AuthSettings.CookieName;
                     options.LoginPath = new PathString($"/{AdminArea.DefaultRoutePrefix}/account/login");
-                });
-
-            services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-                .AddJwtBearer(options =>
+                    //TODO: fix for Google , investigate, how it affects other browsers
+                    options.Cookie.SameSite = SameSiteMode.Lax;
+                })
+                .AddJwtBearer(JwtBearerDefaults.AuthenticationScheme, options =>
                 {
                     options.RequireHttpsMetadata = false;
                     options.SaveToken = true;
@@ -174,9 +174,9 @@ namespace Web.Areas.Admin
                         ValidateAudience = true,
                         ValidateLifetime = true,
                         ValidateIssuerSigningKey = true,
-                        ValidIssuer = jwtSettings.Issuer,
-                        ValidAudience = jwtSettings.Audience,
-                        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSettings.SecretKey)),
+                        ValidIssuer = _jwtAppSettings.Issuer,
+                        ValidAudience = _jwtAppSettings.Audience,
+                        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_jwtAppSettings.SecretKey)),
                         ClockSkew = TimeSpan.Zero
                     };
                 });

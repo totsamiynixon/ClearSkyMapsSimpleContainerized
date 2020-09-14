@@ -7,8 +7,5 @@ services:
 
   web:
     image: web
-    build:
-      context: .
-      dockerfile: src/Web/Dockerfile
     depends_on:
       - web-sql-server
